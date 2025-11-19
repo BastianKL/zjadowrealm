@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Portfolio{% endblock %}</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-black fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('home') }}">
+                <i class="fas fa-user-circle text-blue"></i> ZjadowSide
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <!-- Home and About - Left side -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('home') }}">
+                            <i class="fas fa-home"></i> Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('about') }}">
+                            <i class="fas fa-user"></i> About
+                        </a>
+                    </li>
+                    
+                    <!-- Separator -->
+                    <li class="nav-item">
+                        <div class="nav-separator"></div>
+                    </li>
+                    
+                    <!-- Gaming & Community Group -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('discord') }}">
+                            <i class="fab fa-discord"></i> Discord
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('steam') }}">
+                            <i class="fab fa-steam"></i> Steam
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('minecraft') }}">
+                            <i class="fas fa-cube"></i> Minecraft
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('game_blog') }}">
+                            <i class="fas fa-code-branch"></i> Game Blog
+                        </a>
+                    </li>
+                    
+                    <!-- Separator -->
+                    <li class="nav-item">
+                        <div class="nav-separator"></div>
+                    </li>
+                    
+                    <!-- Reviews Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-star"></i> Reviews
+                        </a>
+                        <ul class="dropdown-menu bg-dark-gray">
+                            <li><a class="dropdown-item text-light" href="{{ url_for('game_reviews') }}">
+                                <i class="fas fa-gamepad"></i> Games
+                            </a></li>
+                            <li><a class="dropdown-item text-light" href="{{ url_for('movie_reviews') }}">
+                                <i class="fas fa-film"></i> Movies
+                            </a></li>
+                        </ul>
+                    </li>
+                    
+                    <!-- Learning Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-brain"></i> Learning
+                        </a>
+                        <ul class="dropdown-menu bg-dark-gray">
+                            <li><a class="dropdown-item text-light" href="{{ url_for('training') }}">
+                                <i class="fas fa-dumbbell"></i> Training
+                            </a></li>
+                            <li><a class="dropdown-item text-light" href="{{ url_for('food') }}">
+                                <i class="fas fa-apple-alt"></i> Food & Nutrition
+                            </a></li>
+                            <li><a class="dropdown-item text-light" href="{{ url_for('tutorials') }}">
+                                <i class="fas fa-graduation-cap"></i> Tutorials
+                            </a></li>
+                            <li><a class="dropdown-item text-light" href="{{ url_for('tools') }}">
+                                <i class="fas fa-tools"></i> Tools
+                            </a></li>
+                        </ul>
+                    </li>
+                    
+                    <!-- Separator -->
+                    <li class="nav-item">
+                        <div class="nav-separator"></div>
+                    </li>
+                    
+                    <!-- Entertainment Group -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('music') }}">
+                            <i class="fas fa-music"></i> Music
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('games') }}">
+                            <i class="fas fa-gamepad"></i> Games
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-black text-light py-4 mt-5 border-top border-dark-gray">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="mb-0">&copy; 2025 ZjadowRealm. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <p class="mb-0">Message me?</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

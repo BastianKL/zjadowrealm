@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}About Me - Portfolio{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="about-header text-center mb-5">
+            <h1 class="display-5 fw-bold mb-3">About Me</h1>
+            <div class="profile-image mb-4">
+                <img src="{{ url_for('static', filename='images/ProfilePicture.jpg') }}" alt="Zjadow's Profile Picture" class="img-fluid" style="width: 350px; max-width: 100%; height: auto; border-radius: 15px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);">
+            </div>
+        </div>
+
+        <div class="card shadow-lg">
+            <div class="card-body p-5">
+                <div class="about-content">
+                    <h3 class="mb-4"><i class="fas fa-bolt text-primary"></i> Hello, I'm Zjadow!</h3>
+                    
+                    <p class="lead mb-4">
+                        Welcome to the Zjadow Realm. I love gaming, movies, music, and other creative pursuits. 
+                    </p>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-gamepad text-primary"></i> Gamer</h5>
+                            <p>
+                                I've been gaming my entire life, and do not plan to stop. I love exploring different genres. From indie gems to AAA 
+                                blockbusters, I enjoy discovering what makes games special and sharing honest reviews.
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-film text-danger"></i> Movie Watcher</h5>
+                            <p>
+                                Cinema is my escape and inspiration. I watch everything from arthouse films to blockbusters, 
+                                always looking for stories that move me and cinematography that takes my breath away.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-music text-success"></i> Music Lover</h5>
+                            <p>
+                                Music is the fuel. I'm trying to discover more artists that are similar to my taste.
+                                Which shouldn't be hard since my taste ranges quite far from ambient soundscapes to energetic beats that fuel my creativity. If it's rock, electronic, orchestral, breakbeat, or any other genres, I'm all ears as long as it has this quality that my ears like.
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-pen-fancy text-info"></i> A Man of Ideas</h5>
+                            <p>
+                                I may not work hard nor talk smart, but I do have many thoughts that I would like to share and get somewhere.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="personal-info bg-light p-4 rounded mb-4">
+                        <h5 class="mb-3"><i class="fas fa-info-circle text-warning"></i> Information</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <ul class="list-unstyled">
+                                    <li><strong>Location:</strong> You'll never know!</li>
+                                    <li><strong>Occupation:</strong> Occupied</li>
+                                    <li><strong>Hobbies:</strong> Gaming, Music, Training</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <ul class="list-unstyled">
+                                    <li><strong>Favorite Game:</strong> Sekiro: Shadows Die Twice</li>
+                                    <li><strong>Current Game:</strong> Ghost of Tsushima</li>
+                                    <li><strong>Favorite Director:</strong> Miyazaki</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="call-to-action text-center">
+                        <h5 class="mb-3">Let's Connect!</h5>
+                        <p class="mb-4">
+                            I'd love to hear about your favorite games, movies, or music. Feel free to join my Discord, friend me on Steam, 
+                            or write a YouTube comment.
+                        </p>
+                        <div class="action-buttons">
+                            <a href="{{ url_for('discord') }}" class="btn btn-primary me-3">
+                                <i class="fas fa-link"></i> My Links
+                            </a>
+                            <a href="{{ url_for('steam') }}" class="btn btn-outline-primary me-3">
+                                <i class="fab fa-steam"></i> Steam Profile
+                            </a>
+                            <a href="{{ url_for('tutorials') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-graduation-cap"></i> Explore Tutorials
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Add fade-in animation for content sections
+document.addEventListener('DOMContentLoaded', function() {
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -100px 0px'
+    };
+
+    const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+
+    document.querySelectorAll('.row, .personal-info, .philosophy, .call-to-action').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(el);
+    });
+});
+</script>
+{% endblock %}

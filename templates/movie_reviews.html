@@ -1,0 +1,406 @@
+{% extends "base.html" %}
+
+{% block title %}Movie Reviews - Portfolio{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="text-center mb-5">
+            <h1 class="display-5 fw-bold mb-3">
+                <i class="fas fa-film text-danger"></i> Movie Reviews
+            </h1>
+            <p class="lead text-muted">My thoughts on cinema, from blockbusters to hidden gems</p>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="card shadow-lg mb-4">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="fas fa-filter"></i> Filter & Sort</h5>
+            </div>
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h6 class="mb-2 text-blue-glow">Filter by Genre:</h6>
+                        <div class="btn-group" role="group">
+                            <input type="radio" class="btn-check" name="movieGenre" id="allMovies" checked>
+                            <label class="btn btn-outline-danger btn-sm" for="allMovies">All</label>
+                            
+                            <input type="radio" class="btn-check" name="movieGenre" id="actionMovies">
+                            <label class="btn btn-outline-danger btn-sm" for="actionMovies">Action</label>
+                            
+                            <input type="radio" class="btn-check" name="movieGenre" id="dramaMovies">
+                            <label class="btn btn-outline-danger btn-sm" for="dramaMovies">Drama</label>
+                            
+                            <input type="radio" class="btn-check" name="movieGenre" id="scifiMovies">
+                            <label class="btn btn-outline-danger btn-sm" for="scifiMovies">Sci-Fi</label>
+                            
+                            <input type="radio" class="btn-check" name="movieGenre" id="comedyMovies">
+                            <label class="btn btn-outline-danger btn-sm" for="comedyMovies">Comedy</label>
+                            
+                            <input type="radio" class="btn-check" name="movieGenre" id="horrorMovies">
+                            <label class="btn btn-outline-danger btn-sm" for="horrorMovies">Horror</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <h6 class="mb-2 text-blue-glow">Sort by:</h6>
+                        <select class="form-select form-select-sm d-inline-block w-auto dark-select">
+                            <option>Latest Reviews</option>
+                            <option>Highest Rated</option>
+                            <option>Release Date</option>
+                            <option>Most Watched</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Movie Reviews -->
+        <div class="movie-reviews-container">
+            <!-- Review 1 -->
+            <div class="card shadow-lg mb-4 movie-review dark-card" data-genre="action">
+                <div class="row g-0">
+                    <div class="col-md-3">
+                        <div class="movie-poster p-4 text-center bg-metal-dark h-100 d-flex align-items-center justify-content-center">
+                            <div class="text-white">
+                                <i class="fas fa-film fa-3x text-danger"></i>
+                                <p class="mt-2 mb-0 text-muted">Movie Poster</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <h5 class="card-title mb-1 text-blue-glow">Epic Action Blockbuster</h5>
+                                    <small class="text-muted">Directed by [Director Name] • 2025 • 2h 30m</small>
+                                </div>
+                                <div class="rating text-center">
+                                    <div class="stars mb-1">
+                                        ⭐⭐⭐⭐☆
+                                    </div>
+                                    <span class="badge bg-success">8.5/10</span>
+                                </div>
+                            </div>
+                            <div class="movie-meta mb-3">
+                                <span class="badge bg-danger me-2">Action</span>
+                                <span class="badge bg-secondary me-2">Adventure</span>
+                                <span class="badge bg-warning text-dark me-2">IMAX</span>
+                            </div>
+                            <p class="card-text">
+                                This action-packed blockbuster delivers on all fronts with spectacular visual effects 
+                                and heart-pounding action sequences. While the plot might be predictable, the 
+                                execution and cinematography make it a worthwhile theater experience.
+                            </p>
+                            <div class="review-highlights mb-3">
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <strong class="text-success">Highlights:</strong>
+                                        <ul class="list-unstyled ms-3">
+                                            <li>• Outstanding visual effects</li>
+                                            <li>• Impressive action choreography</li>
+                                            <li>• Strong performances</li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <strong class="text-warning">Drawbacks:</strong>
+                                        <ul class="list-unstyled ms-3">
+                                            <li>• Predictable storyline</li>
+                                            <li>• Pacing issues in middle</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="recommendation alert alert-success py-2 dark-alert">
+                                <strong>Recommendation:</strong> Perfect for IMAX viewing. Great for action fans!
+                            </div>
+                            <small class="text-muted">Watched on: November 12, 2025 | Theater: Local IMAX</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Review 2 -->
+            <div class="card shadow-lg mb-4 movie-review dark-card" data-genre="drama">
+                <div class="row g-0">
+                    <div class="col-md-3">
+                        <div class="movie-poster p-4 text-center bg-metal-dark h-100 d-flex align-items-center justify-content-center">
+                            <div class="text-white">
+                                <i class="fas fa-film fa-3x text-info"></i>
+                                <p class="mt-2 mb-0 text-muted">Movie Poster</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <h5 class="card-title mb-1 text-blue-glow">Emotional Character Study</h5>
+                                    <small class="text-muted">Directed by [Director Name] • 2025 • 1h 45m</small>
+                                </div>
+                                <div class="rating text-center">
+                                    <div class="stars mb-1">
+                                        ⭐⭐⭐⭐⭐
+                                    </div>
+                                    <span class="badge bg-success">9.5/10</span>
+                                </div>
+                            </div>
+                            <div class="movie-meta mb-3">
+                                <span class="badge bg-info me-2">Drama</span>
+                                <span class="badge bg-secondary me-2">Indie</span>
+                                <span class="badge bg-warning text-dark me-2">Award Winner</span>
+                            </div>
+                            <p class="card-text">
+                                A masterpiece of character-driven storytelling that explores the depths of human 
+                                emotion with remarkable sensitivity. The performances are nothing short of 
+                                extraordinary, and the cinematography is beautifully intimate.
+                            </p>
+                            <div class="review-highlights mb-3">
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <strong class="text-success">Highlights:</strong>
+                                        <ul class="list-unstyled ms-3">
+                                            <li>• Exceptional acting performances</li>
+                                            <li>• Beautiful cinematography</li>
+                                            <li>• Profound emotional impact</li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <strong class="text-warning">Considerations:</strong>
+                                        <ul class="list-unstyled ms-3">
+                                            <li>• Slow pacing (intentional)</li>
+                                            <li>• Heavy emotional content</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="recommendation alert alert-warning py-2 dark-alert">
+                                <strong>Recommendation:</strong> A must-watch for drama enthusiasts. Prepare tissues!
+                            </div>
+                            <small class="text-muted">Watched on: November 8, 2025 | Streaming Platform</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Review 3 -->
+            <div class="card shadow-lg mb-4 movie-review dark-card" data-genre="scifi">
+                <div class="row g-0">
+                    <div class="col-md-3">
+                        <div class="movie-poster p-4 text-center bg-metal-dark h-100 d-flex align-items-center justify-content-center">
+                            <div class="text-white">
+                                <i class="fas fa-film fa-3x text-primary"></i>
+                                <p class="mt-2 mb-0 text-muted">Movie Poster</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <h5 class="card-title mb-1 text-blue-glow">Mind-Bending Sci-Fi Thriller</h5>
+                                    <small class="text-muted">Directed by [Director Name] • 2025 • 2h 15m</small>
+                                </div>
+                                <div class="rating text-center">
+                                    <div class="stars mb-1">
+                                        ⭐⭐⭐⭐☆
+                                    </div>
+                                    <span class="badge bg-warning text-dark">7.5/10</span>
+                                </div>
+                            </div>
+                            <div class="movie-meta mb-3">
+                                <span class="badge bg-primary me-2">Sci-Fi</span>
+                                <span class="badge bg-secondary me-2">Thriller</span>
+                                <span class="badge bg-info me-2">Original</span>
+                            </div>
+                            <p class="card-text">
+                                An ambitious sci-fi thriller that tackles complex themes with stunning visuals 
+                                and innovative concepts. While it might be confusing at times, the payoff is 
+                                worth the mental gymnastics required to follow the plot.
+                            </p>
+                            <div class="review-highlights mb-3">
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <strong class="text-success">Highlights:</strong>
+                                        <ul class="list-unstyled ms-3">
+                                            <li>• Innovative concepts</li>
+                                            <li>• Stunning visual design</li>
+                                            <li>• Thought-provoking themes</li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <strong class="text-warning">Drawbacks:</strong>
+                                        <ul class="list-unstyled ms-3">
+                                            <li>• Overly complex plot</li>
+                                            <li>• Requires multiple viewings</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="recommendation alert alert-info py-2 dark-alert">
+                                <strong>Recommendation:</strong> Perfect for sci-fi fans who enjoy intellectual challenges!
+                            </div>
+                            <small class="text-muted">Watched on: November 1, 2025 | Theater</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Section -->
+        <div class="card shadow-lg mb-4">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Movie Watching Stats</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3 mb-3">
+                        <div class="stat-item p-3">
+                            <i class="fas fa-film fa-2x text-danger mb-2"></i>
+                            <h4 class="text-danger">[XXX]</h4>
+                            <small class="text-muted">Movies Watched</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="stat-item p-3">
+                            <i class="fas fa-edit fa-2x text-success mb-2"></i>
+                            <h4 class="text-success">[XX]</h4>
+                            <small class="text-muted">Reviews Written</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="stat-item p-3">
+                            <i class="fas fa-star fa-2x text-warning mb-2"></i>
+                            <h4 class="text-warning">[X.X]</h4>
+                            <small class="text-muted">Average Rating</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="stat-item p-3">
+                            <i class="fas fa-clock fa-2x text-info mb-2"></i>
+                            <h4 class="text-info">[XXX]</h4>
+                            <small class="text-muted">Hours Watched</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Additional Stats Row -->
+                <hr class="my-4">
+                <div class="row text-center">
+                    <div class="col-md-4 mb-3">
+                        <div class="genre-stat p-3">
+                            <h6 class="text-blue-glow mb-2">Favorite Genre</h6>
+                            <span class="badge bg-primary fs-6">Sci-Fi</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="rating-stat p-3">
+                            <h6 class="text-blue-glow mb-2">Highest Rated</h6>
+                            <span class="badge bg-success fs-6">9.5/10</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="recent-stat p-3">
+                            <h6 class="text-blue-glow mb-2">Last Watched</h6>
+                            <small class="text-muted">November 12, 2025</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Call to Action -->
+        <div class="text-center">
+            <div class="alert alert-danger dark-alert">
+                <h6><i class="fas fa-popcorn text-blue-glow"></i> Movie Recommendation?</h6>
+                <p class="mb-3">Have a movie you think I should watch and review?</p>
+                <a href="{{ url_for('discord') }}" class="btn btn-danger btn-lg">
+                    <i class="fas fa-envelope me-2"></i> Send Suggestion
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Movie genre filtering
+    const genreButtons = document.querySelectorAll('input[name="movieGenre"]');
+    const movieCards = document.querySelectorAll('.movie-review');
+    
+    genreButtons.forEach(button => {
+        button.addEventListener('change', function() {
+            const selectedGenre = this.id.replace('Movies', '').replace('allMovies', 'all');
+            
+            movieCards.forEach(card => {
+                if (selectedGenre === 'all' || card.getAttribute('data-genre') === selectedGenre) {
+                    card.style.display = 'block';
+                    card.style.animation = 'slideIn 0.5s ease';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    });
+    
+    // Sort functionality
+    const sortSelect = document.querySelector('.dark-select');
+    if (sortSelect) {
+        sortSelect.addEventListener('change', function() {
+            console.log('Sorting by:', this.value);
+        });
+    }
+    
+    // Add hover effects for movie cards
+    movieCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-5px)';
+            this.style.transition = 'all 0.3s ease';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+    
+    // Add dark theme specific styles
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .dark-card {
+            background: linear-gradient(135deg, var(--dark-gray), var(--metal-gray));
+            border: 1px solid var(--blue-accent);
+        }
+        
+        .dark-alert {
+            background: var(--metal-shine) !important;
+            border-color: var(--blue-accent);
+        }
+        
+        .dark-select {
+            background: var(--dark-gray);
+            border-color: var(--blue-accent);
+            color: var(--text-light);
+        }
+        
+        .bg-metal-dark {
+            background: linear-gradient(45deg, var(--metal-gray), var(--dark-gray)) !important;
+        }
+        
+        .stat-item {
+            transition: all 0.3s ease;
+        }
+        
+        .stat-item:hover {
+            transform: scale(1.05);
+        }
+    `;
+    document.head.appendChild(style);
+});
+</script>
+{% endblock %}

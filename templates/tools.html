@@ -1,0 +1,380 @@
+{% extends "base.html" %}
+
+{% block title %}Tools - Portfolio{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="text-center mb-5">
+            <h1 class="display-5 fw-bold mb-3">
+                <i class="fas fa-tools text-warning"></i> Utility Tools
+            </h1>
+            <p class="lead text-muted">Helpful calculators and utilities for everyday problem solving</p>
+        </div>
+
+        <!-- Tool Categories -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-lg border-0 bg-dark-gray">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0"><i class="fas fa-calculator"></i> Available Tools</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="btn-group w-100 tool-selector" role="group">
+                            <input type="radio" class="btn-check" name="toolCategory" id="calculator" checked>
+                            <label class="btn btn-outline-warning" for="calculator">
+                                <i class="fas fa-calculator me-2"></i>Math Calculator
+                            </label>
+                            
+                            <input type="radio" class="btn-check" name="toolCategory" id="converter">
+                            <label class="btn btn-outline-warning" for="converter">
+                                <i class="fas fa-exchange-alt me-2"></i>Unit Converter
+                            </label>
+                            
+                            <input type="radio" class="btn-check" name="toolCategory" id="generators">
+                            <label class="btn btn-outline-warning" for="generators">
+                                <i class="fas fa-random me-2"></i>Generators
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mathematical Calculator -->
+        <div class="tool-content" id="calculatorContent">
+            <div class="card shadow-lg border-0 bg-dark-gray">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-calculator"></i> Mathematical Calculator</h4>
+                    <small>Solve various mathematical problems with step-by-step solutions</small>
+                </div>
+                <div class="card-body text-light">
+                    <!-- Math Category Selector -->
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <label for="mathCategory" class="form-label fw-bold">Select Math Category:</label>
+                            <select class="form-select bg-dark text-light" id="mathCategory" onchange="updateMathCategory()">
+                                <option value="basic">Basic Arithmetic</option>
+                                <option value="algebra">Algebra</option>
+                                <option value="geometry">Geometry</option>
+                                <option value="trigonometry">Trigonometry</option>
+                                <option value="calculus">Calculus</option>
+                                <option value="statistics">Statistics</option>
+                                <option value="physics">Physics</option>
+                                <option value="financial">Financial</option>
+                            </select>
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label fw-bold">Description:</label>
+                            <p id="categoryDescription" class="text-muted small">
+                                Perform basic arithmetic operations like addition, subtraction, multiplication, and division.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Input Section -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <label for="mathInput" class="form-label fw-bold">Enter Your Problem:</label>
+                            <textarea class="form-control bg-dark text-light" id="mathInput" rows="3" 
+                                placeholder="e.g., 2 + 2, solve x^2 - 5x + 6 = 0, area of circle with radius 5"></textarea>
+                            <small class="text-muted" id="inputHelp">
+                                Enter your mathematical expression or problem description
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Calculate Button -->
+                    <div class="text-center mb-4">
+                        <button class="btn btn-primary btn-lg" onclick="calculateMath()">
+                            <i class="fas fa-calculator me-2"></i>Calculate
+                        </button>
+                        <button class="btn btn-outline-secondary btn-lg ms-2" onclick="clearCalculator()">
+                            <i class="fas fa-eraser me-2"></i>Clear
+                        </button>
+                    </div>
+
+                    <!-- Results Section -->
+                    <div id="resultsSection" style="display: none;">
+                        <div class="card bg-success text-white">
+                            <div class="card-header">
+                                <h5><i class="fas fa-check-circle"></i> Solution</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="mathResult"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Error Section -->
+                    <div id="errorSection" style="display: none;">
+                        <div class="card bg-danger text-white">
+                            <div class="card-header">
+                                <h5><i class="fas fa-exclamation-triangle"></i> Error</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="errorMessage"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Common Examples -->
+                    <div class="mt-5">
+                        <h5 class="text-warning"><i class="fas fa-lightbulb"></i> Quick Examples</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card bg-dark border-secondary">
+                                    <div class="card-body">
+                                        <h6 class="text-info">Basic Math:</h6>
+                                        <div class="example-buttons">
+                                            <button class="btn btn-outline-light btn-sm mb-2" onclick="setExample('25 * 15 + 100')">25 × 15 + 100</button>
+                                            <button class="btn btn-outline-light btn-sm mb-2" onclick="setExample('sqrt(144)')">√144</button>
+                                            <button class="btn btn-outline-light btn-sm mb-2" onclick="setExample('2^8')">2⁸</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card bg-dark border-secondary">
+                                    <div class="card-body">
+                                        <h6 class="text-info">Advanced:</h6>
+                                        <div class="example-buttons">
+                                            <button class="btn btn-outline-light btn-sm mb-2" onclick="setExample('solve x^2 - 4x + 4 = 0')">Quadratic Equation</button>
+                                            <button class="btn btn-outline-light btn-sm mb-2" onclick="setExample('derivative of x^3 + 2x^2 - 5x + 1')">Derivative</button>
+                                            <button class="btn btn-outline-light btn-sm mb-2" onclick="setExample('area of circle radius 7')">Circle Area</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Unit Converter (Placeholder) -->
+        <div class="tool-content" id="converterContent" style="display: none;">
+            <div class="card shadow-lg border-0 bg-dark-gray">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0"><i class="fas fa-exchange-alt"></i> Unit Converter</h4>
+                    <small>Convert between different units of measurement</small>
+                </div>
+                <div class="card-body text-light">
+                    <p class="lead text-center">Unit Converter coming soon!</p>
+                    <p class="text-center text-muted">Convert between metric/imperial units, currencies, and more.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Generators (Placeholder) -->
+        <div class="tool-content" id="generatorsContent" style="display: none;">
+            <div class="card shadow-lg border-0 bg-dark-gray">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="fas fa-random"></i> Random Generators</h4>
+                    <small>Generate passwords, numbers, colors, and more</small>
+                </div>
+                <div class="card-body text-light">
+                    <p class="lead text-center">Random Generators coming soon!</p>
+                    <p class="text-center text-muted">Password generator, random numbers, color palettes, and more.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.tool-selector .btn {
+    flex: 1;
+}
+
+.example-buttons .btn {
+    margin-right: 5px;
+    white-space: nowrap;
+}
+
+.card {
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+    .tool-selector {
+        flex-direction: column;
+    }
+    
+    .tool-selector .btn {
+        margin-bottom: 5px;
+    }
+}
+</style>
+
+<script>
+// Math category descriptions
+const mathCategories = {
+    basic: "Perform basic arithmetic operations like addition, subtraction, multiplication, and division.",
+    algebra: "Solve algebraic equations, simplify expressions, and work with variables.",
+    geometry: "Calculate areas, perimeters, volumes, and solve geometric problems.",
+    trigonometry: "Work with trigonometric functions, angles, and triangle calculations.",
+    calculus: "Find derivatives, integrals, and solve calculus problems.",
+    statistics: "Calculate mean, median, mode, standard deviation, and probability.",
+    physics: "Solve physics problems involving motion, energy, force, and more.",
+    financial: "Calculate interest, loans, investments, and financial planning."
+};
+
+// Input help text for each category
+const inputHelp = {
+    basic: "Enter expressions like: 2 + 2, 15 * 8, sqrt(25), 2^3",
+    algebra: "Enter equations like: solve x^2 - 5x + 6 = 0, simplify 2x + 3x",
+    geometry: "Enter problems like: area of circle radius 5, volume of sphere radius 3",
+    trigonometry: "Enter like: sin(30), cos(45), tan(60), or angle calculations",
+    calculus: "Enter like: derivative of x^2 + 3x, integral of 2x + 1",
+    statistics: "Enter data like: mean of [1,2,3,4,5], standard deviation of [10,20,30]",
+    physics: "Enter like: velocity with acceleration 9.8 m/s² and time 5s",
+    financial: "Enter like: compound interest with principal 1000, rate 5%, time 2 years"
+};
+
+// Tool category switching
+document.addEventListener('DOMContentLoaded', function() {
+    // Tool category switching
+    const toolRadios = document.querySelectorAll('input[name="toolCategory"]');
+    toolRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            // Hide all tool contents
+            document.querySelectorAll('.tool-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            
+            // Show selected tool content
+            const selectedTool = this.id + 'Content';
+            const toolContent = document.getElementById(selectedTool);
+            if (toolContent) {
+                toolContent.style.display = 'block';
+            }
+        });
+    });
+});
+
+function updateMathCategory() {
+    const category = document.getElementById('mathCategory').value;
+    document.getElementById('categoryDescription').textContent = mathCategories[category];
+    document.getElementById('inputHelp').textContent = inputHelp[category];
+}
+
+function calculateMath() {
+    const input = document.getElementById('mathInput').value.trim();
+    const category = document.getElementById('mathCategory').value;
+    
+    // Hide previous results
+    document.getElementById('resultsSection').style.display = 'none';
+    document.getElementById('errorSection').style.display = 'none';
+    
+    if (!input) {
+        showError("Please enter a mathematical problem to solve.");
+        return;
+    }
+    
+    try {
+        let result = solveMathProblem(input, category);
+        showResult(result);
+    } catch (error) {
+        showError("Could not solve the problem. Please check your input and try again.");
+    }
+}
+
+function solveMathProblem(input, category) {
+    // Simple math expression evaluator
+    // Note: In a real application, you'd want to use a proper math library like Math.js
+    
+    let result = "";
+    
+    // Basic arithmetic expressions
+    if (category === 'basic') {
+        // Handle basic math operations
+        if (input.includes('sqrt(')) {
+            let match = input.match(/sqrt\((\d+(?:\.\d+)?)\)/);
+            if (match) {
+                let num = parseFloat(match[1]);
+                result = `√${num} = ${Math.sqrt(num)}`;
+            }
+        } else if (input.includes('^')) {
+            let parts = input.split('^');
+            if (parts.length === 2) {
+                let base = parseFloat(parts[0].trim());
+                let exp = parseFloat(parts[1].trim());
+                result = `${base}^${exp} = ${Math.pow(base, exp)}`;
+            }
+        } else {
+            // Try to evaluate simple expression
+            let cleanInput = input.replace(/[^0-9+\-*/().\s]/g, '');
+            try {
+                let evaluation = Function('"use strict"; return (' + cleanInput + ')')();
+                result = `${input} = ${evaluation}`;
+            } catch (e) {
+                throw new Error("Invalid expression");
+            }
+        }
+    } 
+    // Algebra category
+    else if (category === 'algebra') {
+        if (input.toLowerCase().includes('solve') && input.includes('x^2')) {
+            result = "Quadratic equation solver: Use the quadratic formula x = (-b ± √(b²-4ac)) / 2a";
+        } else {
+            result = "Algebraic problem detected. For complex algebra, consider using specialized tools like Wolfram Alpha.";
+        }
+    }
+    // Geometry category
+    else if (category === 'geometry') {
+        if (input.toLowerCase().includes('area') && input.toLowerCase().includes('circle')) {
+            let match = input.match(/radius\s+(\d+(?:\.\d+)?)/);
+            if (match) {
+                let radius = parseFloat(match[1]);
+                let area = Math.PI * radius * radius;
+                result = `Area of circle with radius ${radius} = π × ${radius}² = ${area.toFixed(2)} square units`;
+            }
+        } else if (input.toLowerCase().includes('volume') && input.toLowerCase().includes('sphere')) {
+            let match = input.match(/radius\s+(\d+(?:\.\d+)?)/);
+            if (match) {
+                let radius = parseFloat(match[1]);
+                let volume = (4/3) * Math.PI * Math.pow(radius, 3);
+                result = `Volume of sphere with radius ${radius} = (4/3)π × ${radius}³ = ${volume.toFixed(2)} cubic units`;
+            }
+        } else {
+            result = "Geometry problem detected. Please specify the shape and dimensions clearly.";
+        }
+    }
+    // Other categories
+    else {
+        result = `${category.charAt(0).toUpperCase() + category.slice(1)} calculation requested. This feature is under development for advanced mathematical operations.`;
+    }
+    
+    if (!result) {
+        throw new Error("Could not process the input");
+    }
+    
+    return result;
+}
+
+function showResult(result) {
+    document.getElementById('mathResult').innerHTML = `<h6>Result:</h6><p class="lead">${result}</p>`;
+    document.getElementById('resultsSection').style.display = 'block';
+}
+
+function showError(message) {
+    document.getElementById('errorMessage').innerHTML = `<p>${message}</p>`;
+    document.getElementById('errorSection').style.display = 'block';
+}
+
+function clearCalculator() {
+    document.getElementById('mathInput').value = '';
+    document.getElementById('resultsSection').style.display = 'none';
+    document.getElementById('errorSection').style.display = 'none';
+}
+
+function setExample(example) {
+    document.getElementById('mathInput').value = example;
+}
+</script>
+{% endblock %}

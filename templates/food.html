@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+
+{% block title %}Food & Nutrition - Portfolio{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="text-center mb-5">
+            <h1 class="display-5 fw-bold mb-3">
+                <i class="fas fa-apple-alt text-success"></i> Food & Nutrition
+            </h1>
+            <p class="lead text-muted">Healthy eating guidelines and nutritional recommendations</p>
+        </div>
+
+        <!-- Nutrition Basics -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card shadow-lg border-0 bg-dark-gray">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="fas fa-chart-pie"></i> Balanced Diet Foundations</h5>
+                    </div>
+                    <div class="card-body text-light">
+                        <div class="row">
+                            <div class="col-md-3 text-center">
+                                <div class="p-3 bg-primary rounded mb-2">
+                                    <i class="fas fa-drumstick-bite fa-2x"></i>
+                                </div>
+                                <h6>Proteins</h6>
+                                <p class="small">25-30% of calories<br>Builds and repairs muscle</p>
+                                <small class="text-muted">Lean meats, fish, eggs, legumes</small>
+                            </div>
+                            <div class="col-md-3 text-center">
+                                <div class="p-3 bg-warning text-dark rounded mb-2">
+                                    <i class="fas fa-bread-slice fa-2x"></i>
+                                </div>
+                                <h6>Carbohydrates</h6>
+                                <p class="small">45-50% of calories<br>Primary energy source</p>
+                                <small class="text-muted">Whole grains, fruits, vegetables</small>
+                            </div>
+                            <div class="col-md-3 text-center">
+                                <div class="p-3 bg-info rounded mb-2">
+                                    <i class="fas fa-oil-can fa-2x"></i>
+                                </div>
+                                <h6>Healthy Fats</h6>
+                                <p class="small">20-25% of calories<br>Hormone production</p>
+                                <small class="text-muted">Nuts, avocado, olive oil</small>
+                            </div>
+                            <div class="col-md-3 text-center">
+                                <div class="p-3 bg-secondary rounded mb-2">
+                                    <i class="fas fa-seedling fa-2x"></i>
+                                </div>
+                                <h6>Micronutrients</h6>
+                                <p class="small">Vitamins & Minerals<br>Essential functions</p>
+                                <small class="text-muted">Colorful fruits & vegetables</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Meal Planning -->
+        <div class="row mb-5">
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-lg h-100 border-0 bg-dark-gray">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0"><i class="fas fa-utensils"></i> Sample Meal Plan</h5>
+                    </div>
+                    <div class="card-body text-light">
+                        <div class="mb-3">
+                            <h6 class="text-warning"><i class="fas fa-sun"></i> Breakfast</h6>
+                            <ul class="small">
+                                <li>Greek yogurt with berries and nuts</li>
+                                <li>Oatmeal with banana and peanut butter</li>
+                                <li>Eggs with spinach and whole grain toast</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <h6 class="text-warning"><i class="fas fa-clock"></i> Lunch</h6>
+                            <ul class="small">
+                                <li>Quinoa bowl with vegetables and chicken</li>
+                                <li>Salmon salad with mixed greens</li>
+                                <li>Lentil soup with whole grain bread</li>
+                            </ul>
+                        </div>
+
+                        <div class="mb-3">
+                            <h6 class="text-warning"><i class="fas fa-moon"></i> Dinner</h6>
+                            <ul class="small">
+                                <li>Grilled fish with roasted vegetables</li>
+                                <li>Lean beef with sweet potato</li>
+                                <li>Tofu stir-fry with brown rice</li>
+                            </ul>
+                        </div>
+
+                        <div>
+                            <h6 class="text-warning"><i class="fas fa-cookie-bite"></i> Snacks</h6>
+                            <ul class="small">
+                                <li>Apple with almond butter</li>
+                                <li>Greek yogurt with honey</li>
+                                <li>Mixed nuts and dried fruit</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-lg h-100 border-0 bg-dark-gray">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-tint"></i> Hydration & Timing</h5>
+                    </div>
+                    <div class="card-body text-light">
+                        <div class="mb-4">
+                            <h6 class="text-info">Daily Hydration Goals</h6>
+                            <ul class="small">
+                                <li>8-10 glasses of water daily</li>
+                                <li>Extra 16-20oz per hour of exercise</li>
+                                <li>Monitor urine color (light yellow = good)</li>
+                                <li>Start each day with a glass of water</li>
+                            </ul>
+                        </div>
+
+                        <div class="mb-4">
+                            <h6 class="text-info">Meal Timing Tips</h6>
+                            <ul class="small">
+                                <li>Eat within 2 hours of waking</li>
+                                <li>3 main meals + 1-2 healthy snacks</li>
+                                <li>Stop eating 2-3 hours before bed</li>
+                                <li>Pre/post workout nutrition matters</li>
+                            </ul>
+                        </div>
+
+                        <div>
+                            <h6 class="text-info">Foods to Limit</h6>
+                            <ul class="small text-danger">
+                                <li>Processed and packaged foods</li>
+                                <li>Sugary drinks and desserts</li>
+                                <li>Excessive alcohol</li>
+                                <li>Trans fats and fried foods</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Specific Goals -->
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card shadow-lg h-100 border-0 bg-dark-gray">
+                    <div class="card-header bg-danger text-white">
+                        <h6 class="mb-0"><i class="fas fa-weight-hanging"></i> Weight Loss</h6>
+                    </div>
+                    <div class="card-body text-light">
+                        <ul class="small">
+                            <li>Create caloric deficit (300-500 calories)</li>
+                            <li>Increase protein to preserve muscle</li>
+                            <li>Focus on whole, unprocessed foods</li>
+                            <li>Practice portion control</li>
+                            <li>Eat slowly and mindfully</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-4">
+                <div class="card shadow-lg h-100 border-0 bg-dark-gray">
+                    <div class="card-header bg-success text-white">
+                        <h6 class="mb-0"><i class="fas fa-dumbbell"></i> Muscle Gain</h6>
+                    </div>
+                    <div class="card-body text-light">
+                        <ul class="small">
+                            <li>Eat in slight caloric surplus (200-300)</li>
+                            <li>1.2-2g protein per kg body weight</li>
+                            <li>Time protein around workouts</li>
+                            <li>Don't fear healthy carbohydrates</li>
+                            <li>Consistent meal timing</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-4">
+                <div class="card shadow-lg h-100 border-0 bg-dark-gray">
+                    <div class="card-header bg-primary text-white">
+                        <h6 class="mb-0"><i class="fas fa-running"></i> Athletic Performance</h6>
+                    </div>
+                    <div class="card-body text-light">
+                        <ul class="small">
+                            <li>Fuel before and after workouts</li>
+                            <li>Carbs for energy, protein for recovery</li>
+                            <li>Stay hydrated during training</li>
+                            <li>Consider electrolyte replacement</li>
+                            <li>Plan nutrition around training</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Reference -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-lg border-0 bg-dark-gray">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0"><i class="fas fa-list-check"></i> Quick Healthy Swaps</h5>
+                    </div>
+                    <div class="card-body text-light">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="text-secondary">Instead of...</h6>
+                                <ul class="small">
+                                    <li>White bread → Whole grain bread</li>
+                                    <li>Soda → Sparkling water with lemon</li>
+                                    <li>Candy → Fresh fruit</li>
+                                    <li>Chips → Air-popped popcorn</li>
+                                    <li>Ice cream → Greek yogurt with berries</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-secondary">Try these...</h6>
+                                <ul class="small">
+                                    <li>Mayo → Avocado or hummus</li>
+                                    <li>Butter → Olive oil or nut butter</li>
+                                    <li>Refined pasta → Whole grain or zucchini noodles</li>
+                                    <li>Sugary cereal → Oatmeal with fruit</li>
+                                    <li>Energy drinks → Green tea</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,345 @@
+{% extends "base.html" %}
+
+{% block title %}Discord - Portfolio{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="text-center mb-5">
+            <h1 class="display-5 fw-bold mb-3">
+                <i class="fab fa-discord text-primary"></i> Discord Community
+            </h1>
+            <p class="lead text-muted">Join me on Discord for gaming, chatting, and community fun!</p>
+        </div>
+
+        <!-- Discord Server Banner -->
+        <div class="card shadow-lg mb-5 discord-banner">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fab fa-discord me-2"></i> My Discord Server
+                    <span class="badge bg-success ms-2">ONLINE</span>
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-4 text-center">
+                        <div class="discord-logo p-4">
+                            <i class="fab fa-discord fa-5x text-primary mb-3"></i>
+                            <h5 class="text-blue-glow">ZjadowSide's Server</h5>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="server-info">
+                            <h4 class="text-blue-glow mb-3">Welcome to My Gaming Community!</h4>
+                            <p class="mb-3">
+                                Join our friendly Discord server where we discuss games, share Minecraft builds, 
+                                watch movies together, and hang out! Whether you're into gaming, coding, or just 
+                                want to chat, there's a place for you here.
+                            </p>
+                            
+                            <div class="server-features mb-4">
+                                <div class="row">
+                                    <div class="col-sm-6 mb-2">
+                                        <small class="text-success">
+                                            <i class="fas fa-check-circle me-2"></i> Gaming Discussion
+                                        </small>
+                                    </div>
+                                    <div class="col-sm-6 mb-2">
+                                        <small class="text-success">
+                                            <i class="fas fa-check-circle me-2"></i> Minecraft Showcases
+                                        </small>
+                                    </div>
+                                    <div class="col-sm-6 mb-2">
+                                        <small class="text-success">
+                                            <i class="fas fa-check-circle me-2"></i> Movie Nights
+                                        </small>
+                                    </div>
+                                    <div class="col-sm-6 mb-2">
+                                        <small class="text-success">
+                                            <i class="fas fa-check-circle me-2"></i> Voice Channels
+                                        </small>
+                                    </div>
+                                    <div class="col-sm-6 mb-2">
+                                        <small class="text-success">
+                                            <i class="fas fa-check-circle me-2"></i> Friendly Community
+                                        </small>
+                                    </div>
+                                    <div class="col-sm-6 mb-2">
+                                        <small class="text-success">
+                                            <i class="fas fa-check-circle me-2"></i> Regular Events
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="server-stats mb-4">
+                                <div class="row text-center">
+                                    <div class="col-4">
+                                        <div class="stat-box p-3 border rounded">
+                                            <h5 class="text-primary mb-1">[XXX]</h5>
+                                            <small class="text-muted">Members</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="stat-box p-3 border rounded">
+                                            <h5 class="text-success mb-1">[XX]</h5>
+                                            <small class="text-muted">Online Now</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="stat-box p-3 border rounded">
+                                            <h5 class="text-warning mb-1">[X]</h5>
+                                            <small class="text-muted">Years Active</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="join-actions text-center">
+                                <a href="https://discord.gg/YOUR_INVITE_CODE" target="_blank" class="btn btn-primary btn-lg me-3 mb-2">
+                                    <i class="fab fa-discord me-2"></i> Join Server
+                                </a>
+                                <button class="btn btn-outline-info btn-lg mb-2" onclick="copyDiscordTag()">
+                                    <i class="fas fa-copy me-2"></i> Copy My Tag
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Discord Profile Section -->
+        <div class="card shadow mb-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="fas fa-user-circle"></i> My Discord Profile</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="discord-profile">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="profile-avatar me-3">
+                                    <div class="avatar-placeholder bg-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                        <i class="fas fa-user fa-2x text-white"></i>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1 text-blue-glow">ZjadowSide</h6>
+                                    <p class="mb-1 text-muted">#[YOUR_DISCRIMINATOR]</p>
+                                    <span class="badge bg-success">Online</span>
+                                </div>
+                            </div>
+                            
+                            <div class="profile-info">
+                                <h6 class="text-blue-glow mb-2">About Me</h6>
+                                <p class="text-muted">
+                                    Gamer, developer, and content creator. Always up for a good discussion 
+                                    about games, movies, or tech!
+                                </p>
+                                
+                                <h6 class="text-blue-glow mb-2">Playing</h6>
+                                <div class="activity-status p-2 border rounded">
+                                    <i class="fas fa-gamepad text-success me-2"></i>
+                                    <small>Minecraft • Building something epic</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="quick-connect">
+                            <h6 class="text-blue-glow mb-3">Quick Connect</h6>
+                            
+                            <div class="connect-option mb-3 p-3 border rounded">
+                                <h6 class="mb-2">
+                                    <i class="fas fa-plus-circle text-success me-2"></i> Add as Friend
+                                </h6>
+                                <p class="text-muted mb-2 small">
+                                    Send me a friend request to chat directly
+                                </p>
+                                <code class="discord-tag">ZjadowSide#[YOUR_DISCRIMINATOR]</code>
+                            </div>
+                            
+                            <div class="connect-option mb-3 p-3 border rounded">
+                                <h6 class="mb-2">
+                                    <i class="fas fa-comment text-primary me-2"></i> Direct Message
+                                </h6>
+                                <p class="text-muted mb-2 small">
+                                    We need to be friends first or share a server
+                                </p>
+                                <small class="text-warning">
+                                    <i class="fas fa-info-circle me-1"></i> Mutual server required
+                                </small>
+                            </div>
+                            
+                            <div class="connect-option p-3 border rounded">
+                                <h6 class="mb-2">
+                                    <i class="fas fa-microphone text-info me-2"></i> Voice Chat
+                                </h6>
+                                <p class="text-muted mb-2 small">
+                                    Join me in voice channels for gaming sessions
+                                </p>
+                                <small class="text-info">
+                                    <i class="fas fa-clock me-1"></i> Usually online evenings
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Discord Tips & Guidelines -->
+        <div class="card shadow mb-4">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0"><i class="fas fa-exclamation-triangle"></i> Server Guidelines</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-success mb-3">✅ Do's</h6>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                Be respectful and friendly
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                Share your gaming experiences
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                Ask questions about games or tech
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                Participate in events and discussions
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                Show off your Minecraft builds
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-danger mb-3">❌ Don'ts</h6>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i class="fas fa-times text-danger me-2"></i>
+                                No spam or self-promotion
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-times text-danger me-2"></i>
+                                Keep it family-friendly
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-times text-danger me-2"></i>
+                                No trolling or toxic behavior
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-times text-danger me-2"></i>
+                                Respect others' opinions
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-times text-danger me-2"></i>
+                                No off-topic discussions in game channels
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Info -->
+        <div class="text-center">
+            <div class="alert alert-info dark-alert">
+                <h6 class="text-blue-glow"><i class="fab fa-discord"></i> Ready to Connect?</h6>
+                <p class="mb-3">Join our community and let's game together!</p>
+                <a href="https://discord.gg/YOUR_INVITE_CODE" target="_blank" class="btn btn-primary btn-lg">
+                    <i class="fab fa-discord me-2"></i> Join Discord Server
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Discord tag copy functionality
+    window.copyDiscordTag = function() {
+        const discordTag = "ZjadowSide#[YOUR_DISCRIMINATOR]";
+        navigator.clipboard.writeText(discordTag).then(function() {
+            // Show success notification
+            const btn = event.target.closest('button');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check me-2"></i> Copied!';
+            btn.classList.remove('btn-outline-info');
+            btn.classList.add('btn-success');
+            
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.classList.remove('btn-success');
+                btn.classList.add('btn-outline-info');
+            }, 2000);
+        });
+    };
+    
+    // Add Discord-specific animations and styling
+    const style = document.createElement('style');
+    style.textContent = `
+        .discord-banner {
+            background: linear-gradient(135deg, var(--dark-gray), var(--metal-gray));
+            border: 1px solid var(--blue-accent);
+        }
+        
+        .discord-logo {
+            background: var(--metal-shine);
+            border-radius: 15px;
+        }
+        
+        .stat-box:hover {
+            transform: translateY(-3px);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .connect-option:hover {
+            background: var(--metal-gray);
+            transition: all 0.3s ease;
+        }
+        
+        .discord-tag {
+            background: var(--dark-gray);
+            color: var(--text-light);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .activity-status {
+            background: var(--metal-gray);
+            border-color: var(--blue-accent) !important;
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // Add pulse animation to online status
+    const onlineBadges = document.querySelectorAll('.badge.bg-success');
+    onlineBadges.forEach(badge => {
+        badge.style.animation = 'pulse 2s infinite';
+    });
+    
+    const pulseStyle = document.createElement('style');
+    pulseStyle.textContent = `
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+    `;
+    document.head.appendChild(pulseStyle);
+});
+</script>
+{% endblock %}

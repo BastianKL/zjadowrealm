@@ -1,0 +1,5359 @@
+{% extends "base.html" %}
+
+{% block title %}Browser Games - Portfolio{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-11">
+        <div class="text-center mb-5">
+            <h1 class="display-5 fw-bold mb-3">
+                <i class="fas fa-gamepad text-success"></i> Browser Games
+            </h1>
+            <p class="lead text-muted">Quick games to play while browsing my portfolio!</p>
+        </div>
+
+        <!-- Game Selection -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-lg">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-play"></i> Choose a Game</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="btn-group w-100 game-selector" role="group">
+                            <input type="radio" class="btn-check" name="gameType" id="snake" checked>
+                            <label class="btn btn-outline-primary" for="snake">
+                                <i class="fas fa-circle-dot me-2"></i>Snake
+                            </label>
+                            
+                            <input type="radio" class="btn-check" name="gameType" id="pong">
+                            <label class="btn btn-outline-primary" for="pong">
+                                <i class="fas fa-table-tennis me-2"></i>Pong
+                            </label>
+                            
+                            <input type="radio" class="btn-check" name="gameType" id="memory">
+                            <label class="btn btn-outline-primary" for="memory">
+                                <i class="fas fa-brain me-2"></i>Memory
+                            </label>
+                            
+                            <input type="radio" class="btn-check" name="gameType" id="tetris">
+                            <label class="btn btn-outline-primary" for="tetris">
+                                <i class="fas fa-th me-2"></i>Tetris
+                            </label>
+                            
+                            <input type="radio" class="btn-check" name="gameType" id="pirates">
+                            <label class="btn btn-outline-primary" for="pirates">
+                                <i class="fas fa-ship me-2"></i>Pirate Adventure
+                            </label>
+                            
+                            <input type="radio" class="btn-check" name="gameType" id="chess">
+                            <label class="btn btn-outline-primary" for="chess">
+                                <i class="fas fa-chess me-2"></i>Chess
+                            </label>
+                            
+                            <input type="radio" class="btn-check" name="gameType" id="tictactoe">
+                            <label class="btn btn-outline-primary" for="tictactoe">
+                                <i class="fas fa-hashtag me-2"></i>Tic Tac Toe
+                            </label>
+                            
+                            <input type="radio" class="btn-check" name="gameType" id="wordguess">
+                            <label class="btn btn-outline-primary" for="wordguess">
+                                <i class="fas fa-spell-check me-2"></i>Word Guess
+                            </label>
+                            
+                            <input type="radio" class="btn-check" name="gameType" id="strands">
+                            <label class="btn btn-outline-primary" for="strands">
+                                <i class="fas fa-project-diagram me-2"></i>Strands
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Snake Game -->
+        <div class="game-container" id="snakeGame" style="display: block;">
+            <div class="card shadow-lg">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-circle-dot me-2"></i>Snake Game
+                        <span class="float-end">Score: <span id="snakeScore">0</span> | High: <span id="snakeHighScore">0</span></span>
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    <div class="game-area mb-3">
+                        <canvas id="snakeCanvas" width="400" height="400" class="border rounded game-canvas"></canvas>
+                    </div>
+                    <div class="game-controls mb-3">
+                        <button class="btn btn-success me-2" onclick="startSnake()">
+                            <i class="fas fa-play"></i> Start
+                        </button>
+                        <button class="btn btn-warning me-2" onclick="pauseSnake()">
+                            <i class="fas fa-pause"></i> Pause
+                        </button>
+                        <button class="btn btn-danger me-2" onclick="resetSnake()">
+                            <i class="fas fa-redo"></i> Reset
+                        </button>
+                        <button class="btn btn-info me-2" onclick="toggleAdvancedMode()" id="advancedBtn">
+                            <i class="fas fa-magic"></i> Advanced!
+                        </button>
+                    </div>
+                    <div id="advancedModeInfo" style="display: none;" class="mb-3">
+                        <div class="alert alert-info">
+                            <strong>Advanced Mode Active!</strong><br>
+                            <small>
+                                🟣 Purple squares: +2 length | 🟠 Orange with yellow rim: Thick mode (broader) | 
+                                🔵🟠 Blue-Orange lines: Teleport | 🔴🟡 Red-Yellow lines: Generate obstacles | ⚫ Black pulsing: Cuts snake in half | 🟫 Obstacles: Avoid!
+                            </small>
+                        </div>
+                    </div>
+                    <p class="text-muted">Use WASD or arrow keys to move. Collect food to grow!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pong Game -->
+        <div class="game-container" id="pongGame" style="display: none;">
+            <div class="card shadow-lg">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-table-tennis me-2"></i>Pong
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    <div class="game-stats mb-3">
+                        <div class="row text-center">
+                            <div class="col-3">
+                                <span class="text-info">Player: </span>
+                                <span id="pongPlayerScore" class="text-light fw-bold">0</span>
+                            </div>
+                            <div class="col-3">
+                                <span class="text-warning">AI: </span>
+                                <span id="pongAIScore" class="text-light fw-bold">0</span>
+                            </div>
+                            <div class="col-6">
+                                <div class="text-success">Next Goal Worth: 
+                                    <span id="potentialScore" class="fw-bold">1</span> pts
+                                    <span id="obstacleBonus" class="text-warning"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="game-area mb-3">
+                        <canvas id="pongCanvas" width="600" height="300" class="border rounded game-canvas"></canvas>
+                        
+                        <!-- Upgrade Choice Modal -->
+                        <div id="upgradeChoice" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.9); padding: 20px; border-radius: 10px; z-index: 1000; width: 350px;">
+                            <h5 class="text-warning text-center mb-3">AI Scored! Choose Your Upgrade:</h5>
+                            <div class="text-center" id="upgradeButtons">
+                                <!-- Two random upgrade buttons will be dynamically inserted here -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="game-controls mb-3">
+                        <button class="btn btn-info me-2" onclick="startPong()">
+                            <i class="fas fa-play"></i> Start
+                        </button>
+                        <button class="btn btn-warning me-2" onclick="pausePong()">
+                            <i class="fas fa-pause"></i> Pause
+                        </button>
+                        <button class="btn btn-danger" onclick="resetPong()">
+                            <i class="fas fa-redo"></i> Reset
+                        </button>
+                    </div>
+                    <div class="mb-2">
+                        <small class="text-info">
+                            <strong>Dash Status:</strong> 
+                            Player: <span id="playerDashStatus" class="badge bg-success">Ready</span> | 
+                            AI: <span id="aiDashStatus" class="badge bg-success">Ready</span>
+                        </small>
+                    </div>
+                    <div class="mb-2">
+                        <small class="text-success">
+                            <strong>Player Upgrades:</strong> 
+                            Paddle Size: <span id="paddleSize">Normal</span> | 
+                            Speed: <span id="paddleSpeed">Normal</span> |
+                            Freeze Curse: <span id="freezeLevel">None</span>
+                        </small>
+                    </div>
+                    <div class="mb-2" id="freezeStatus" style="display: none;">
+                        <small class="text-success">
+                            <strong>❄️ AI FROZEN!</strong> Enemy can't move for <span id="freezeTimer">0</span>s
+                        </small>
+                    </div>
+                    <p class="text-muted">Use W/S keys to move your paddle. Press <strong>D key</strong> to dash! Each goal adds walls or portals. First to 5 points wins!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Memory Game -->
+        <div class="game-container" id="memoryGame" style="display: none;">
+            <div class="card shadow-lg">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">
+                        <i class="fas fa-brain me-2"></i>Memory Challenge
+                        <span class="float-end">Level: <span id="memoryLevel">1</span> | Score: <span id="memoryScore">0</span></span>
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    <div class="game-area mb-3">
+                        <div id="memoryCards" class="d-flex flex-wrap justify-content-center gap-2">
+                            <p class="text-center">Click Start Memory to begin!</p>
+                        </div>
+                    </div>
+                    <div class="game-controls mb-3">
+                        <button class="btn btn-warning me-2" onclick="startMemory()">
+                            <i class="fas fa-play"></i> Start Memory
+                        </button>
+                        <button class="btn btn-danger" onclick="resetMemory()">
+                            <i class="fas fa-redo"></i> Reset
+                        </button>
+                    </div>
+                    <p class="text-muted">Find matching pairs to progress through levels!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tetris Game -->
+        <div class="game-container" id="tetrisGame" style="display: none;">
+            <div class="card shadow-lg">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-th me-2"></i>Tetris
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="text-center">
+                                <canvas id="tetrisCanvas" width="300" height="600" class="border rounded game-canvas"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="tetris-stats mb-3">
+                                <h4>Score: <span id="tetrisScore">0</span></h4>
+                                <h5>Level: <span id="tetrisLevel">1</span></h5>
+                                <h5>Lines: <span id="tetrisLines">0</span></h5>
+                            </div>
+                            
+                            <div class="next-piece mb-3">
+                                <h6>Next Piece:</h6>
+                                <canvas id="nextPieceCanvas" width="120" height="120" style="border: 1px solid #666; background: #000;"></canvas>
+                            </div>
+                            
+                            <div class="game-controls mb-3">
+                                <button id="tetrisStartButton" class="btn btn-success me-2" onclick="startTetris()">
+                                    <i class="fas fa-play"></i> Start
+                                </button>
+                                <button id="tetrisPauseButton" class="btn btn-warning me-2" onclick="pauseTetris()" disabled>
+                                    <i class="fas fa-pause"></i> Pause
+                                </button>
+                                <button class="btn btn-danger" onclick="resetTetris()">
+                                    <i class="fas fa-redo"></i> Reset
+                                </button>
+                            </div>
+                            
+                            <div class="controls-help">
+                                <h6>Controls:</h6>
+                                <small class="text-muted">
+                                    <div>← → Move left/right</div>
+                                    <div>↓ Soft drop</div>
+                                    <div>↑ / Space: Rotate</div>
+                                    <div>Shift: Hard drop</div>
+                                    <div>P: Pause</div>
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pirate Adventure Game -->
+        <div class="game-container" id="piratesGame" style="display: none;">
+            <div class="card shadow-lg">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-ship me-2"></i>Pirate Adventure
+                        <span class="float-end">Turn: <span id="pirateTurn">1</span> | Player: <span id="currentPiratePlayer">1</span></span>
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    <div class="row mb-3">
+                        <div class="col-md-8">
+                            <div class="game-area">
+                                <canvas id="pirateBoard" width="640" height="640" class="border rounded game-canvas"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="action-wheel mb-3">
+                                <h6><i class="fas fa-cog"></i> Spinning Action Wheel</h6>
+                                <div class="text-center mb-3">
+                                    <canvas id="actionWheelCanvas" width="200" height="200" style="border: 2px solid #333; border-radius: 50%; cursor: pointer;"></canvas>
+                                    <div class="mt-2">
+                                        <button class="btn btn-warning" onclick="spinActionWheel()" id="spinButton">
+                                            <i class="fas fa-sync-alt"></i> Spin Wheel!
+                                        </button>
+                                    </div>
+                                    <div class="mt-2">
+                                        <strong>Selected Action: <span id="selectedAction">None</span></strong>
+                                    </div>
+                                </div>
+                                
+                                <div class="dice-area mb-3">
+                                    <h6><i class="fas fa-dice"></i> Action Dice</h6>
+                                    <div class="text-center">
+                                        <canvas id="diceCanvas" width="120" height="60" style="border: 1px solid #666;"></canvas>
+                                        <div class="mt-2">
+                                            <button class="btn btn-info btn-sm" onclick="rollActionDice()" id="diceButton" disabled>
+                                                <i class="fas fa-dice-d6"></i> Roll Dice
+                                            </button>
+                                        </div>
+                                        <div class="mt-1">
+                                            <small>Dice Result: <span id="diceResult">-</span></small>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="action-execute mb-3">
+                                    <button class="btn btn-success w-100" onclick="executeSelectedAction()" id="executeButton" disabled>
+                                        <i class="fas fa-play"></i> Execute Action
+                                    </button>
+                                </div>
+                                </div>
+                            </div>
+                            <div class="player-info">
+                                <h6><i class="fas fa-users"></i> Player Status</h6>
+                                <div id="playerStatus">
+                                    <p class="mb-1">Player 1: <span class="text-success">3 ships</span> | <span class="text-warning">5 coins</span></p>
+                                    <p class="mb-1">Player 2: <span class="text-success">3 ships</span> | <span class="text-warning">5 coins</span></p>
+                                </div>
+                            </div>
+                            
+                            <div class="hotbar-section mt-3">
+                                <h6><i class="fas fa-toolbox"></i> Supply Hotbar</h6>
+                                <div class="hotbar d-flex gap-1 mb-2" id="supplyHotbar">
+                                    <div class="hotbar-slot empty">Empty</div>
+                                    <div class="hotbar-slot empty">Empty</div>
+                                    <div class="hotbar-slot empty">Empty</div>
+                                    <div class="hotbar-slot empty">Empty</div>
+                                </div>
+                                <button class="btn btn-sm btn-outline-primary" onclick="buyHotbarSlot('supply')">
+                                    <i class="fas fa-plus"></i> Buy Slot (3g)
+                                </button>
+                            </div>
+                            
+                            <div class="card-hotbar-section mt-3">
+                                <h6><i class="fas fa-hand-holding"></i> Card Hotbar</h6>
+                                <div class="hotbar d-flex gap-1 mb-2" id="cardHotbar">
+                                    <div class="hotbar-slot empty">Empty</div>
+                                    <div class="hotbar-slot empty">Empty</div>
+                                    <div class="hotbar-slot empty">Empty</div>
+                                    <div class="hotbar-slot empty">Empty</div>
+                                </div>
+                                <button class="btn btn-sm btn-outline-info" onclick="buyHotbarSlot('card')">
+                                    <i class="fas fa-plus"></i> Buy Slot (3g)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="game-controls mb-3">
+                        <button class="btn btn-dark me-2" onclick="startPirateGame()">
+                            <i class="fas fa-play"></i> Start Adventure
+                        </button>
+                        <button class="btn btn-warning me-2" onclick="nextPirateTurn()">
+                            <i class="fas fa-forward"></i> Next Turn
+                        </button>
+                        <button class="btn btn-danger" onclick="resetPirateGame()">
+                            <i class="fas fa-redo"></i> Reset Game
+                        </button>
+                    </div>
+                    <p class="text-muted">Multiplayer pirate adventure! Use the action wheel to take turns.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+        <!-- Chess Game -->
+        <div class="game-container" id="chessGame" style="display: none;">
+            <div class="card shadow-lg">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chess me-2"></i>Chess
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="text-center">
+                                <canvas id="chessBoard" width="480" height="480" class="border rounded game-canvas" style="background: #f0d9b5;"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="chess-info">
+                                <h6>Game Status: <span id="chessStatus">White's Turn</span></h6>
+                                <h6>Turn: <span id="chessTurn">White</span></h6>
+                                <div class="mt-3">
+                                    <button class="btn btn-success" onclick="startChess()">New Game</button>
+                                    <button class="btn btn-secondary" onclick="resetChess()">Reset</button>
+                                </div>
+                                <div class="mt-3">
+                                    <h6>Captured Pieces:</h6>
+                                    <div id="capturedWhite" class="mb-2">White: <span class="captured-pieces"></span></div>
+                                    <div id="capturedBlack">Black: <span class="captured-pieces"></span></div>
+                                </div>
+                                <div class="mt-3">
+                                    <small class="text-muted">
+                                        Click a piece to select, then click destination to move.
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tic Tac Toe Game -->
+        <div class="game-container" id="tictactoeGame" style="display: none;">
+            <div class="card shadow-lg">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-hashtag me-2"></i>Tic Tac Toe
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row justify-content-center">
+                        <div class="col-md-6">
+                            <div class="text-center">
+                                <canvas id="ticTacToeBoard" width="300" height="300" class="border rounded game-canvas"></canvas>
+                                <div class="mt-3">
+                                    <h5 id="ticTacToeStatus">Player X's Turn</h5>
+                                    <button class="btn btn-info" onclick="startTicTacToe()">New Game</button>
+                                    <button class="btn btn-warning" onclick="toggleTicTacToeMode()">vs Computer</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="tic-tac-toe-stats">
+                                <h6>Game Mode: <span id="gameMode">2 Players</span></h6>
+                                <h6>Score:</h6>
+                                <ul class="list-unstyled">
+                                    <li>Player X: <span id="scoreX">0</span></li>
+                                    <li>Player O: <span id="scoreO">0</span></li>
+                                    <li>Draws: <span id="scoreDraw">0</span></li>
+                                </ul>
+                                <small class="text-muted">
+                                    Click on any empty square to make your move.
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Word Guess Game -->
+        <div class="game-container" id="wordguessGame" style="display: none;">
+            <div class="card shadow-lg">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">
+                        <i class="fas fa-spell-check me-2"></i>Word Guess
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row justify-content-center">
+                        <div class="col-md-8">
+                            <div class="text-center">
+                                <div class="word-display mb-4">
+                                    <h2 id="wordDisplay" class="letter-spacing">_ _ _ _ _</h2>
+                                    <p class="text-muted">Category: <span id="wordCategory">Animals</span></p>
+                                </div>
+                                
+                                <div class="alphabet-grid mb-4">
+                                    <!-- Letters will be generated by JavaScript -->
+                                </div>
+                                
+                                <div class="hangman-display">
+                                    <canvas id="hangmanCanvas" width="200" height="250"></canvas>
+                                </div>
+                                
+                                <div class="mt-3">
+                                    <h6>Guesses remaining: <span id="guessesLeft">6</span></h6>
+                                    <h6>Score: <span id="wordScore">0</span></h6>
+                                    <button class="btn btn-warning" onclick="startWordGuess()">New Word</button>
+                                    <button class="btn btn-secondary" onclick="giveWordHint()">Hint</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Strands Game -->
+        <div class="game-container" id="strandsGame" style="display: none;">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-project-diagram me-2"></i>Strands
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="text-center">
+                                <div class="strands-theme mb-3">
+                                    <h5>Today's Theme: <span id="strandsTheme">Ocean Creatures</span></h5>
+                                </div>
+                                <canvas id="strandsBoard" width="400" height="400" class="border rounded game-canvas"></canvas>
+                                <div class="mt-3">
+                                    <input type="text" id="strandsInput" class="form-control mb-2" placeholder="Type your word and press Enter">
+                                    <button class="btn btn-primary" onclick="submitStrandsWord()">Submit Word</button>
+                                    <button class="btn btn-secondary" onclick="startStrands()">New Puzzle</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="strands-info">
+                                <h6>Words Found: <span id="strandsFound">0</span>/8</h6>
+                                <h6>Score: <span id="strandsScore">0</span></h6>
+                                
+                                <div class="found-words mt-3">
+                                    <h6>Found Words:</h6>
+                                    <div id="foundWordsList" class="list-group list-group-flush">
+                                        <!-- Found words will appear here -->
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-3">
+                                    <small class="text-muted">
+                                        Find words related to the theme by clicking and dragging across letters.
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+<!-- Custom CSS for games -->
+<style>
+.game-canvas {
+    background: #2a2a2a;
+    image-rendering: pixelated;
+}
+
+.memory-card {
+    width: 60px;
+    height: 60px;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+.action-wheel button {
+    margin-bottom: 5px;
+}
+
+.game-container {
+    margin-bottom: 2rem;
+}
+
+.hotbar {
+    border: 2px solid #666;
+    border-radius: 5px;
+    padding: 5px;
+    background: #f8f9fa;
+}
+
+.hotbar-slot {
+    width: 50px;
+    height: 50px;
+    border: 2px solid #999;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    font-size: 11px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.hotbar-slot.empty {
+    color: #999;
+    font-style: italic;
+}
+
+.hotbar-slot.filled {
+    background: #e7f3ff;
+    border-color: #007bff;
+    color: #007bff;
+    font-weight: bold;
+}
+
+.shop-dialog {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border: 3px solid #333;
+    border-radius: 10px;
+    padding: 20px;
+    z-index: 1000;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+.shop-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 999;
+}
+
+@media (max-width: 768px) {
+    .game-canvas {
+        max-width: 100%;
+        height: auto;
+    }
+    
+    .btn-group {
+        flex-direction: column;
+    }
+    
+    .btn-group .btn {
+        border-radius: 0.375rem !important;
+        margin-bottom: 5px;
+    }
+}
+</style>
+
+<script>
+console.log('Games script loading...');
+
+// Game state management
+let currentGame = 'snake';
+let gameStates = {
+    snake: { running: false, score: 0 },
+    pong: { running: false, playerScore: 0, aiScore: 0 },
+    memory: { running: false, level: 1, score: 0 },
+    tetris: { running: false, score: 0 },
+    pirates: { running: false, turn: 1 },
+    chess: { running: false, score: 0 },
+    tictactoe: { running: false, score: 0 },
+    wordguess: { running: false, score: 0 },
+    strands: { running: false, score: 0 }
+};
+
+// Snake game variables
+let snake = { x: 200, y: 200 };
+let snakeBody = [{ x: 200, y: 200 }];
+let food = { x: 100, y: 100 };
+let direction = { x: 0, y: 0 };
+let snakeInterval;
+
+// Advanced Snake features
+let advancedMode = false;
+let thickMode = false;
+let obstacles = [];
+let specialItems = [];
+let teleportLines = []; // Lines that go across the map
+let obstacleLines = []; // Lines that generate obstacles
+let pulseEffect = 0;
+
+// Pong game variables
+let pongBall = { x: 300, y: 150, vx: 3, vy: 2 };
+let playerPaddle = { x: 10, y: 120, width: 10, height: 60 };
+let aiPaddle = { x: 580, y: 120, width: 10, height: 60 };
+let pongInterval;
+
+// Dash abilities
+let playerDashCooldown = 0;
+let aiDashCooldown = 0;
+let playerDashActive = false;
+let aiDashActive = false;
+const DASH_COOLDOWN = 360; // 6 seconds at 60fps
+const DASH_DURATION = 20; // frames (longer for easier timing)
+const DASH_SPEED_MULTIPLIER = 2.0;
+
+// Dynamic obstacles
+let pongWalls = [];
+let pongPortals = [];
+
+// New upgrade system variables
+let blockades = [];
+let extraBalls = [];
+let dashArrows = [];
+let dashBoostLevel = 0;
+let aiPaddleSpeed = 5; // Reduced from 8 to 5 for much slower AI movement
+let aiPaddleHeight = 60;
+let playerDashCooldownReduction = 0;
+let obstacleHitCount = 0;
+let lastBallDirection = 0; // Track which direction ball is going for obstacle scoring
+let middlePaddle = null; // Moving paddle in the center to prevent portal loops
+
+// Player upgrades
+let playerPaddleSpeed = 15;
+let playerPaddleHeight = 60;
+
+// Freeze upgrade system
+let aiFreezeActive = false;
+let aiFreezeTime = 0;
+let freezeUpgradeLevel = 0;
+let lastFreezeActivation = 0;
+
+// Memory game variables
+let memoryCards = [];
+let flippedCards = [];
+let memoryMatched = 0;
+
+// Pirate game variables
+let pirateGame = null;
+let wheelRotation = 0;
+let wheelSpinning = false;
+let selectedActionType = null;
+let diceRolls = [];
+let actionPower = 0;
+
+// Action wheel configuration
+const wheelActions = [
+    { name: 'Move', color: '#0066ff', icon: '⛵' },
+    { name: 'Coin', color: '#00cc00', icon: '💰' },
+    { name: 'Card', color: '#8800ff', icon: '🃏' },
+    { name: 'Attack', color: '#ff0000', icon: '⚔️' }
+];
+
+// Fixed terrain layouts for consistent appearance
+let terrainSeeds = null;
+let islandLayout = null;
+let treasureSpawns = null;
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, initializing games...');
+    
+    // Set up radio button listeners
+    const radioButtons = document.querySelectorAll('input[name="gameType"]');
+    console.log('Found radio buttons:', radioButtons.length);
+    
+    radioButtons.forEach(button => {
+        button.addEventListener('change', function() {
+            if (this.checked) {
+                switchGame(this.id);
+            }
+        });
+    });
+    
+    // Initialize all game canvases
+    initializeAllGames();
+    
+    // Load high scores
+    loadHighScores();
+    
+    console.log('Games initialized successfully');
+});
+
+// Game switching function
+function switchGame(gameId) {
+    console.log('Switching to game:', gameId);
+    
+    // Stop all running games
+    stopAllGames();
+    
+    // Hide all games
+    const allGames = document.querySelectorAll('.game-container');
+    allGames.forEach(game => {
+        game.style.display = 'none';
+    });
+    
+    // Show selected game
+    const selectedGame = document.getElementById(gameId + 'Game');
+    if (selectedGame) {
+        selectedGame.style.display = 'block';
+        currentGame = gameId;
+        console.log('Successfully switched to:', gameId);
+    } else {
+        console.error('Game container not found:', gameId + 'Game');
+    }
+}
+
+function stopAllGames() {
+    if (snakeInterval) clearInterval(snakeInterval);
+    if (pongInterval) clearInterval(pongInterval);
+    
+    Object.keys(gameStates).forEach(game => {
+        gameStates[game].running = false;
+    });
+}
+
+function initializeAllGames() {
+    initializeSnakeCanvas();
+    initializePongCanvas();
+    initializeMemoryGame();
+    initializeTetrisCanvas();
+    initializePirateCanvas();
+    initializeChess();
+    initializeTicTacToe();
+    initializeWordGuess();
+    initializeStrands();
+}
+
+// Snake Game Functions
+function initializeSnakeCanvas() {
+    const canvas = document.getElementById('snakeCanvas');
+    if (canvas) {
+        const ctx = canvas.getContext('2d');
+        drawSnakeGame(ctx);
+    }
+}
+
+function startSnake() {
+    if (gameStates.snake.running) return;
+    
+    console.log('Starting Snake game...');
+    gameStates.snake.running = true;
+    gameStates.snake.score = 0;
+    
+    // Reset game state
+    snake = { x: 200, y: 200 };
+    snakeBody = [{ x: 200, y: 200 }];
+    direction = { x: 0, y: 0 };
+    thickMode = false;
+    obstacles = [];
+    specialItems = [];
+    teleportLines = [];
+    obstacleLines = [];
+    pulseEffect = 0;
+    
+    generateFood();
+    
+    // Generate obstacles and special items if in advanced mode
+    if (advancedMode) {
+        generateObstacles();
+        generateSpecialItems();
+        generateTeleportLines();
+        generateObstacleLines();
+    }
+    
+    // Update score display
+    document.getElementById('snakeScore').textContent = gameStates.snake.score;
+    
+    // Add keyboard controls
+    document.addEventListener('keydown', handleSnakeInput);
+    
+    // Start game loop
+    snakeInterval = setInterval(updateSnake, 150);
+}
+
+function toggleAdvancedMode() {
+    advancedMode = !advancedMode;
+    const btn = document.getElementById('advancedBtn');
+    const info = document.getElementById('advancedModeInfo');
+    
+    if (advancedMode) {
+        btn.innerHTML = '<i class="fas fa-magic"></i> Normal Mode';
+        btn.className = 'btn btn-warning me-2';
+        info.style.display = 'block';
+    } else {
+        btn.innerHTML = '<i class="fas fa-magic"></i> Advanced!';
+        btn.className = 'btn btn-info me-2';
+        info.style.display = 'none';
+    }
+    
+    // Reset game if running
+    if (gameStates.snake.running) {
+        resetSnake();
+    }
+}
+
+function generateObstacles() {
+    obstacles = [];
+    const numObstacles = Math.floor(Math.random() * 8) + 5; // 5-12 obstacles
+    
+    for (let i = 0; i < numObstacles; i++) {
+        let obstacle;
+        do {
+            obstacle = {
+                x: Math.floor(Math.random() * 20) * 20,
+                y: Math.floor(Math.random() * 20) * 20
+            };
+        } while (
+            (obstacle.x === snake.x && obstacle.y === snake.y) ||
+            (obstacle.x === food.x && obstacle.y === food.y) ||
+            obstacles.some(obs => obs.x === obstacle.x && obs.y === obstacle.y)
+        );
+        obstacles.push(obstacle);
+    }
+}
+
+function generateSpecialItems() {
+    specialItems = [];
+    const itemTypes = ['purple', 'thick', 'cut'];
+    
+    // Generate 2-3 special items (removed teleport since it's now lines)
+    const numItems = Math.floor(Math.random() * 2) + 2;
+    
+    for (let i = 0; i < numItems; i++) {
+        let item;
+        do {
+            item = {
+                x: Math.floor(Math.random() * 20) * 20,
+                y: Math.floor(Math.random() * 20) * 20,
+                type: itemTypes[Math.floor(Math.random() * itemTypes.length)]
+            };
+        } while (
+            (item.x === snake.x && item.y === snake.y) ||
+            (item.x === food.x && item.y === food.y) ||
+            obstacles.some(obs => obs.x === item.x && obs.y === item.y) ||
+            specialItems.some(si => si.x === item.x && si.y === item.y)
+        );
+        specialItems.push(item);
+    }
+}
+
+function generateTeleportLines() {
+    teleportLines = [];
+    const numLines = Math.floor(Math.random() * 2) + 1; // 1-2 lines
+    
+    for (let i = 0; i < numLines; i++) {
+        const isHorizontal = Math.random() < 0.5;
+        let line = [];
+        
+        if (isHorizontal) {
+            // Horizontal line across entire width
+            const y = Math.floor(Math.random() * 20) * 20;
+            for (let x = 0; x < 400; x += 20) {
+                line.push({ x: x, y: y });
+            }
+        } else {
+            // Vertical line across entire height
+            const x = Math.floor(Math.random() * 20) * 20;
+            for (let y = 0; y < 400; y += 20) {
+                line.push({ x: x, y: y });
+            }
+        }
+        teleportLines.push(line);
+    }
+}
+
+function generateObstacleLines() {
+    obstacleLines = [];
+    const numLines = Math.floor(Math.random() * 2) + 1; // 1-2 lines
+    
+    for (let i = 0; i < numLines; i++) {
+        const isHorizontal = Math.random() < 0.5;
+        let line = [];
+        
+        if (isHorizontal) {
+            // Horizontal line across entire width
+            const y = Math.floor(Math.random() * 20) * 20;
+            for (let x = 0; x < 400; x += 20) {
+                line.push({ x: x, y: y });
+            }
+        } else {
+            // Vertical line across entire height
+            const x = Math.floor(Math.random() * 20) * 20;
+            for (let y = 0; y < 400; y += 20) {
+                line.push({ x: x, y: y });
+            }
+        }
+        obstacleLines.push(line);
+    }
+}
+
+function addSingleSpecialItem() {
+    const itemTypes = ['purple', 'thick', 'cut'];
+    let item;
+    let attempts = 0;
+    
+    do {
+        item = {
+            x: Math.floor(Math.random() * 20) * 20,
+            y: Math.floor(Math.random() * 20) * 20,
+            type: itemTypes[Math.floor(Math.random() * itemTypes.length)]
+        };
+        attempts++;
+    } while (
+        attempts < 50 && (
+            (item.x === snake.x && item.y === snake.y) ||
+            (item.x === food.x && item.y === food.y) ||
+            obstacles.some(obs => obs.x === item.x && obs.y === item.y) ||
+            specialItems.some(si => si.x === item.x && si.y === item.y)
+        )
+    );
+    
+    if (attempts < 50) {
+        specialItems.push(item);
+    }
+}
+
+function handleSnakeInput(e) {
+    if (!gameStates.snake.running) return;
+    
+    const key = e.key.toLowerCase();
+    switch (key) {
+        case 'w':
+        case 'arrowup':
+            if (direction.y === 0) direction = { x: 0, y: -20 };
+            break;
+        case 's':
+        case 'arrowdown':
+            if (direction.y === 0) direction = { x: 0, y: 20 };
+            break;
+        case 'a':
+        case 'arrowleft':
+            if (direction.x === 0) direction = { x: -20, y: 0 };
+            break;
+        case 'd':
+        case 'arrowright':
+            if (direction.x === 0) direction = { x: 20, y: 0 };
+            break;
+    }
+}
+
+function updateSnake() {
+    if (!gameStates.snake.running) return;
+    if (direction.x === 0 && direction.y === 0) return;
+    
+    // Move snake
+    const newHead = { x: snake.x + direction.x, y: snake.y + direction.y };
+    
+    // Check wall collision
+    if (newHead.x < 0 || newHead.x >= 400 || newHead.y < 0 || newHead.y >= 400) {
+        gameOver('snake');
+        return;
+    }
+    
+    // Check obstacle collision (advanced mode)
+    if (advancedMode && obstacles.some(obs => obs.x === newHead.x && obs.y === newHead.y)) {
+        gameOver('snake');
+        return;
+    }
+    
+    // Check self collision
+    for (let segment of snakeBody) {
+        if (newHead.x === segment.x && newHead.y === segment.y) {
+            gameOver('snake');
+            return;
+        }
+    }
+    
+    snakeBody.unshift(newHead);
+    snake.x = newHead.x;
+    snake.y = newHead.y;
+    
+    // Check food collision
+    if (snake.x === food.x && snake.y === food.y) {
+        gameStates.snake.score += 10;
+        document.getElementById('snakeScore').textContent = gameStates.snake.score;
+        generateFood();
+    } else {
+        snakeBody.pop();
+    }
+    
+    // Check special item collision (advanced mode)
+    if (advancedMode) {
+        // Check regular special items
+        for (let i = specialItems.length - 1; i >= 0; i--) {
+            const item = specialItems[i];
+            if (snake.x === item.x && snake.y === item.y) {
+                handleSpecialItem(item);
+                specialItems.splice(i, 1);
+                
+                // Add one new special item to replace the consumed one
+                setTimeout(() => {
+                    if (gameStates.snake.running && advancedMode) {
+                        addSingleSpecialItem();
+                    }
+                }, 1000);
+                break;
+            }
+        }
+        
+        // Check teleport lines
+        for (let lineIndex = 0; lineIndex < teleportLines.length; lineIndex++) {
+            const line = teleportLines[lineIndex];
+            if (line.some(square => square.x === snake.x && square.y === snake.y)) {
+                // Teleport!
+                teleportSnake();
+                teleportLines.splice(lineIndex, 1); // Remove the line
+                
+                // Generate a new teleport line after delay
+                setTimeout(() => {
+                    if (gameStates.snake.running && advancedMode) {
+                        generateTeleportLines();
+                    }
+                }, 3000);
+                break;
+            }
+        }
+        
+        // Check obstacle lines
+        for (let lineIndex = 0; lineIndex < obstacleLines.length; lineIndex++) {
+            const line = obstacleLines[lineIndex];
+            if (line.some(square => square.x === snake.x && square.y === snake.y)) {
+                // Generate more obstacles!
+                generateMoreObstacles();
+                obstacleLines.splice(lineIndex, 1); // Remove the line
+                
+                // Generate a new obstacle line after delay
+                setTimeout(() => {
+                    if (gameStates.snake.running && advancedMode) {
+                        generateObstacleLines();
+                    }
+                }, 5000);
+                break;
+            }
+        }
+        
+        // Update pulse effect for black squares
+        pulseEffect = (pulseEffect + 0.2) % (Math.PI * 2);
+    }
+    
+    drawSnakeGame(document.getElementById('snakeCanvas').getContext('2d'));
+}
+
+function handleSpecialItem(item) {
+    switch (item.type) {
+        case 'purple':
+            // Purple square: +2 length
+            snakeBody.push({ x: snakeBody[snakeBody.length - 1].x, y: snakeBody[snakeBody.length - 1].y });
+            snakeBody.push({ x: snakeBody[snakeBody.length - 1].x, y: snakeBody[snakeBody.length - 1].y });
+            gameStates.snake.score += 20;
+            document.getElementById('snakeScore').textContent = gameStates.snake.score;
+            break;
+            
+        case 'thick':
+            // Orange with yellow rim: Make snake broader (wider)
+            thickMode = !thickMode;
+            gameStates.snake.score += 15;
+            document.getElementById('snakeScore').textContent = gameStates.snake.score;
+            break;
+            
+        case 'cut':
+            // Black pulsing: Cut snake in half
+            if (snakeBody.length > 2) {
+                const halfLength = Math.floor(snakeBody.length / 2);
+                snakeBody = snakeBody.slice(0, halfLength);
+                gameStates.snake.score += 10; // Small reward for surviving the cut
+                document.getElementById('snakeScore').textContent = gameStates.snake.score;
+            }
+            break;
+    }
+}
+
+function teleportSnake() {
+    let newPos;
+    let attempts = 0;
+    do {
+        newPos = {
+            x: Math.floor(Math.random() * 20) * 20,
+            y: Math.floor(Math.random() * 20) * 20
+        };
+        attempts++;
+    } while (
+        attempts < 50 && (
+            snakeBody.some(segment => segment.x === newPos.x && segment.y === newPos.y) ||
+            obstacles.some(obs => obs.x === newPos.x && obs.y === newPos.y) ||
+            (newPos.x === food.x && newPos.y === food.y)
+        )
+    );
+    
+    if (attempts < 50) {
+        snake.x = newPos.x;
+        snake.y = newPos.y;
+        snakeBody[0] = { x: newPos.x, y: newPos.y };
+        gameStates.snake.score += 25;
+        document.getElementById('snakeScore').textContent = gameStates.snake.score;
+    }
+}
+
+function generateMoreObstacles() {
+    const numNewObstacles = Math.floor(Math.random() * 6) + 4; // 4-9 new obstacles
+    
+    for (let i = 0; i < numNewObstacles; i++) {
+        let obstacle;
+        let attempts = 0;
+        do {
+            obstacle = {
+                x: Math.floor(Math.random() * 20) * 20,
+                y: Math.floor(Math.random() * 20) * 20
+            };
+            attempts++;
+        } while (
+            attempts < 30 && (
+                (obstacle.x === snake.x && obstacle.y === snake.y) ||
+                (obstacle.x === food.x && obstacle.y === food.y) ||
+                snakeBody.some(segment => segment.x === obstacle.x && segment.y === obstacle.y) ||
+                obstacles.some(obs => obs.x === obstacle.x && obs.y === obstacle.y) ||
+                specialItems.some(item => item.x === obstacle.x && item.y === obstacle.y)
+            )
+        );
+        if (attempts < 30) {
+            obstacles.push(obstacle);
+        }
+    }
+    
+    gameStates.snake.score += 10; // Small reward for triggering this
+    document.getElementById('snakeScore').textContent = gameStates.snake.score;
+}
+
+function drawSnakeGame(ctx) {
+    // Clear canvas
+    ctx.fillStyle = '#2a2a2a';
+    ctx.fillRect(0, 0, 400, 400);
+    
+    // Draw grid
+    ctx.strokeStyle = '#444';
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= 400; i += 20) {
+        ctx.beginPath();
+        ctx.moveTo(i, 0);
+        ctx.lineTo(i, 400);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(0, i);
+        ctx.lineTo(400, i);
+        ctx.stroke();
+    }
+    
+    // Draw obstacles (advanced mode)
+    if (advancedMode) {
+        ctx.fillStyle = '#8B4513'; // Brown color for obstacles
+        obstacles.forEach(obstacle => {
+            ctx.fillRect(obstacle.x + 1, obstacle.y + 1, 18, 18);
+        });
+    }
+    
+    // Draw teleport lines (advanced mode)
+    if (advancedMode) {
+        teleportLines.forEach(line => {
+            line.forEach(square => {
+                // Blue background with orange stripes
+                ctx.fillStyle = '#0000FF';
+                ctx.fillRect(square.x + 1, square.y + 1, 18, 18);
+                
+                // Orange horizontal stripes
+                ctx.fillStyle = '#FF8C00';
+                ctx.fillRect(square.x + 1, square.y + 4, 18, 3);
+                ctx.fillRect(square.x + 1, square.y + 10, 18, 3);
+                ctx.fillRect(square.x + 1, square.y + 16, 18, 3);
+            });
+        });
+    }
+    
+    // Draw obstacle generator lines (advanced mode)
+    if (advancedMode) {
+        obstacleLines.forEach(line => {
+            line.forEach(square => {
+                // Red background with yellow warning stripes
+                ctx.fillStyle = '#FF0000';
+                ctx.fillRect(square.x + 1, square.y + 1, 18, 18);
+                
+                // Yellow warning stripes
+                ctx.fillStyle = '#FFFF00';
+                ctx.fillRect(square.x + 1, square.y + 3, 18, 2);
+                ctx.fillRect(square.x + 1, square.y + 8, 18, 2);
+                ctx.fillRect(square.x + 1, square.y + 13, 18, 2);
+                ctx.fillRect(square.x + 1, square.y + 18, 18, 2);
+            });
+        });
+    }
+    
+    // Draw special items (advanced mode)
+    if (advancedMode) {
+        specialItems.forEach(item => {
+            switch (item.type) {
+                case 'purple':
+                    // Purple square: +2 length
+                    ctx.fillStyle = '#800080';
+                    ctx.fillRect(item.x + 1, item.y + 1, 18, 18);
+                    break;
+                    
+                case 'thick':
+                    // Orange with yellow rim: Thick mode
+                    ctx.fillStyle = '#FFD700'; // Yellow rim
+                    ctx.fillRect(item.x, item.y, 20, 20);
+                    ctx.fillStyle = '#FF8C00'; // Orange center
+                    ctx.fillRect(item.x + 3, item.y + 3, 14, 14);
+                    break;
+                    
+                case 'cut':
+                    // Black pulsing: Cut in half
+                    const pulseIntensity = Math.sin(pulseEffect) * 0.3 + 0.7;
+                    const grayValue = Math.floor(pulseIntensity * 255);
+                    ctx.fillStyle = `rgb(${grayValue}, ${grayValue}, ${grayValue})`;
+                    ctx.fillRect(item.x + 1, item.y + 1, 18, 18);
+                    
+                    // Add pulsing border effect
+                    ctx.strokeStyle = '#FFFFFF';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(item.x + 1, item.y + 1, 18, 18);
+                    break;
+            }
+        });
+    }
+    
+    // Draw snake
+    if (thickMode) {
+        // Thick mode: Snake is 2 segments wide (broader)
+        ctx.fillStyle = '#00ff00';
+        snakeBody.forEach((segment, index) => {
+            if (index === 0) {
+                // Head - slightly different color
+                ctx.fillStyle = '#00CC00';
+            } else {
+                ctx.fillStyle = '#00ff00';
+            }
+            
+            // Draw main segment
+            ctx.fillRect(segment.x, segment.y, 18, 18);
+            
+            // Draw adjacent segment to make it broader
+            // Determine direction to expand based on movement or previous segment
+            let expandX = 0, expandY = 0;
+            
+            if (index === 0 && direction.x !== 0) {
+                // Moving horizontally, expand vertically
+                expandY = direction.x > 0 ? -20 : 20;
+            } else if (index === 0 && direction.y !== 0) {
+                // Moving vertically, expand horizontally  
+                expandX = direction.y > 0 ? -20 : 20;
+            } else if (index > 0) {
+                // For body segments, expand perpendicular to movement
+                const prev = snakeBody[index - 1];
+                if (prev.x !== segment.x) {
+                    // Horizontal movement, expand vertically
+                    expandY = -20;
+                } else {
+                    // Vertical movement, expand horizontally
+                    expandX = -20;
+                }
+            }
+            
+            // Draw the expanded segment if it's within bounds
+            const newX = segment.x + expandX;
+            const newY = segment.y + expandY;
+            if (newX >= 0 && newX < 400 && newY >= 0 && newY < 400) {
+                ctx.fillRect(newX, newY, 18, 18);
+            }
+        });
+    } else {
+        // Normal mode
+        ctx.fillStyle = '#00ff00';
+        snakeBody.forEach((segment, index) => {
+            if (index === 0) {
+                // Head - slightly different color
+                ctx.fillStyle = '#00CC00';
+            } else {
+                ctx.fillStyle = '#00ff00';
+            }
+            ctx.fillRect(segment.x, segment.y, 18, 18);
+        });
+    }
+    
+    // Draw food
+    ctx.fillStyle = '#ff0000';
+    ctx.fillRect(food.x, food.y, 18, 18);
+    
+    // Draw mode indicator
+    if (advancedMode) {
+        ctx.fillStyle = '#FFFF00';
+        ctx.font = 'bold 12px Arial';
+        ctx.textAlign = 'left';
+        ctx.fillText('ADVANCED MODE', 10, 20);
+        
+        if (thickMode) {
+            ctx.fillStyle = '#FF8C00';
+            ctx.fillText('THICK MODE ACTIVE', 10, 35);
+        }
+    }
+    
+    if (!gameStates.snake.running) {
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '16px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('Click Start to play!', 200, 200);
+        if (advancedMode) {
+            ctx.font = '12px Arial';
+            ctx.fillText('Advanced mode is ON', 200, 220);
+        }
+    }
+}
+
+function generateFood() {
+    do {
+        food.x = Math.floor(Math.random() * 20) * 20;
+        food.y = Math.floor(Math.random() * 20) * 20;
+    } while (
+        snakeBody.some(segment => segment.x === food.x && segment.y === food.y) ||
+        (advancedMode && obstacles.some(obs => obs.x === food.x && obs.y === food.y)) ||
+        (advancedMode && specialItems.some(item => item.x === food.x && item.y === food.y))
+    );
+}
+
+function pauseSnake() {
+    if (snakeInterval) {
+        clearInterval(snakeInterval);
+        snakeInterval = null;
+        gameStates.snake.running = false;
+    } else if (gameStates.snake.score >= 0) {
+        startSnake();
+    }
+}
+
+function resetSnake() {
+    gameStates.snake.running = false;
+    if (snakeInterval) clearInterval(snakeInterval);
+    gameStates.snake.score = 0;
+    document.getElementById('snakeScore').textContent = '0';
+    initializeSnakeCanvas();
+}
+
+// Pong Game Functions
+function initializePongCanvas() {
+    const canvas = document.getElementById('pongCanvas');
+    if (canvas) {
+        const ctx = canvas.getContext('2d');
+        drawPongGame(ctx);
+    }
+}
+
+function startPong() {
+    if (gameStates.pong.running) return;
+    
+    console.log('Starting Pong game...');
+    gameStates.pong.running = true;
+    gameStates.pong.playerScore = 0;
+    gameStates.pong.aiScore = 0;
+    
+    // Reset positions and dash states
+    pongBall = { x: 300, y: 150, vx: 3, vy: 2, justTeleported: false };
+    playerPaddle = { x: 10, y: 120, width: 10, height: 60 }; // Reset to default height
+    aiPaddle = { x: 580, y: 120, width: 10, height: 60 }; // Reset to default height
+    playerDashCooldown = 0;
+    aiDashCooldown = 0;
+    playerDashActive = false;
+    aiDashActive = false;
+    
+    // Reset all game objects
+    pongWalls = [];
+    pongPortals = [];
+    blockades = [];
+    extraBalls = [];
+    dashArrows = [];
+    middlePaddle = null;
+    
+    // Reset all upgrade variables
+    playerPaddleSpeed = 15;
+    playerPaddleHeight = 60;
+    aiPaddleSpeed = 5;
+    aiPaddleHeight = 60;
+    dashBoostLevel = 0;
+    playerDashCooldownReduction = 0;
+    freezeUpgradeLevel = 0;
+    
+    // Reset freeze state
+    aiFreezeActive = false;
+    aiFreezeTime = 0;
+    lastFreezeActivation = 0;
+    
+    // Reset obstacle tracking
+    obstacleHitCount = 0;
+    lastBallDirection = 0;
+    
+    updatePotentialScore();
+    
+    // Update score display
+    document.getElementById('pongPlayerScore').textContent = '0';
+    document.getElementById('pongAIScore').textContent = '0';
+    
+    // Reset UI displays to default
+    document.getElementById('paddleSize').textContent = 'Normal';
+    document.getElementById('paddleSpeed').textContent = 'Normal';
+    document.getElementById('freezeLevel').textContent = 'None';
+    document.getElementById('freezeStatus').style.display = 'none';
+    
+    updateDashStatus();
+    
+    document.addEventListener('keydown', handlePongInput);
+    pongInterval = setInterval(updatePong, 16);
+}
+
+function handlePongInput(e) {
+    if (!gameStates.pong.running) return;
+    
+    const key = e.key.toLowerCase();
+    let moveSpeed = playerDashActive ? playerPaddleSpeed * 1.5 : playerPaddleSpeed;
+    
+    if (key === 'w' && playerPaddle.y > 0) {
+        playerPaddle.y -= moveSpeed;
+    } else if (key === 's' && playerPaddle.y < 300 - playerPaddle.height) {
+        playerPaddle.y += moveSpeed;
+    } else if (key === 'd') {
+        // Always trigger dash attempt, easier timing
+        if (playerDashCooldown === 0) {
+            playerDash();
+        }
+        e.preventDefault(); // Prevent any default behavior
+    }
+}
+
+function updatePong() {
+    if (!gameStates.pong.running) return;
+    
+    // Update freeze mechanics
+    if (freezeUpgradeLevel > 0) {
+        const currentTime = Date.now();
+        
+        // Check if AI freeze is active
+        if (aiFreezeActive) {
+            aiFreezeTime--;
+            
+            // Update freeze status display
+            const freezeStatus = document.getElementById('freezeStatus');
+            const freezeTimer = document.getElementById('freezeTimer');
+            freezeStatus.style.display = 'block';
+            freezeTimer.textContent = Math.ceil(aiFreezeTime / 60);
+            
+            if (aiFreezeTime <= 0) {
+                aiFreezeActive = false;
+                freezeStatus.style.display = 'none';
+                console.log('AI unfrozen!');
+            }
+        } else {
+            // Hide freeze status when AI not frozen
+            document.getElementById('freezeStatus').style.display = 'none';
+            
+            // Random chance to activate AI freeze based on upgrade level
+            // Higher levels = more frequent freezes
+            const freezeChance = freezeUpgradeLevel * 0.001; // 0.1% per level per frame
+            const timeSinceLastFreeze = currentTime - lastFreezeActivation;
+            
+            if (Math.random() < freezeChance && timeSinceLastFreeze > 4000) { // Min 4 seconds between freezes
+                aiFreezeActive = true;
+                aiFreezeTime = 90 + (freezeUpgradeLevel * 30); // 1.5-3 seconds based on level
+                lastFreezeActivation = currentTime;
+                console.log(`AI frozen for ${Math.ceil(aiFreezeTime/60)} seconds!`);
+            }
+        }
+    }
+    
+    // Update dash cooldowns with reduction factor
+    if (playerDashCooldown > 0) {
+        playerDashCooldown--;
+        if (playerDashCooldown === 0) {
+            updateDashStatus();
+        }
+    }
+    
+    if (aiDashCooldown > 0) {
+        aiDashCooldown--;
+        if (aiDashCooldown === 0) {
+            updateDashStatus();
+        }
+    }
+    
+    // Update dash arrows
+    dashArrows = dashArrows.filter(arrow => {
+        arrow.x += arrow.vx;
+        arrow.y += arrow.vy;
+        arrow.life--;
+        return arrow.life > 0 && arrow.x > -20 && arrow.x < 620;
+    });
+    
+    // Update dash durations
+    if (playerDashActive) {
+        playerDashCooldown--;
+        if (playerDashCooldown <= DASH_COOLDOWN - DASH_DURATION) {
+            playerDashActive = false;
+        }
+    }
+    
+    if (aiDashActive) {
+        aiDashCooldown--;
+        if (aiDashCooldown <= DASH_COOLDOWN - DASH_DURATION) {
+            aiDashActive = false;
+        }
+    }
+    
+    // Move main ball and extra balls
+    let allBalls = [pongBall, ...extraBalls];
+    
+    allBalls.forEach(ball => {
+        ball.x += ball.vx;
+        ball.y += ball.vy;
+        
+        // Ball collision with top/bottom - add small push to prevent infinite bouncing
+        if (ball.y <= 5 || ball.y >= 295) {
+            ball.vy = -ball.vy;
+            
+            // Add small random horizontal push to prevent infinite ceiling/floor bouncing
+            const pushStrength = 0.3 + Math.random() * 0.4; // 0.3 to 0.7
+            if (Math.abs(ball.vx) < 1.5) { // Only push if ball is moving too slowly horizontally
+                ball.vx += Math.random() > 0.5 ? pushStrength : -pushStrength;
+            }
+            
+            // Ensure minimum horizontal speed
+            if (Math.abs(ball.vx) < 0.8) {
+                ball.vx = ball.vx >= 0 ? 0.8 : -0.8;
+            }
+        }
+        
+        // Ball collision with blockades - improved collision detection + scoring
+        for (let i = 0; i < blockades.length; i++) {
+            const blockade = blockades[i];
+            const ballRadius = 5;
+            const ballLeft = ball.x - ballRadius;
+            const ballRight = ball.x + ballRadius;
+            const ballTop = ball.y - ballRadius;
+            const ballBottom = ball.y + ballRadius;
+            
+            // Check if ball overlaps with blockade
+            if (ballRight > blockade.x && ballLeft < blockade.x + blockade.width &&
+                ballBottom > blockade.y && ballTop < blockade.y + blockade.height) {
+                
+                // Track obstacle hit for scoring (only if moving toward opponent)
+                const ballMovingRight = ball.vx > 0;
+                const ballMovingLeft = ball.vx < 0;
+                
+                if ((ballMovingRight && lastBallDirection >= 0) || (ballMovingLeft && lastBallDirection <= 0)) {
+                    if (!blockade.hitThisRound) {
+                        obstacleHitCount++;
+                        blockade.hitThisRound = true;
+                        
+                        // Visual feedback - make blockade flash
+                        blockade.flashTime = 30;
+                        
+                        console.log(`Obstacle hit! Bonus count: ${obstacleHitCount}`);
+                        updatePotentialScore();
+                    }
+                }
+                
+                // Calculate overlap on each side
+                const overlapLeft = ballRight - blockade.x;
+                const overlapRight = (blockade.x + blockade.width) - ballLeft;
+                const overlapTop = ballBottom - blockade.y;
+                const overlapBottom = (blockade.y + blockade.height) - ballTop;
+                
+                // Find the smallest overlap to determine collision side
+                const minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
+                
+                if (minOverlap === overlapLeft || minOverlap === overlapRight) {
+                    // Horizontal collision
+                    ball.vx = -ball.vx;
+                    // Push ball out of blockade
+                    if (minOverlap === overlapLeft) {
+                        ball.x = blockade.x - ballRadius - 1;
+                    } else {
+                        ball.x = blockade.x + blockade.width + ballRadius + 1;
+                    }
+                } else {
+                    // Vertical collision
+                    ball.vy = -ball.vy;
+                    // Push ball out of blockade
+                    if (minOverlap === overlapTop) {
+                        ball.y = blockade.y - ballRadius - 1;
+                    } else {
+                        ball.y = blockade.y + blockade.height + ballRadius + 1;
+                    }
+                }
+                break;
+            }
+            
+            // Update flash timer
+            if (blockade.flashTime > 0) {
+                blockade.flashTime--;
+            }
+        }
+    });
+    
+    // Ball collision with walls (for all balls)
+    allBalls.forEach(ball => {
+        for (let i = 0; i < pongWalls.length; i++) {
+            const wall = pongWalls[i];
+            const ballRadius = 5;
+            const ballLeft = ball.x - ballRadius;
+            const ballRight = ball.x + ballRadius;
+            const ballTop = ball.y - ballRadius;
+            const ballBottom = ball.y + ballRadius;
+            
+            // Check if ball overlaps with wall
+            if (ballRight > wall.x && ballLeft < wall.x + wall.width &&
+                ballBottom > wall.y && ballTop < wall.y + wall.height) {
+                
+                // Track wall hit for scoring (only if moving toward opponent)
+                const ballMovingRight = ball.vx > 0;
+                const ballMovingLeft = ball.vx < 0;
+                
+                if ((ballMovingRight && lastBallDirection >= 0) || (ballMovingLeft && lastBallDirection <= 0)) {
+                    if (!wall.hitThisRound) {
+                        obstacleHitCount++;
+                        wall.hitThisRound = true;
+                        
+                        // Visual feedback - make wall flash
+                        wall.flashTime = 30;
+                        
+                        console.log(`Wall hit! Bonus count: ${obstacleHitCount}`);
+                        updatePotentialScore();
+                    }
+                }
+                
+                // Calculate overlap on each side
+                const overlapLeft = ballRight - wall.x;
+                const overlapRight = (wall.x + wall.width) - ballLeft;
+                const overlapTop = ballBottom - wall.y;
+                const overlapBottom = (wall.y + wall.height) - ballTop;
+                
+                // Find the smallest overlap to determine collision side
+                const minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
+                
+                if (minOverlap === overlapLeft || minOverlap === overlapRight) {
+                    // Horizontal collision
+                    ball.vx = -ball.vx;
+                    // Push ball out of wall
+                    if (minOverlap === overlapLeft) {
+                        ball.x = wall.x - ballRadius - 1;
+                    } else {
+                        ball.x = wall.x + wall.width + ballRadius + 1;
+                    }
+                } else {
+                    // Vertical collision
+                    ball.vy = -ball.vy;
+                    // Push ball out of wall
+                    if (minOverlap === overlapTop) {
+                        ball.y = wall.y - ballRadius - 1;
+                    } else {
+                        ball.y = wall.y + wall.height + ballRadius + 1;
+                    }
+                }
+                break;
+            }
+            
+            // Update flash timer
+            if (wall.flashTime > 0) {
+                wall.flashTime--;
+            }
+        }
+        
+        // Ball collision with portals - improved with direction handling
+        for (let portal of pongPortals) {
+            const ballRadius = 5;
+            const portalRadius = 15;
+            
+            // Check orange portal collision
+            const distToOrange = Math.sqrt(
+                Math.pow(ball.x - portal.orange.x, 2) + 
+                Math.pow(ball.y - portal.orange.y, 2)
+            );
+            
+            if (distToOrange <= ballRadius + portalRadius && !ball.justTeleported) {
+                // Add portal bonus scoring
+                if (!portal.hitThisRound) {
+                    obstacleHitCount++;
+                    portal.hitThisRound = true;
+                    portal.flashTime = 30;
+                    updatePotentialScore();
+                    console.log(`Portal hit! Bonus count: ${obstacleHitCount}`);
+                }
+                
+                // Determine entry side based on ball's velocity and position
+                const relativeX = ball.x - portal.orange.x;
+                const relativeY = ball.y - portal.orange.y;
+                
+                // Teleport to blue portal
+                if (ball.vx > 0) {
+                    // Coming from left, exit right side of blue portal
+                    ball.x = portal.blue.x + portalRadius + ballRadius + 2;
+                } else {
+                    // Coming from right, exit left side of blue portal
+                    ball.x = portal.blue.x - portalRadius - ballRadius - 2;
+                }
+                
+                if (ball.vy > 0) {
+                    // Coming from top, exit bottom side of blue portal
+                    ball.y = portal.blue.y + portalRadius + ballRadius + 2;
+                } else if (ball.vy < 0) {
+                    // Coming from bottom, exit top side of blue portal
+                    ball.y = portal.blue.y - portalRadius - ballRadius - 2;
+                } else {
+                    // No vertical movement, place at center
+                    ball.y = portal.blue.y;
+                }
+                
+                ball.justTeleported = true;
+                setTimeout(() => { ball.justTeleported = false; }, 100); // Prevent immediate re-teleport
+                break;
+            }
+            
+            // Check blue portal collision
+            const distToBlue = Math.sqrt(
+                Math.pow(ball.x - portal.blue.x, 2) + 
+                Math.pow(ball.y - portal.blue.y, 2)
+            );
+            
+            if (distToBlue <= ballRadius + portalRadius && !ball.justTeleported) {
+                // Add portal bonus scoring (only if not already hit this round)
+                if (!portal.hitThisRound) {
+                    obstacleHitCount++;
+                    portal.hitThisRound = true;
+                    portal.flashTime = 30;
+                    updatePotentialScore();
+                    console.log(`Portal hit! Bonus count: ${obstacleHitCount}`);
+                }
+                
+                // Determine entry side based on ball's velocity and position
+                const relativeX = ball.x - portal.blue.x;
+                const relativeY = ball.y - portal.blue.y;
+                
+                // Teleport to orange portal
+                if (ball.vx > 0) {
+                    // Coming from left, exit right side of orange portal
+                    ball.x = portal.orange.x + portalRadius + ballRadius + 2;
+                } else {
+                    // Coming from right, exit left side of orange portal
+                    ball.x = portal.orange.x - portalRadius - ballRadius - 2;
+                }
+                
+                if (ball.vy > 0) {
+                    // Coming from top, exit bottom side of orange portal
+                    ball.y = portal.orange.y + portalRadius + ballRadius + 2;
+                } else if (ball.vy < 0) {
+                    // Coming from bottom, exit top side of orange portal
+                    ball.y = portal.orange.y - portalRadius - ballRadius - 2;
+                } else {
+                    // No vertical movement, place at center
+                    ball.y = portal.orange.y;
+                }
+                
+                ball.justTeleported = true;
+                setTimeout(() => { ball.justTeleported = false; }, 100); // Prevent immediate re-teleport
+                break;
+            }
+        }
+    });
+    
+    // AI paddle movement with variable speed and dash ability - slower but responsive
+    const aiCenter = aiPaddle.y + aiPaddle.height / 2;
+    let aiMoveSpeed = aiDashActive ? aiPaddleSpeed * 1.5 : aiPaddleSpeed;
+    
+    // AI follows the closest ball - slower movement but still responsive
+    let closestBall = allBalls.reduce((closest, ball) => {
+        const distanceToClosest = Math.abs(closest.x - aiPaddle.x);
+        const distanceToBall = Math.abs(ball.x - aiPaddle.x);
+        return distanceToBall < distanceToClosest ? ball : closest;
+    });
+    
+    // Check if AI is frozen
+    if (!aiFreezeActive) {
+        const deadzone = 15; // Slightly larger than original 10
+        
+        if (aiCenter < closestBall.y - deadzone) {
+            aiPaddle.y += aiMoveSpeed;
+        } else if (aiCenter > closestBall.y + deadzone) {
+            aiPaddle.y -= aiMoveSpeed;
+        }
+    }
+    
+    // Ensure AI paddle stays within bounds
+    aiPaddle.y = Math.max(0, Math.min(300 - aiPaddle.height, aiPaddle.y));
+    
+    // AI dash logic - uses closest ball (aggressive again)
+    if (aiDashCooldown === 0 && closestBall.vx > 0 && closestBall.x > 350 && 
+        Math.abs(closestBall.y - aiCenter) > 15 && Math.abs(closestBall.y - aiCenter) < 50) {
+        aiDash();
+    }
+    
+    // Paddle collisions with dash speed bonus (for all balls)
+    allBalls.forEach(ball => {
+        // Player paddle collision
+        if (ball.x <= playerPaddle.x + playerPaddle.width &&
+            ball.y >= playerPaddle.y && ball.y <= playerPaddle.y + playerPaddle.height) {
+            
+            // Only reset if ball was coming from AI side (opponent hit)
+            if (lastBallDirection === -1) {
+                resetObstacleHits();
+                obstacleHitCount = 0;
+                updatePotentialScore();
+            }
+            lastBallDirection = 1; // Ball going right
+            
+            let speedMultiplier = playerDashActive ? DASH_SPEED_MULTIPLIER * (1 + dashBoostLevel * 0.3) : 1;
+            ball.vx = Math.abs(ball.vx) * speedMultiplier;
+            
+            // Add some angle variation based on where ball hits paddle
+            const hitPos = (ball.y - playerPaddle.y) / playerPaddle.height;
+            ball.vy = (hitPos - 0.5) * 4 * speedMultiplier;
+            
+            // Create dash arrows effect if dash boost is active
+            if (playerDashActive && dashBoostLevel > 0) {
+                createDashArrows();
+            }
+            
+            // Reset dash after successful hit
+            if (playerDashActive) {
+                playerDashActive = false;
+                updateDashStatus();
+            }
+        }
+        
+        // AI paddle collision
+        if (ball.x >= aiPaddle.x &&
+            ball.y >= aiPaddle.y && ball.y <= aiPaddle.y + aiPaddle.height) {
+            
+            // Only reset if ball was coming from player side (opponent hit)
+            if (lastBallDirection === 1) {
+                resetObstacleHits();
+                obstacleHitCount = 0;
+                updatePotentialScore();
+            }
+            lastBallDirection = -1; // Ball going left
+            
+            let speedMultiplier = aiDashActive ? DASH_SPEED_MULTIPLIER : 1;
+            ball.vx = -Math.abs(ball.vx) * speedMultiplier;
+            
+            // Add some angle variation based on where ball hits paddle
+            const hitPos = (ball.y - aiPaddle.y) / aiPaddle.height;
+            ball.vy = (hitPos - 0.5) * 4 * speedMultiplier;
+            
+            // Reset dash after successful hit
+            if (aiDashActive) {
+                aiDashActive = false;
+                updateDashStatus();
+            }
+        }
+        
+        // Middle paddle collision (if it exists)
+        if (middlePaddle && ball.x >= middlePaddle.x && ball.x <= middlePaddle.x + middlePaddle.width &&
+            ball.y >= middlePaddle.y && ball.y <= middlePaddle.y + middlePaddle.height) {
+            
+            // Track middle paddle hit for scoring bonus
+            if (!middlePaddle.hitThisRound) {
+                obstacleHitCount++;
+                middlePaddle.hitThisRound = true;
+                middlePaddle.flashTime = 30;
+                updatePotentialScore();
+                console.log(`Middle paddle hit! Bonus count: ${obstacleHitCount}`);
+            }
+            
+            // Determine which side was hit
+            const ballCenterX = ball.x;
+            const paddleCenterX = middlePaddle.x + middlePaddle.width / 2;
+            
+            if (ballCenterX < paddleCenterX) {
+                // Hit left side, bounce left
+                ball.vx = -Math.abs(ball.vx);
+                ball.x = middlePaddle.x - 6;
+            } else {
+                // Hit right side, bounce right
+                ball.vx = Math.abs(ball.vx);
+                ball.x = middlePaddle.x + middlePaddle.width + 6;
+            }
+            
+            // Add slight vertical variation
+            const hitPos = (ball.y - middlePaddle.y) / middlePaddle.height;
+            ball.vy += (hitPos - 0.5) * 2;
+        }
+        
+        // Limit ball speed to prevent it from going too fast
+        const maxSpeed = 12;
+        if (Math.abs(ball.vx) > maxSpeed) {
+            ball.vx = ball.vx > 0 ? maxSpeed : -maxSpeed;
+        }
+        if (Math.abs(ball.vy) > maxSpeed) {
+            ball.vy = ball.vy > 0 ? maxSpeed : -maxSpeed;
+        }
+    });
+    
+    // Update middle paddle movement
+    if (middlePaddle) {
+        middlePaddle.y += middlePaddle.vy;
+        
+        // Bounce off top/bottom
+        if (middlePaddle.y <= 0 || middlePaddle.y >= 300 - middlePaddle.height) {
+            middlePaddle.vy = -middlePaddle.vy;
+            middlePaddle.y = Math.max(0, Math.min(300 - middlePaddle.height, middlePaddle.y));
+        }
+        
+        // Update flash timer
+        if (middlePaddle.flashTime > 0) {
+            middlePaddle.flashTime--;
+        }
+    }
+    
+    // Score (check all balls) with obstacle bonus
+    let scoredBalls = [];
+    allBalls.forEach((ball, index) => {
+        if (ball.x < 0) {
+            const finalScore = 1 + obstacleHitCount;
+            gameStates.pong.aiScore += finalScore;
+            document.getElementById('pongAIScore').textContent = gameStates.pong.aiScore;
+            
+            if (obstacleHitCount > 0) {
+                console.log(`AI scored ${finalScore} points (1 + ${obstacleHitCount} obstacle bonus)!`);
+            }
+            
+            addPongObstacle();
+            showPlayerUpgradeChoice();
+            scoredBalls.push(index);
+        } else if (ball.x > 600) {
+            const finalScore = 1 + obstacleHitCount;
+            gameStates.pong.playerScore += finalScore;
+            document.getElementById('pongPlayerScore').textContent = gameStates.pong.playerScore;
+            
+            if (obstacleHitCount > 0) {
+                console.log(`Player scored ${finalScore} points (1 + ${obstacleHitCount} obstacle bonus)!`);
+            }
+            
+            addPongObstacle();
+            setTimeout(() => aiChooseRandomUpgrade(), 500);
+            scoredBalls.push(index);
+        }
+    });
+    
+    // Remove scored extra balls or reset main ball
+    scoredBalls.reverse().forEach(index => {
+        if (index === 0) {
+            resetPongBall();
+            resetObstacleHits();
+            obstacleHitCount = 0;
+            updatePotentialScore();
+        } else {
+            extraBalls.splice(index - 1, 1);
+        }
+    });
+    
+    // Check for game end - now 10 points to win
+    if (gameStates.pong.playerScore >= 10 || gameStates.pong.aiScore >= 10) {
+        gameOver('pong');
+        return;
+    }
+    
+    drawPongGame(document.getElementById('pongCanvas').getContext('2d'));
+}
+
+function resetObstacleHits() {
+    // Reset hit flags on all obstacles
+    blockades.forEach(blockade => {
+        blockade.hitThisRound = false;
+        blockade.flashTime = 0;
+    });
+    pongWalls.forEach(wall => {
+        wall.hitThisRound = false;
+        wall.flashTime = 0;
+    });
+    pongPortals.forEach(portal => {
+        portal.hitThisRound = false;
+        portal.flashTime = 0;
+    });
+    if (middlePaddle) {
+        middlePaddle.hitThisRound = false;
+        middlePaddle.flashTime = 0;
+    }
+}
+
+function updatePotentialScore() {
+    const potentialPoints = 1 + obstacleHitCount;
+    document.getElementById('potentialScore').textContent = potentialPoints;
+    
+    if (obstacleHitCount > 0) {
+        document.getElementById('obstacleBonus').textContent = `(1 + ${obstacleHitCount} bonus)`;
+    } else {
+        document.getElementById('obstacleBonus').textContent = '';
+    }
+}
+
+function playerDash() {
+    playerDashActive = true;
+    const adjustedCooldown = Math.max(DASH_COOLDOWN - (playerDashCooldownReduction || 0), 60); // Min 1 second
+    playerDashCooldown = adjustedCooldown;
+    updateDashStatus();
+}
+
+function aiDash() {
+    aiDashActive = true;
+    aiDashCooldown = DASH_COOLDOWN;
+    updateDashStatus();
+}
+
+function updateDashStatus() {
+    const playerStatus = document.getElementById('playerDashStatus');
+    const aiStatus = document.getElementById('aiDashStatus');
+    
+    if (playerDashCooldown === 0) {
+        playerStatus.textContent = 'Ready';
+        playerStatus.className = 'badge bg-success';
+    } else {
+        playerStatus.textContent = `${Math.ceil(playerDashCooldown / 60)}s`;
+        playerStatus.className = 'badge bg-warning';
+    }
+    
+    if (aiDashCooldown === 0) {
+        aiStatus.textContent = 'Ready';
+        aiStatus.className = 'badge bg-success';
+    } else {
+        aiStatus.textContent = `${Math.ceil(aiDashCooldown / 60)}s`;
+        aiStatus.className = 'badge bg-warning';
+    }
+}
+
+function addPongObstacle() {
+    // 70% chance for wall, 30% chance for portal
+    if (Math.random() < 0.7) {
+        // Add a small wall
+        const wall = {
+            x: Math.random() * (600 - 40) + 20, // Random x position, avoid edges
+            y: Math.random() * (300 - 40) + 20, // Random y position, avoid edges
+            width: 15,
+            height: 40,
+            hitThisRound: false,
+            flashTime: 0
+        };
+        
+        // Make sure wall doesn't spawn too close to paddles
+        if (wall.x > 100 && wall.x < 500) {
+            pongWalls.push(wall);
+        }
+    } else {
+        // Add a portal pair with better positioning
+        const portal = {
+            orange: {
+                x: 150 + Math.random() * 100, // More centered left side
+                y: 50 + Math.random() * 200
+            },
+            blue: {
+                x: 350 + Math.random() * 100, // More centered right side  
+                y: 50 + Math.random() * 200
+            },
+            hitThisRound: false,
+            flashTime: 0
+        };
+        pongPortals.push(portal);
+        
+        // Spawn moving middle paddle to prevent infinite portal loops
+        middlePaddle = {
+            x: 290, // Center of screen
+            y: 100 + Math.random() * 100,
+            width: 20,
+            height: 40,
+            vy: (Math.random() > 0.5 ? 1 : -1) * (1 + Math.random()), // Random speed 1-2
+            hitThisRound: false,
+            flashTime: 0
+        };
+    }
+}
+
+function showPlayerUpgradeChoice() {
+    // Pause the game
+    gameStates.pong.running = false;
+    if (pongInterval) {
+        clearInterval(pongInterval);
+        pongInterval = null;
+    }
+    
+    // Generate two random upgrade options
+    const allUpgrades = [
+        { type: 'bigger', name: 'Bigger Paddle', icon: 'fas fa-expand-alt', class: 'btn-primary' },
+        { type: 'faster', name: 'Faster Movement', icon: 'fas fa-tachometer-alt', class: 'btn-success' },
+        { type: 'blockade', name: 'Place Blockade', icon: 'fas fa-cube', class: 'btn-warning' },
+        { type: 'shrink', name: 'Shrink AI Paddle', icon: 'fas fa-compress-alt', class: 'btn-danger' },
+        { type: 'slow', name: 'Slow AI', icon: 'fas fa-clock', class: 'btn-secondary' },
+        { type: 'extraball', name: 'Extra Ball', icon: 'fas fa-circle', class: 'btn-info' },
+        { type: 'dashboost', name: 'Boost Dash', icon: 'fas fa-bolt', class: 'btn-light' },
+        { type: 'cooldown', name: 'Faster Cooldown', icon: 'fas fa-stopwatch', class: 'btn-dark' },
+        { type: 'freeze', name: 'Freeze AI', icon: 'fas fa-snowflake', class: 'btn-info' }
+    ];
+    
+    // Shuffle and pick 2 random upgrades
+    const shuffled = allUpgrades.sort(() => 0.5 - Math.random());
+    const selectedUpgrades = shuffled.slice(0, 2);
+    
+    // Create buttons HTML
+    const buttonsHTML = selectedUpgrades.map(upgrade => 
+        `<button class="btn ${upgrade.class} me-2 mb-2" onclick="chooseUpgrade('${upgrade.type}')" style="min-width: 140px;">
+            <i class="${upgrade.icon}"></i> ${upgrade.name}
+        </button>`
+    ).join('');
+    
+    // Insert buttons and show modal
+    document.getElementById('upgradeButtons').innerHTML = buttonsHTML;
+    document.getElementById('upgradeChoice').style.display = 'block';
+}
+
+            function chooseUpgrade(type) {
+                if (type === 'bigger') {
+                    // Increase paddle height
+                    playerPaddleHeight = Math.min(playerPaddleHeight + 15, 120); // Max height 120
+                    playerPaddle.height = playerPaddleHeight;
+                    
+                    // Adjust position if paddle goes out of bounds
+                    if (playerPaddle.y + playerPaddle.height > 300) {
+                        playerPaddle.y = 300 - playerPaddle.height;
+                    }
+                    
+                    // Update status display
+                    const sizeLevel = Math.floor((playerPaddleHeight - 60) / 15) + 1;
+                    document.getElementById('paddleSize').textContent = sizeLevel === 1 ? 'Normal' : `+${sizeLevel - 1}`;
+                    
+                } else if (type === 'faster') {
+                    // Increase paddle speed
+                    playerPaddleSpeed = Math.min(playerPaddleSpeed + 5, 30); // Max speed 30
+                    
+                    // Update status display
+                    const speedLevel = Math.floor((playerPaddleSpeed - 15) / 5) + 1;
+                    document.getElementById('paddleSpeed').textContent = speedLevel === 1 ? 'Normal' : `+${speedLevel - 1}`;
+                    
+                } else if (type === 'blockade') {
+                    // Place blockade near AI
+                    blockades.push({
+                        x: 400 + Math.random() * 100,
+                        y: 50 + Math.random() * 200,
+                        width: 20,
+                        height: 60,
+                        hitThisRound: false,
+                        flashTime: 0
+                    });
+                    
+                } else if (type === 'shrink') {
+                    // Shrink AI paddle
+                    aiPaddleHeight = Math.max(aiPaddleHeight - 15, 30); // Min height 30
+                    aiPaddle.height = aiPaddleHeight;
+                    
+                    // Adjust position if paddle goes out of bounds
+                    if (aiPaddle.y + aiPaddle.height > 300) {
+                        aiPaddle.y = 300 - aiPaddle.height;
+                    }
+                    
+                } else if (type === 'slow') {
+                    // Slow down AI
+                    aiPaddleSpeed = Math.max(aiPaddleSpeed - 3, 5); // Min speed 5
+                    
+                } else if (type === 'extraball') {
+                    // Add extra ball
+                    extraBalls.push({
+                        x: 300,
+                        y: 100 + Math.random() * 100,
+                        vx: Math.random() > 0.5 ? 3 : -3,
+                        vy: Math.random() * 4 - 2,
+                        justTeleported: false
+                    });
+                    
+                } else if (type === 'dashboost') {
+                    // Boost dash ability
+                    dashBoostLevel = Math.min(dashBoostLevel + 1, 3); // Max level 3
+                    
+                } else if (type === 'cooldown') {
+                    // Reduce dash cooldown frames
+                    const currentCooldown = DASH_COOLDOWN;
+                    // Since DASH_COOLDOWN is a constant, we need to track reduction separately
+                    playerDashCooldownReduction = Math.min((playerDashCooldownReduction || 0) + 30, 120); // Reduce by 30 frames each upgrade
+                
+                } else if (type === 'freeze') {
+                    // Add permanent freeze curse upgrade
+                    freezeUpgradeLevel = Math.min(freezeUpgradeLevel + 1, 5); // Max 5 levels
+                    
+                    // Update status display
+                    const freezeDisplay = document.getElementById('freezeLevel');
+                    if (freezeUpgradeLevel === 0) {
+                        freezeDisplay.textContent = 'None';
+                    } else {
+                        freezeDisplay.textContent = `Level ${freezeUpgradeLevel}`;
+                    }
+                    
+                    console.log(`Freeze upgrade level: ${freezeUpgradeLevel}`);
+                }
+                
+                // Hide upgrade choice and resume game
+                document.getElementById('upgradeChoice').style.display = 'none';
+                gameStates.pong.running = true;
+                pongInterval = setInterval(updatePong, 16);
+            }
+            
+            function aiChooseRandomUpgrade() {
+                const upgrades = ['bigger', 'faster', 'blockade', 'shrink', 'slow', 'extraball', 'dashboost', 'cooldown'];
+                const randomUpgrade = upgrades[Math.floor(Math.random() * upgrades.length)];
+                
+                if (randomUpgrade === 'bigger') {
+                    // AI gets bigger paddle
+                    aiPaddleHeight = Math.min(aiPaddleHeight + 15, 120);
+                    aiPaddle.height = aiPaddleHeight;
+                    if (aiPaddle.y + aiPaddle.height > 300) {
+                        aiPaddle.y = 300 - aiPaddle.height;
+                    }
+                } else if (randomUpgrade === 'faster') {
+                    // AI gets faster
+                    aiPaddleSpeed = Math.min(aiPaddleSpeed + 5, 30);
+                } else if (randomUpgrade === 'blockade') {
+                    // AI places blockade near player
+                    blockades.push({
+                        x: 100 + Math.random() * 100,
+                        y: 50 + Math.random() * 200,
+                        width: 20,
+                        height: 60,
+                        hitThisRound: false,
+                        flashTime: 0
+                    });
+                } else if (randomUpgrade === 'shrink') {
+                    // AI shrinks player paddle
+                    playerPaddleHeight = Math.max(playerPaddleHeight - 15, 30);
+                    playerPaddle.height = playerPaddleHeight;
+                    if (playerPaddle.y + playerPaddle.height > 300) {
+                        playerPaddle.y = 300 - playerPaddle.height;
+                    }
+                    const sizeLevel = Math.floor((playerPaddleHeight - 60) / 15) + 1;
+                    document.getElementById('paddleSize').textContent = sizeLevel === 1 ? 'Normal' : `${sizeLevel - 1}`;
+                } else if (randomUpgrade === 'slow') {
+                    // AI slows player
+                    playerPaddleSpeed = Math.max(playerPaddleSpeed - 3, 5);
+                    const speedLevel = Math.floor((playerPaddleSpeed - 15) / 5) + 1;
+                    document.getElementById('paddleSpeed').textContent = speedLevel === 1 ? 'Normal' : `${speedLevel - 1}`;
+                } else if (randomUpgrade === 'extraball') {
+                    // AI adds extra ball
+                    extraBalls.push({
+                        x: 300,
+                        y: 100 + Math.random() * 100,
+                        vx: Math.random() > 0.5 ? 3 : -3,
+                        vy: Math.random() * 4 - 2,
+                        justTeleported: false
+                    });
+                } else if (randomUpgrade === 'dashboost') {
+                    // AI improves dash cooldown (make AI dash better)
+                    aiDashCooldown = Math.max(aiDashCooldown - 30, 60); // Reduce AI dash cooldown in frames
+                }
+            }
+            
+            function createDashArrows() {
+                // Create arrows that shoot out from the player paddle during dash boost
+                for (let i = 0; i < 8; i++) {
+                    dashArrows.push({
+                        x: playerPaddle.x + playerPaddle.width,
+                        y: playerPaddle.y + playerPaddle.height / 2,
+                        vx: 3 + Math.random() * 4, // Forward velocity
+                        vy: (Math.random() - 0.5) * 6, // Random vertical spread
+                        life: 20 + Math.random() * 20 // How long they last
+                    });
+                }
+            }
+            
+            function drawPongGame(ctx) {
+    ctx.fillStyle = '#2a2a2a';
+    ctx.fillRect(0, 0, 600, 300);
+    
+    // Center line
+    ctx.setLineDash([5, 5]);
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(300, 0);
+    ctx.lineTo(300, 300);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    
+    // Draw walls with flash effect
+    for (let wall of pongWalls) {
+        if (wall.flashTime > 0) {
+            // Flash effect - alternate between normal and bright color
+            ctx.fillStyle = (wall.flashTime % 6 < 3) ? '#FFD700' : '#8B4513';
+        } else {
+            ctx.fillStyle = '#8B4513'; // Brown walls
+        }
+        ctx.fillRect(wall.x, wall.y, wall.width, wall.height);
+    }
+    
+    // Draw portals with flash effects
+    for (let portal of pongPortals) {
+        // Orange portal
+        if (portal.flashTime > 0) {
+            ctx.fillStyle = (portal.flashTime % 6 < 3) ? '#FFD700' : '#FF8C00';
+        } else {
+            ctx.fillStyle = '#FF8C00';
+        }
+        ctx.beginPath();
+        ctx.arc(portal.orange.x, portal.orange.y, 15, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Orange portal rim
+        ctx.strokeStyle = '#FFD700';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        
+        // Blue portal
+        if (portal.flashTime > 0) {
+            ctx.fillStyle = (portal.flashTime % 6 < 3) ? '#FFD700' : '#0000FF';
+        } else {
+            ctx.fillStyle = '#0000FF';
+        }
+        ctx.beginPath();
+        ctx.arc(portal.blue.x, portal.blue.y, 15, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Blue portal rim
+        ctx.strokeStyle = '#87CEEB';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        
+        // Draw connection line between portals
+        ctx.setLineDash([3, 3]);
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(portal.orange.x, portal.orange.y);
+        ctx.lineTo(portal.blue.x, portal.blue.y);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        
+        // Update flash timer
+        if (portal.flashTime > 0) {
+            portal.flashTime--;
+        }
+    }
+    
+    // Paddles with dash effect and freeze effect
+    if (playerDashActive) {
+        // Player paddle with dash glow effect
+        ctx.shadowColor = '#00ffff';
+        ctx.shadowBlur = 10;
+        ctx.fillStyle = '#00ffff';
+    } else {
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = '#ffffff';
+    }
+    ctx.fillRect(playerPaddle.x, playerPaddle.y, playerPaddle.width, playerPaddle.height);
+    
+    // AI paddle with dash/freeze effects
+    if (aiFreezeActive) {
+        // AI paddle frozen - light blue with icy effect
+        ctx.shadowColor = '#87CEEB';
+        ctx.shadowBlur = 15;
+        ctx.fillStyle = '#87CEEB'; // Light blue for frozen state
+        
+        // Add some sparkle effect for frozen paddle
+        const sparkleIntensity = Math.sin(Date.now() * 0.01) * 0.3 + 0.7;
+        ctx.globalAlpha = sparkleIntensity;
+    } else if (aiDashActive) {
+        // AI paddle with dash glow effect
+        ctx.shadowColor = '#ff0000';
+        ctx.shadowBlur = 10;
+        ctx.fillStyle = '#ff0000';
+        ctx.globalAlpha = 1;
+    } else {
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = '#ffffff';
+        ctx.globalAlpha = 1;
+    }
+    ctx.fillRect(aiPaddle.x, aiPaddle.y, aiPaddle.width, aiPaddle.height);
+    
+    // Reset alpha and shadow for other elements
+    ctx.globalAlpha = 1;
+    
+    // Draw blockades with flash effect
+    for (let blockade of blockades) {
+        if (blockade.flashTime > 0) {
+            // Flash effect - alternate between normal and bright color
+            ctx.fillStyle = (blockade.flashTime % 6 < 3) ? '#FFD700' : '#8B4513';
+        } else {
+            ctx.fillStyle = '#8B4513'; // Dark brown blockades
+        }
+        
+        ctx.fillRect(blockade.x, blockade.y, blockade.width, blockade.height);
+        // Add a border to make them more visible
+        ctx.strokeStyle = '#654321';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(blockade.x, blockade.y, blockade.width, blockade.height);
+    }
+    
+    // Draw middle paddle (portal loop prevention)
+    if (middlePaddle) {
+        ctx.fillStyle = '#FF6B6B'; // Red middle paddle
+        ctx.fillRect(middlePaddle.x, middlePaddle.y, middlePaddle.width, middlePaddle.height);
+        
+        // Add a glow effect
+        ctx.strokeStyle = '#FF4444';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(middlePaddle.x, middlePaddle.y, middlePaddle.width, middlePaddle.height);
+    }
+    for (let arrow of dashArrows) {
+        ctx.save();
+        ctx.translate(arrow.x, arrow.y);
+        
+        // Draw arrow shape
+        ctx.beginPath();
+        ctx.moveTo(0, -3);
+        ctx.lineTo(8, 0);
+        ctx.lineTo(0, 3);
+        ctx.lineTo(2, 0);
+        ctx.closePath();
+        ctx.fill();
+        
+        ctx.restore();
+    }
+    
+    // Draw middle paddle (portal loop prevention)
+    if (middlePaddle) {
+        ctx.fillStyle = '#FF6B6B'; // Red middle paddle
+        ctx.fillRect(middlePaddle.x, middlePaddle.y, middlePaddle.width, middlePaddle.height);
+        
+        // Add a glow effect
+        ctx.strokeStyle = '#FF4444';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(middlePaddle.x, middlePaddle.y, middlePaddle.width, middlePaddle.height);
+    }
+    
+    // Reset shadow
+    ctx.shadowBlur = 0;
+    
+    // Main ball
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(pongBall.x - 5, pongBall.y - 5, 10, 10);
+    
+    // Extra balls
+    ctx.fillStyle = '#ffff00'; // Yellow extra balls to distinguish them
+    for (let ball of extraBalls) {
+        ctx.fillRect(ball.x - 4, ball.y - 4, 8, 8);
+    }
+    
+    if (!gameStates.pong.running) {
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '16px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('Click Start to play!', 300, 150);
+    }
+}
+
+function resetPongBall() {
+    pongBall.x = 300;
+    pongBall.y = 150;
+    pongBall.vx = (Math.random() > 0.5 ? 3 : -3);
+    pongBall.vy = (Math.random() > 0.5 ? 2 : -2);
+    pongBall.justTeleported = false;
+}
+
+function pausePong() {
+    if (pongInterval) {
+        clearInterval(pongInterval);
+        pongInterval = null;
+        gameStates.pong.running = false;
+    } else if (gameStates.pong.playerScore >= 0) {
+        startPong();
+    }
+}
+
+function resetPong() {
+    gameStates.pong.running = false;
+    if (pongInterval) clearInterval(pongInterval);
+    gameStates.pong.playerScore = 0;
+    gameStates.pong.aiScore = 0;
+    
+    // Reset all upgrade-related variables
+    playerPaddleHeight = 60;
+    aiPaddleHeight = 60;
+    playerPaddleSpeed = 15;
+    aiPaddleSpeed = 15;
+    dashBoostLevel = 0;
+    playerDashCooldownReduction = 0;
+    blockades = [];
+    extraBalls = [];
+    dashArrows = [];
+    pongWalls = [];
+    pongPortals = [];
+    middlePaddle = null;
+    obstacleHitCount = 0;
+    
+    document.getElementById('pongPlayerScore').textContent = '0';
+    document.getElementById('pongAIScore').textContent = '0';
+    
+    // Reset upgrade status displays
+    document.getElementById('paddleSize').textContent = 'Normal';
+    document.getElementById('paddleSpeed').textContent = 'Normal';
+    
+    initializePongCanvas();
+}
+
+// Memory Game Functions
+function initializeMemoryGame() {
+    const container = document.getElementById('memoryCards');
+    if (container) {
+        container.innerHTML = '<p class="text-center">Click Start Memory to begin!</p>';
+    }
+}
+
+function startMemory() {
+    if (gameStates.memory.running) return;
+    
+    console.log('Starting Memory game...');
+    gameStates.memory.running = true;
+    gameStates.memory.level = 1;
+    gameStates.memory.score = 0;
+    
+    generateMemoryCards();
+    updateMemoryUI();
+}
+
+function generateMemoryCards() {
+    const symbols = ['🌟', '🎵', '🎨', '🎮', '🚀', '💎', '🔥', '⚡'];
+    memoryCards = [];
+    
+    // Create pairs
+    symbols.forEach(symbol => {
+        memoryCards.push(symbol, symbol);
+    });
+    
+    // Shuffle
+    for (let i = memoryCards.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [memoryCards[i], memoryCards[j]] = [memoryCards[j], memoryCards[i]];
+    }
+    
+    renderMemoryCards();
+}
+
+function renderMemoryCards() {
+    const container = document.getElementById('memoryCards');
+    container.innerHTML = '';
+    container.className = 'd-flex flex-wrap justify-content-center gap-2';
+    
+    memoryCards.forEach((symbol, index) => {
+        const card = document.createElement('div');
+        card.className = 'memory-card btn btn-primary';
+        card.style.width = '60px';
+        card.style.height = '60px';
+        card.style.fontSize = '24px';
+        card.dataset.index = index;
+        card.textContent = '?';
+        card.onclick = () => flipMemoryCard(index);
+        container.appendChild(card);
+    });
+}
+
+function flipMemoryCard(index) {
+    if (flippedCards.length >= 2) return;
+    if (flippedCards.includes(index)) return;
+    
+    const card = document.querySelector(`[data-index="${index}"]`);
+    card.textContent = memoryCards[index];
+    card.classList.add('btn-warning');
+    flippedCards.push(index);
+    
+    if (flippedCards.length === 2) {
+        setTimeout(checkMemoryMatch, 1000);
+    }
+}
+
+function checkMemoryMatch() {
+    const [first, second] = flippedCards;
+    
+    if (memoryCards[first] === memoryCards[second]) {
+        // Match!
+        gameStates.memory.score += 10;
+        memoryMatched += 2;
+        
+        if (memoryMatched === memoryCards.length) {
+            gameStates.memory.level++;
+            setTimeout(() => {
+                alert(`Level ${gameStates.memory.level - 1} completed!`);
+                generateMemoryCards();
+                memoryMatched = 0;
+            }, 500);
+        }
+    } else {
+        // No match - flip back
+        const card1 = document.querySelector(`[data-index="${first}"]`);
+        const card2 = document.querySelector(`[data-index="${second}"]`);
+        card1.textContent = '?';
+        card2.textContent = '?';
+        card1.classList.remove('btn-warning');
+        card2.classList.remove('btn-warning');
+    }
+    
+    flippedCards = [];
+    updateMemoryUI();
+}
+
+function updateMemoryUI() {
+    document.getElementById('memoryLevel').textContent = gameStates.memory.level;
+    document.getElementById('memoryScore').textContent = gameStates.memory.score;
+}
+
+function resetMemory() {
+    gameStates.memory.running = false;
+    gameStates.memory.level = 1;
+    gameStates.memory.score = 0;
+    memoryMatched = 0;
+    flippedCards = [];
+    updateMemoryUI();
+    initializeMemoryGame();
+}
+
+// Tetris Game Functions
+let tetrisState = {
+    board: [],
+    currentPiece: null,
+    nextPiece: null,
+    score: 0,
+    level: 1,
+    lines: 0,
+    gameRunning: false,
+    paused: false,
+    dropCounter: 0,
+    dropInterval: 1000,
+    lastTime: 0
+};
+
+const TETRIS_COLORS = [
+    null,
+    '#FF0D72', // I
+    '#0DC2FF', // O  
+    '#0DFF72', // T
+    '#F538FF', // S
+    '#FF8E0D', // Z
+    '#FFE138', // J
+    '#3877FF'  // L
+];
+
+const TETRIS_PIECES = [
+    [],
+    [[1,1,1,1]], // I
+    [[2,2],[2,2]], // O
+    [[0,3,0],[3,3,3]], // T
+    [[0,4,4],[4,4,0]], // S
+    [[5,5,0],[0,5,5]], // Z
+    [[6,0,0],[6,6,6]], // J
+    [[0,0,7],[7,7,7]]  // L
+];
+
+function initializeTetrisCanvas() {
+    const canvas = document.getElementById('tetrisCanvas');
+    if (canvas) {
+        // Initialize empty board
+        tetrisState.board = Array(20).fill().map(() => Array(10).fill(0));
+        tetrisState.score = 0;
+        tetrisState.level = 1;
+        tetrisState.lines = 0;
+        tetrisState.gameRunning = false;
+        tetrisState.paused = false;
+        
+        updateTetrisDisplay();
+        drawTetrisBoard();
+        drawNextPiece();
+        
+        // Add keyboard controls
+        document.addEventListener('keydown', handleTetrisInput);
+    }
+}
+
+function createPiece(type) {
+    return {
+        type: type,
+        shape: TETRIS_PIECES[type].map(row => [...row]),
+        x: Math.floor((10 - TETRIS_PIECES[type][0].length) / 2),
+        y: 0
+    };
+}
+
+function getRandomPiece() {
+    return Math.floor(Math.random() * 7) + 1;
+}
+
+function startTetris() {
+    if (tetrisState.gameRunning) return;
+    
+    tetrisState.gameRunning = true;
+    tetrisState.paused = false;
+    tetrisState.board = Array(20).fill().map(() => Array(10).fill(0));
+    tetrisState.score = 0;
+    tetrisState.level = 1;
+    tetrisState.lines = 0;
+    tetrisState.dropCounter = 0;
+    tetrisState.dropInterval = 1000;
+    
+    tetrisState.currentPiece = createPiece(getRandomPiece());
+    tetrisState.nextPiece = createPiece(getRandomPiece());
+    
+    updateTetrisDisplay();
+    drawNextPiece();
+    
+    document.getElementById('tetrisStartButton').disabled = true;
+    document.getElementById('tetrisPauseButton').disabled = false;
+    
+    tetrisGameLoop();
+}
+
+function pauseTetris() {
+    if (!tetrisState.gameRunning) return;
+    
+    tetrisState.paused = !tetrisState.paused;
+    const pauseBtn = document.getElementById('tetrisPauseButton');
+    pauseBtn.textContent = tetrisState.paused ? 'Resume' : 'Pause';
+    
+    if (!tetrisState.paused) {
+        tetrisGameLoop();
+    }
+}
+
+function resetTetris() {
+    tetrisState.gameRunning = false;
+    tetrisState.paused = false;
+    tetrisState.score = 0;
+    tetrisState.level = 1;
+    tetrisState.lines = 0;
+    tetrisState.board = Array(20).fill().map(() => Array(10).fill(0));
+    
+    document.getElementById('tetrisStartButton').disabled = false;
+    document.getElementById('tetrisPauseButton').disabled = true;
+    document.getElementById('tetrisPauseButton').textContent = 'Pause';
+    
+    updateTetrisDisplay();
+    drawTetrisBoard();
+    drawNextPiece();
+}
+
+function tetrisGameLoop(time = 0) {
+    if (!tetrisState.gameRunning || tetrisState.paused) return;
+    
+    const deltaTime = time - tetrisState.lastTime;
+    tetrisState.lastTime = time;
+    tetrisState.dropCounter += deltaTime;
+    
+    if (tetrisState.dropCounter > tetrisState.dropInterval) {
+        dropPiece();
+    }
+    
+    drawTetrisBoard();
+    requestAnimationFrame(tetrisGameLoop);
+}
+
+function dropPiece() {
+    tetrisState.dropCounter = 0;
+    
+    if (canMovePiece(tetrisState.currentPiece, 0, 1)) {
+        tetrisState.currentPiece.y++;
+    } else {
+        // Lock piece
+        lockPiece();
+        clearLines();
+        spawnNewPiece();
+        
+        // Check game over
+        if (!canMovePiece(tetrisState.currentPiece, 0, 0)) {
+            gameOver();
+        }
+    }
+}
+
+function lockPiece() {
+    const piece = tetrisState.currentPiece;
+    for (let y = 0; y < piece.shape.length; y++) {
+        for (let x = 0; x < piece.shape[y].length; x++) {
+            if (piece.shape[y][x] !== 0) {
+                const boardX = piece.x + x;
+                const boardY = piece.y + y;
+                if (boardY >= 0) {
+                    tetrisState.board[boardY][boardX] = piece.shape[y][x];
+                }
+            }
+        }
+    }
+}
+
+function clearLines() {
+    let linesCleared = 0;
+    
+    for (let y = tetrisState.board.length - 1; y >= 0; y--) {
+        if (tetrisState.board[y].every(cell => cell !== 0)) {
+            tetrisState.board.splice(y, 1);
+            tetrisState.board.unshift(Array(10).fill(0));
+            linesCleared++;
+            y++; // Check the same line again
+        }
+    }
+    
+    if (linesCleared > 0) {
+        tetrisState.lines += linesCleared;
+        tetrisState.score += linesCleared * 100 * tetrisState.level;
+        tetrisState.level = Math.floor(tetrisState.lines / 10) + 1;
+        tetrisState.dropInterval = Math.max(50, 1000 - (tetrisState.level - 1) * 100);
+        updateTetrisDisplay();
+    }
+}
+
+function spawnNewPiece() {
+    tetrisState.currentPiece = tetrisState.nextPiece;
+    tetrisState.nextPiece = createPiece(getRandomPiece());
+    drawNextPiece();
+}
+
+function canMovePiece(piece, offsetX, offsetY) {
+    for (let y = 0; y < piece.shape.length; y++) {
+        for (let x = 0; x < piece.shape[y].length; x++) {
+            if (piece.shape[y][x] !== 0) {
+                const newX = piece.x + x + offsetX;
+                const newY = piece.y + y + offsetY;
+                
+                if (newX < 0 || newX >= 10 || newY >= 20) {
+                    return false;
+                }
+                
+                if (newY >= 0 && tetrisState.board[newY][newX] !== 0) {
+                    return false;
+                }
+            }
+        }
+    }
+    return true;
+}
+
+function rotatePiece() {
+    if (!tetrisState.currentPiece) return;
+    
+    const rotated = tetrisState.currentPiece.shape[0].map((_, i) =>
+        tetrisState.currentPiece.shape.map(row => row[i]).reverse()
+    );
+    
+    const originalShape = tetrisState.currentPiece.shape;
+    tetrisState.currentPiece.shape = rotated;
+    
+    if (!canMovePiece(tetrisState.currentPiece, 0, 0)) {
+        tetrisState.currentPiece.shape = originalShape;
+    }
+}
+
+function handleTetrisInput(event) {
+    if (!tetrisState.gameRunning || tetrisState.paused) return;
+    
+    switch(event.key) {
+        case 'ArrowLeft':
+            if (canMovePiece(tetrisState.currentPiece, -1, 0)) {
+                tetrisState.currentPiece.x--;
+            }
+            break;
+        case 'ArrowRight':
+            if (canMovePiece(tetrisState.currentPiece, 1, 0)) {
+                tetrisState.currentPiece.x++;
+            }
+            break;
+        case 'ArrowDown':
+            if (canMovePiece(tetrisState.currentPiece, 0, 1)) {
+                tetrisState.currentPiece.y++;
+                tetrisState.score += 1;
+                updateTetrisDisplay();
+            }
+            break;
+        case 'ArrowUp':
+        case ' ':
+            rotatePiece();
+            break;
+        case 'Shift':
+            // Hard drop
+            while (canMovePiece(tetrisState.currentPiece, 0, 1)) {
+                tetrisState.currentPiece.y++;
+                tetrisState.score += 2;
+            }
+            updateTetrisDisplay();
+            break;
+        case 'p':
+        case 'P':
+            pauseTetris();
+            break;
+    }
+}
+
+function drawTetrisBoard() {
+    const canvas = document.getElementById('tetrisCanvas');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    const cellSize = 30;
+    
+    // Clear canvas
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw board
+    for (let y = 0; y < tetrisState.board.length; y++) {
+        for (let x = 0; x < tetrisState.board[y].length; x++) {
+            if (tetrisState.board[y][x] !== 0) {
+                ctx.fillStyle = TETRIS_COLORS[tetrisState.board[y][x]];
+                ctx.fillRect(x * cellSize, y * cellSize, cellSize - 1, cellSize - 1);
+            }
+        }
+    }
+    
+    // Draw current piece
+    if (tetrisState.currentPiece) {
+        ctx.fillStyle = TETRIS_COLORS[tetrisState.currentPiece.type];
+        for (let y = 0; y < tetrisState.currentPiece.shape.length; y++) {
+            for (let x = 0; x < tetrisState.currentPiece.shape[y].length; x++) {
+                if (tetrisState.currentPiece.shape[y][x] !== 0) {
+                    const drawX = (tetrisState.currentPiece.x + x) * cellSize;
+                    const drawY = (tetrisState.currentPiece.y + y) * cellSize;
+                    ctx.fillRect(drawX, drawY, cellSize - 1, cellSize - 1);
+                }
+            }
+        }
+    }
+    
+    // Draw grid
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = 1;
+    for (let x = 0; x <= 10; x++) {
+        ctx.beginPath();
+        ctx.moveTo(x * cellSize, 0);
+        ctx.lineTo(x * cellSize, 600);
+        ctx.stroke();
+    }
+    for (let y = 0; y <= 20; y++) {
+        ctx.beginPath();
+        ctx.moveTo(0, y * cellSize);
+        ctx.lineTo(300, y * cellSize);
+        ctx.stroke();
+    }
+}
+
+function drawNextPiece() {
+    const canvas = document.getElementById('nextPieceCanvas');
+    if (!canvas || !tetrisState.nextPiece) return;
+    
+    const ctx = canvas.getContext('2d');
+    const cellSize = 20;
+    
+    // Clear canvas
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw next piece centered
+    const piece = tetrisState.nextPiece;
+    const startX = (canvas.width - piece.shape[0].length * cellSize) / 2;
+    const startY = (canvas.height - piece.shape.length * cellSize) / 2;
+    
+    ctx.fillStyle = TETRIS_COLORS[piece.type];
+    for (let y = 0; y < piece.shape.length; y++) {
+        for (let x = 0; x < piece.shape[y].length; x++) {
+            if (piece.shape[y][x] !== 0) {
+                ctx.fillRect(
+                    startX + x * cellSize,
+                    startY + y * cellSize,
+                    cellSize - 1,
+                    cellSize - 1
+                );
+            }
+        }
+    }
+}
+
+function updateTetrisDisplay() {
+    document.getElementById('tetrisScore').textContent = tetrisState.score;
+    document.getElementById('tetrisLevel').textContent = tetrisState.level;
+    document.getElementById('tetrisLines').textContent = tetrisState.lines;
+}
+
+function gameOver() {
+    tetrisState.gameRunning = false;
+    alert(`Game Over! Final Score: ${tetrisState.score}`);
+    resetTetris();
+}
+
+// Pirate Adventure Game Functions
+function initializePirateCanvas() {
+    const canvas = document.getElementById('pirateBoard');
+    if (canvas) {
+        // Initialize fixed terrain once
+        if (!terrainSeeds) {
+            generateFixedTerrain();
+        }
+        const ctx = canvas.getContext('2d');
+        drawPirateBoard(ctx);
+        
+        // Add hover tooltips
+        addCanvasTooltips(canvas);
+    }
+    
+    // Initialize action wheel
+    const wheelCanvas = document.getElementById('actionWheelCanvas');
+    if (wheelCanvas) {
+        drawActionWheel();
+    }
+    
+    // Initialize dice
+    const diceCanvas = document.getElementById('diceCanvas');
+    if (diceCanvas) {
+        drawDice();
+    }
+}
+
+function addCanvasTooltips(canvas) {
+    // Create tooltip element
+    const tooltip = document.createElement('div');
+    tooltip.id = 'canvasTooltip';
+    tooltip.style.cssText = `
+        position: absolute;
+        background: rgba(0,0,0,0.8);
+        color: white;
+        padding: 5px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        pointer-events: none;
+        z-index: 1000;
+        display: none;
+    `;
+    document.body.appendChild(tooltip);
+    
+    canvas.addEventListener('mousemove', function(event) {
+        const rect = canvas.getBoundingClientRect();
+        const x = Math.floor((event.clientX - rect.left) / 40);
+        const y = Math.floor((event.clientY - rect.top) / 40);
+        
+        if (x >= 0 && x < 16 && y >= 0 && y < 16) {
+            const tileType = getTileType(x, y);
+            const tooltipText = getTileTooltip(tileType, x, y);
+            
+            tooltip.textContent = tooltipText;
+            tooltip.style.display = 'block';
+            tooltip.style.left = (event.clientX + 10) + 'px';
+            tooltip.style.top = (event.clientY - 30) + 'px';
+        }
+    });
+    
+    canvas.addEventListener('mouseleave', function() {
+        tooltip.style.display = 'none';
+    });
+}
+
+function getTileTooltip(tileType, x, y) {
+    const baseTooltips = {
+        water: 'Water - Ships can sail here',
+        deepwater: 'Deep Water - Ships can sail here',
+        beach: 'Beach - Landing area for ships',
+        stone: 'Stone Island - Impassable terrain',
+        forest: 'Forest - Chop with axe for wood (must be adjacent)',
+        jungle: 'Jungle Island - Impassable terrain with trees',
+        harbor: 'Harbor - Shop for supplies (must be adjacent)',
+        lighthouse: 'Lighthouse - Activate beacon (must be adjacent)',
+        cave: 'Cave Tunnel - Teleport across island (must be adjacent)'
+    };
+    
+    let tooltip = baseTooltips[tileType] || 'Unknown terrain';
+    
+    // Add additional info
+    if (pirateGame) {
+        const treasure = getTreasureAt(x, y);
+        if (treasure && !treasure.collected) {
+            tooltip += ` | Treasure: ${treasure.coins} coins`;
+        }
+        
+        const ship = getShipAt(x, y);
+        if (ship) {
+            tooltip += ` | ${ship.owner.name}'s ship`;
+        }
+    }
+    
+    return tooltip;
+}
+
+function updateHotbarDisplay() {
+    if (!pirateGame) return;
+    
+    const player = pirateGame.players[pirateGame.currentPlayer];
+    if (!player.items) return;
+    
+    const hotbar = document.getElementById('supplyHotbar');
+    Array.from(hotbar.children).forEach(slot => {
+        if (slot.classList.contains('filled')) {
+            // Update quantities or remove empty items
+            const icon = slot.textContent;
+            let found = false;
+            
+            Object.entries(player.items).forEach(([item, count]) => {
+                if (getItemIcon(item) === icon && count > 0) {
+                    slot.title = `${getItemName(item)} (${count})`;
+                    found = true;
+                }
+            });
+            
+            if (!found) {
+                slot.className = 'hotbar-slot empty';
+                slot.textContent = 'Empty';
+                slot.title = '';
+            }
+        }
+    });
+}
+
+function generateFixedTerrain() {
+    terrainSeeds = {
+        stones: [],
+        trees: [],
+        sand: []
+    };
+    
+    // Generate fixed stone positions for central island
+    for (let i = 0; i < 15; i++) {
+        terrainSeeds.stones.push({
+            x: Math.random() * 30,
+            y: Math.random() * 30,
+            size: 4 + Math.random() * 6
+        });
+    }
+    
+    // Generate tree positions
+    for (let i = 0; i < 8; i++) {
+        terrainSeeds.trees.push({
+            x: Math.random() * 30,
+            y: Math.random() * 30
+        });
+    }
+    
+    // Generate sand texture
+    for (let i = 0; i < 20; i++) {
+        terrainSeeds.sand.push({
+            x: Math.random() * 30,
+            y: Math.random() * 30,
+            size: 2 + Math.random() * 3
+        });
+    }
+    
+    // Create natural island layout
+    islandLayout = generateNaturalIslands();
+    
+    // Fixed treasure spawns
+    treasureSpawns = [
+        { x: 7, y: 6, coins: 4 }, // Cave entrance treasure
+        { x: 8, y: 9, coins: 3 }, // Cave exit treasure
+        { x: 2, y: 13, coins: 5 }, // Beach treasure
+        { x: 13, y: 2, coins: 5 }, // Beach treasure
+        { x: 1, y: 1, coins: 6 }, // Corner treasure
+        { x: 14, y: 14, coins: 6 } // Corner treasure
+    ];
+}
+
+function generateNaturalIslands() {
+    const layout = {};
+    
+    // Central island with irregular shape
+    const centerIsland = new Set();
+    for (let x = 5; x < 11; x++) {
+        for (let y = 5; y < 11; y++) {
+            const distFromCenter = Math.sqrt((x - 8) ** 2 + (y - 8) ** 2);
+            if (distFromCenter < 2.5 + Math.random() * 0.8) {
+                centerIsland.add(`${x},${y}`);
+            }
+        }
+    }
+    
+    // Add beaches around central island
+    const beaches = new Set();
+    centerIsland.forEach(pos => {
+        const [x, y] = pos.split(',').map(Number);
+        for (let dx = -1; dx <= 1; dx++) {
+            for (let dy = -1; dy <= 1; dy++) {
+                const bx = x + dx, by = y + dy;
+                if (bx >= 0 && bx < 16 && by >= 0 && by < 16 && !centerIsland.has(`${bx},${by}`)) {
+                    if (Math.random() < 0.6) beaches.add(`${bx},${by}`);
+                }
+            }
+        }
+    });
+    
+    // Forest areas - only on edges of central island, adjacent to water/beaches
+    const forests = new Set();
+    centerIsland.forEach(pos => {
+        const [x, y] = pos.split(',').map(Number);
+        // Check if this tile is on the edge of the island (next to water/beach)
+        let isEdge = false;
+        for (let dx = -1; dx <= 1; dx++) {
+            for (let dy = -1; dy <= 1; dy++) {
+                const adjX = x + dx, adjY = y + dy;
+                if (adjX >= 0 && adjX < 16 && adjY >= 0 && adjY < 16) {
+                    if (!centerIsland.has(`${adjX},${adjY}`) || beaches.has(`${adjX},${adjY}`)) {
+                        isEdge = true;
+                        break;
+                    }
+                }
+            }
+            if (isEdge) break;
+        }
+        
+        // Only place forests on edge tiles with some randomness
+        if (isEdge && Math.random() < 0.3) {
+            forests.add(pos);
+        }
+    });
+    
+    // Border islands with beaches
+    const borderIslands = new Set();
+    const borderBeaches = new Set();
+    
+    // Corner islands
+    const corners = [[1, 1], [14, 1], [1, 14], [14, 14]];
+    corners.forEach(([cx, cy]) => {
+        for (let x = cx - 1; x <= cx + 1; x++) {
+            for (let y = cy - 1; y <= cy + 1; y++) {
+                if (x >= 0 && x < 16 && y >= 0 && y < 16) {
+                    const dist = Math.abs(x - cx) + Math.abs(y - cy);
+                    if (dist <= 1 && Math.random() < 0.8) {
+                        if (dist === 0) borderIslands.add(`${x},${y}`);
+                        else borderBeaches.add(`${x},${y}`);
+                    }
+                }
+            }
+        }
+    });
+    
+    return {
+        centerIsland,
+        beaches,
+        borderIslands,
+        borderBeaches,
+        forests
+    };
+}
+
+function drawActionWheel() {
+    const canvas = document.getElementById('actionWheelCanvas');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    const centerX = 100;
+    const centerY = 100;
+    const radius = 90;
+    
+    ctx.clearRect(0, 0, 200, 200);
+    
+    // Draw wheel sections
+    const sectionAngle = (Math.PI * 2) / wheelActions.length;
+    
+    wheelActions.forEach((action, index) => {
+        const startAngle = (index * sectionAngle) + wheelRotation;
+        const endAngle = ((index + 1) * sectionAngle) + wheelRotation;
+        
+        // Draw section
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+        ctx.closePath();
+        ctx.fillStyle = action.color;
+        ctx.fill();
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        // Draw action icon and text
+        const textAngle = startAngle + sectionAngle / 2;
+        const textX = centerX + Math.cos(textAngle) * (radius * 0.7);
+        const textY = centerY + Math.sin(textAngle) * (radius * 0.7);
+        
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 20px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(action.icon, textX, textY - 5);
+        
+        ctx.font = '10px Arial';
+        ctx.fillText(action.name, textX, textY + 10);
+    });
+    
+    // Draw center hub
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, 15, 0, Math.PI * 2);
+    ctx.fillStyle = '#333';
+    ctx.fill();
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    
+    // Draw pointer
+    ctx.beginPath();
+    ctx.moveTo(centerX, centerY - radius - 10);
+    ctx.lineTo(centerX - 8, centerY - radius + 5);
+    ctx.lineTo(centerX + 8, centerY - radius + 5);
+    ctx.closePath();
+    ctx.fillStyle = '#ff0000';
+    ctx.fill();
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+}
+
+function drawDice() {
+    const canvas = document.getElementById('diceCanvas');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, 120, 60);
+    
+    // Draw two dice
+    drawSingleDie(ctx, 15, 15, diceRolls[0] || 1);
+    drawSingleDie(ctx, 65, 15, diceRolls[1] || 1);
+}
+
+function drawSingleDie(ctx, x, y, value) {
+    const size = 30;
+    
+    // Draw die face
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(x, y, size, size);
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x, y, size, size);
+    
+    // Draw dots based on value
+    ctx.fillStyle = '#000';
+    const dotSize = 4;
+    const positions = {
+        1: [[15, 15]],
+        2: [[5, 5], [25, 25]],
+        3: [[5, 5], [15, 15], [25, 25]],
+        4: [[5, 5], [25, 5], [5, 25], [25, 25]],
+        5: [[5, 5], [25, 5], [15, 15], [5, 25], [25, 25]],
+        6: [[5, 5], [25, 5], [5, 15], [25, 15], [5, 25], [25, 25]]
+    };
+    
+    if (positions[value]) {
+        positions[value].forEach(([dx, dy]) => {
+            ctx.beginPath();
+            ctx.arc(x + dx, y + dy, dotSize, 0, Math.PI * 2);
+            ctx.fill();
+        });
+    }
+}
+
+function spinActionWheel() {
+    if (wheelSpinning || pirateGame.actionTaken) return;
+    
+    wheelSpinning = true;
+    document.getElementById('spinButton').disabled = true;
+    
+    const spinAmount = Math.PI * 2 * (3 + Math.random() * 5); // 3-8 full rotations
+    const spinDuration = 2000; // 2 seconds
+    const startTime = Date.now();
+    const startRotation = wheelRotation;
+    
+    function animate() {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / spinDuration, 1);
+        
+        // Easing function for natural spin
+        const easeOut = 1 - Math.pow(1 - progress, 3);
+        wheelRotation = startRotation + spinAmount * easeOut;
+        
+        drawActionWheel();
+        
+        if (progress < 1) {
+            requestAnimationFrame(animate);
+        } else {
+            wheelSpinning = false;
+            
+            // Fix: Calculate which section the arrow points to
+            // Arrow points up (0 degrees), sections start from right (0 degrees)
+            const normalizedRotation = (wheelRotation % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
+            const sectionAngle = (Math.PI * 2) / wheelActions.length;
+            
+            // Offset by 90 degrees since arrow points up but sections start from right
+            const adjustedRotation = (normalizedRotation + Math.PI / 2) % (Math.PI * 2);
+            const selectedIndex = Math.floor(adjustedRotation / sectionAngle) % wheelActions.length;
+            
+            selectedActionType = wheelActions[selectedIndex].name.toLowerCase();
+            document.getElementById('selectedAction').textContent = wheelActions[selectedIndex].name;
+            document.getElementById('diceButton').disabled = false;
+            
+            alert(`Wheel landed on: ${wheelActions[selectedIndex].name} ${wheelActions[selectedIndex].icon}`);
+        }
+    }
+    
+    animate();
+}
+
+function rollActionDice() {
+    if (!selectedActionType) return;
+    
+    document.getElementById('diceButton').disabled = true;
+    
+    diceRolls = [Math.floor(Math.random() * 6) + 1, Math.floor(Math.random() * 6) + 1];
+    actionPower = diceRolls[0] + diceRolls[1];
+    
+    drawDice();
+    
+    document.getElementById('diceResult').textContent = `${diceRolls[0]} + ${diceRolls[1]} = ${actionPower}`;
+    document.getElementById('executeButton').disabled = false;
+    
+    alert(`Rolled dice: ${diceRolls[0]} + ${diceRolls[1]} = ${actionPower} power!`);
+}
+
+function executeSelectedAction() {
+    if (!selectedActionType || !actionPower) return;
+    
+    // Execute the action with dice power
+    pirateAction(selectedActionType);
+    
+    // Auto-advance turn after action
+    setTimeout(() => {
+        if (pirateGame && pirateGame.actionTaken) {
+            nextPirateTurn();
+        }
+    }, 1500);
+}
+
+function buyHotbarSlot(type) {
+    if (!pirateGame) return;
+    
+    const player = pirateGame.players[pirateGame.currentPlayer];
+    const cost = 3;
+    
+    if (player.coins < cost) {
+        alert(`Need ${cost} coins to buy an extra hotbar slot!`);
+        return;
+    }
+    
+    const hotbarId = type === 'supply' ? 'supplyHotbar' : 'cardHotbar';
+    const hotbar = document.getElementById(hotbarId);
+    const currentSlots = hotbar.children.length;
+    
+    if (currentSlots >= 6) {
+        alert('Maximum 6 slots allowed!');
+        return;
+    }
+    
+    player.coins -= cost;
+    const newSlot = document.createElement('div');
+    newSlot.className = 'hotbar-slot empty';
+    newSlot.textContent = 'Empty';
+    hotbar.appendChild(newSlot);
+    
+    updatePiratePlayerStatus();
+    alert(`Bought extra ${type} slot for ${cost} coins!`);
+}
+
+function showShop(shopType) {
+    const player = pirateGame.players[pirateGame.currentPlayer];
+    let shopHTML = `
+        <div class="shop-overlay" onclick="closeShop()"></div>
+        <div class="shop-dialog">
+            <h4>${shopType === 'harbor' ? '🏪 Harbor Shop' : shopType === 'lighthouse' ? '🏰 Lighthouse' : '🕳️ Cave Tunnel'}</h4>
+            <div class="shop-items">
+    `;
+    
+    if (shopType === 'harbor') {
+        shopHTML += `
+            <div class="mb-2">
+                <button class="btn btn-primary" onclick="buyItem('cannon', 5)">
+                    🏴‍☠️ Cannon (5 coins) - +2 Attack Power
+                </button>
+            </div>
+            <div class="mb-2">
+                <button class="btn btn-success" onclick="buyItem('supplies', 3)">
+                    📦 Supplies (3 coins) - +1 Move Range
+                </button>
+            </div>
+            <div class="mb-2">
+                <button class="btn btn-warning" onclick="buyItem('spyglass', 4)">
+                    🔭 Spyglass (4 coins) - See All Treasures
+                </button>
+            </div>
+            <div class="mb-2">
+                <button class="btn btn-secondary" onclick="buyItem('axe', 2)">
+                    🪓 Axe (2 coins) - Chop forests for wood
+                </button>
+            </div>
+        `;
+    } else if (shopType === 'lighthouse') {
+        shopHTML += `
+            <div class="mb-2">
+                <button class="btn btn-info" onclick="buyItem('lighthouse', 4)">
+                    💡 Activate Lighthouse (4 coins) - Reveals all enemy ships for 3 turns
+                </button>
+            </div>
+        `;
+    } else if (shopType === 'cave') {
+        shopHTML += `
+            <div class="mb-2">
+                <button class="btn btn-secondary" onclick="buyItem('tunnel', 2)">
+                    🕳️ Use Cave Tunnel (2 coins) - Teleport to other side
+                </button>
+            </div>
+        `;
+    }
+    
+    shopHTML += `
+            </div>
+            <div class="mt-3">
+                <button class="btn btn-secondary" onclick="closeShop()">Close</button>
+                <div class="mt-2">Your coins: <strong>${player.coins}</strong></div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', shopHTML);
+}
+
+function buyItem(item, cost) {
+    const player = pirateGame.players[pirateGame.currentPlayer];
+    
+    if (player.coins < cost) {
+        alert(`Need ${cost} coins to buy this item!`);
+        return;
+    }
+    
+    player.coins -= cost;
+    
+    // Add item to hotbar
+    const hotbar = document.getElementById('supplyHotbar');
+    const emptySlot = Array.from(hotbar.children).find(slot => slot.classList.contains('empty'));
+    
+    if (emptySlot && item !== 'tunnel' && item !== 'lighthouse') {
+        emptySlot.className = 'hotbar-slot filled';
+        emptySlot.textContent = getItemIcon(item);
+        emptySlot.title = getItemName(item);
+        
+        if (!player.items) player.items = {};
+        if (!player.items[item]) player.items[item] = 0;
+        player.items[item]++;
+    }
+    
+    // Special item effects
+    if (item === 'tunnel') {
+        useCaveTunnel();
+    } else if (item === 'lighthouse') {
+        activateLighthouse();
+    }
+    
+    updatePiratePlayerStatus();
+    closeShop();
+    alert(`Purchased ${getItemName(item)} for ${cost} coins!`);
+}
+
+function getItemIcon(item) {
+    const icons = {
+        cannon: '🏴‍☠️',
+        supplies: '📦',
+        spyglass: '🔭',
+        axe: '🪓'
+    };
+    return icons[item] || '❓';
+}
+
+function getItemName(item) {
+    const names = {
+        cannon: 'Cannon',
+        supplies: 'Supplies',
+        spyglass: 'Spyglass',
+        axe: 'Axe',
+        tunnel: 'Cave Tunnel',
+        lighthouse: 'Lighthouse Beacon'
+    };
+    return names[item] || 'Unknown Item';
+}
+
+function chopForest(x, y) {
+    if (!pirateGame.selectedShip) {
+        alert('Select a ship first!');
+        return false;
+    }
+    
+    const ship = pirateGame.selectedShip;
+    const player = pirateGame.players[pirateGame.currentPlayer];
+    
+    // Check if player has an axe
+    if (!player.items || !player.items.axe || player.items.axe <= 0) {
+        alert('You need an axe to chop down forests! Buy one at a harbor.');
+        return false;
+    }
+    
+    // Check if ship is adjacent to forest
+    const distance = Math.abs(ship.x - x) + Math.abs(ship.y - y);
+    if (distance !== 1) {
+        alert('You must be adjacent to the forest to chop it down!');
+        return false;
+    }
+    
+    // Remove forest and add wood
+    islandLayout.forests.delete(`${x},${y}`);
+    islandLayout.centerIsland.add(`${x},${y}`); // Becomes regular stone
+    
+    // Give wood to player
+    if (!player.items.wood) player.items.wood = 0;
+    player.items.wood += 2;
+    
+    // Use up axe
+    player.items.axe--;
+    if (player.items.axe <= 0) {
+        // Remove axe from hotbar
+        const hotbar = document.getElementById('supplyHotbar');
+        Array.from(hotbar.children).forEach(slot => {
+            if (slot.textContent === getItemIcon('axe')) {
+                slot.className = 'hotbar-slot empty';
+                slot.textContent = 'Empty';
+                slot.title = '';
+            }
+        });
+    }
+    
+    updateHotbarDisplay();
+    updatePiratePlayerStatus();
+    drawPirateBoard(document.getElementById('pirateBoard').getContext('2d'));
+    
+    alert(`Forest chopped down! Gained 2 wood. ${player.items.axe} axe uses remaining.`);
+    return true;
+}
+
+function useCaveTunnel() {
+    if (!pirateGame.selectedShip) {
+        alert('Select a ship first!');
+        return;
+    }
+    
+    const ship = pirateGame.selectedShip;
+    // Teleport from one cave to the other
+    if (ship.x === 5 && ship.y === 7) {
+        ship.x = 10;
+        ship.y = 8;
+    } else if (ship.x === 10 && ship.y === 8) {
+        ship.x = 5;
+        ship.y = 7;
+    } else {
+        alert('Ship must be at a cave entrance to use tunnel!');
+        return;
+    }
+    
+    drawPirateBoard(document.getElementById('pirateBoard').getContext('2d'));
+}
+
+function activateLighthouse() {
+    if (!pirateGame.lighthouseActive) {
+        pirateGame.lighthouseActive = 3; // 3 turns
+        pirateGame.lighthouseOwner = pirateGame.currentPlayer;
+    }
+}
+
+function closeShop() {
+    const overlay = document.querySelector('.shop-overlay');
+    const dialog = document.querySelector('.shop-dialog');
+    if (overlay) overlay.remove();
+    if (dialog) dialog.remove();
+}
+
+function drawPirateBoard(ctx) {
+    // Clear canvas with water
+    ctx.fillStyle = '#1a4c87';
+    ctx.fillRect(0, 0, 640, 640);
+    
+    const tileSize = 40;
+    
+    // Draw different tile types
+    for (let x = 0; x < 16; x++) {
+        for (let y = 0; y < 16; y++) {
+            const tileType = getTileType(x, y);
+            drawTile(ctx, x, y, tileSize, tileType);
+        }
+    }
+    
+    // Draw grid lines
+    ctx.strokeStyle = '#0066cc';
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= 16; i++) {
+        ctx.beginPath();
+        ctx.moveTo(i * tileSize, 0);
+        ctx.lineTo(i * tileSize, 640);
+        ctx.stroke();
+        
+        ctx.beginPath();
+        ctx.moveTo(0, i * tileSize);
+        ctx.lineTo(640, i * tileSize);
+        ctx.stroke();
+    }
+    
+    if (pirateGame) {
+        // Draw treasure chests
+        ctx.fillStyle = '#ffd700';
+        pirateGame.treasures.forEach(treasure => {
+            if (!treasure.collected) {
+                const x = treasure.x * tileSize + 10;
+                const y = treasure.y * tileSize + 10;
+                ctx.fillRect(x, y, 20, 15);
+                ctx.strokeStyle = '#8b4513';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(x, y, 20, 15);
+                
+                // Draw treasure value
+                ctx.fillStyle = '#000000';
+                ctx.font = '10px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(treasure.coins, x + 10, y + 12);
+            }
+        });
+        
+        // Draw player ships
+        pirateGame.players.forEach((player, playerIndex) => {
+            ctx.fillStyle = player.color;
+            player.shipPositions.forEach(ship => {
+                if (ship.alive) {
+                    drawShip(ctx, ship.x, ship.y, tileSize, player.color, playerIndex + 1, false);
+                }
+            });
+        });
+        
+        // Draw bot ships
+        pirateGame.bots.forEach((bot, botIndex) => {
+            bot.shipPositions.forEach(ship => {
+                if (ship.alive) {
+                    drawShip(ctx, ship.x, ship.y, tileSize, bot.color, '☠', true);
+                }
+            });
+        });
+        
+        // Highlight selected ship
+        if (pirateGame.selectedShip) {
+            const ship = pirateGame.selectedShip;
+            ctx.strokeStyle = '#ffff00';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(ship.x * tileSize + 5, ship.y * tileSize + 5, tileSize - 10, tileSize - 10);
+        }
+        
+        // Show possible moves
+        if (pirateGame.showMoves && pirateGame.selectedShip) {
+            ctx.fillStyle = 'rgba(0, 255, 0, 0.3)';
+            const ship = pirateGame.selectedShip;
+            const moveRange = actionPower || 1;
+            
+            for (let dx = -moveRange; dx <= moveRange; dx++) {
+                for (let dy = -moveRange; dy <= moveRange; dy++) {
+                    if (dx === 0 && dy === 0) continue;
+                    const newX = ship.x + dx;
+                    const newY = ship.y + dy;
+                    if (isWaterTile(newX, newY) && !getShipAt(newX, newY)) {
+                        ctx.fillRect(newX * tileSize, newY * tileSize, tileSize, tileSize);
+                    }
+                }
+            }
+        }
+    } else {
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '20px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('Pirate Adventure', 320, 300);
+        ctx.fillText('Redesigned Board Game', 320, 330);
+        ctx.fillText('Click Start Adventure!', 320, 360);
+    }
+}
+
+function getTileType(x, y) {
+    if (!islandLayout) return 'water';
+    
+    const pos = `${x},${y}`;
+    
+    // Forest areas (accessible from water)
+    if (islandLayout.forests && islandLayout.forests.has(pos)) {
+        return 'forest';
+    }
+    
+    // Central stone island
+    if (islandLayout.centerIsland.has(pos)) {
+        return 'stone';
+    }
+    
+    // Beaches around central island and border islands
+    if (islandLayout.beaches.has(pos) || islandLayout.borderBeaches.has(pos)) {
+        return 'beach';
+    }
+    
+    // Border jungle islands
+    if (islandLayout.borderIslands.has(pos)) {
+        return 'jungle';
+    }
+    
+    // Cave entrances (east and west sides of center island)
+    if ((x === 5 && y === 7) || (x === 10 && y === 8)) {
+        return 'cave';
+    }
+    
+    // Lighthouse (corner)
+    if (x === 0 && y === 0) {
+        return 'lighthouse';
+    }
+    
+    // Harbors at map edges
+    if ((x === 0 || x === 15) && (y === 7 || y === 8)) return 'harbor';
+    if ((y === 0 || y === 15) && (x === 7 || x === 8)) return 'harbor';
+    
+    // Deep water (corners)
+    if ((x < 3 && y < 3) || (x > 12 && y < 3) || (x < 3 && y > 12) || (x > 12 && y > 12)) {
+        return 'deepwater';
+    }
+    
+    return 'water';
+}
+
+function drawTile(ctx, x, y, tileSize, tileType) {
+    const px = x * tileSize;
+    const py = y * tileSize;
+    
+    switch (tileType) {
+        case 'stone':
+            ctx.fillStyle = '#8b4513';
+            ctx.fillRect(px, py, tileSize - 2, tileSize - 2);
+            // Fixed stone texture
+            ctx.fillStyle = '#a0522d';
+            terrainSeeds.stones.forEach(stone => {
+                if (stone.x < tileSize - stone.size && stone.y < tileSize - stone.size) {
+                    ctx.fillRect(px + stone.x, py + stone.y, stone.size, stone.size);
+                }
+            });
+            break;
+            
+        case 'forest':
+            ctx.fillStyle = '#228b22';
+            ctx.fillRect(px, py, tileSize - 2, tileSize - 2);
+            // Add multiple trees
+            ctx.fillStyle = '#006400';
+            ctx.font = '16px Arial';
+            ctx.textAlign = 'center';
+            terrainSeeds.trees.slice(0, 3).forEach((tree, i) => {
+                const treeX = px + 8 + (i * 8);
+                const treeY = py + 15 + (i * 5);
+                ctx.fillText('🌲', treeX, treeY);
+            });
+            break;
+            
+        case 'beach':
+            ctx.fillStyle = '#deb887';
+            ctx.fillRect(px, py, tileSize - 2, tileSize - 2);
+            // Fixed sand texture
+            ctx.fillStyle = '#f4e4bc';
+            terrainSeeds.sand.forEach(sand => {
+                if (sand.x < tileSize - sand.size && sand.y < tileSize - sand.size) {
+                    ctx.fillRect(px + sand.x, py + sand.y, sand.size, sand.size);
+                }
+            });
+            break;
+            
+        case 'jungle':
+            ctx.fillStyle = '#228b22';
+            ctx.fillRect(px, py, tileSize - 2, tileSize - 2);
+            // Add tree symbol
+            ctx.fillStyle = '#006400';
+            ctx.font = '20px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('🌲', px + tileSize/2, py + tileSize/2 + 5);
+            break;
+            
+        case 'cave':
+            ctx.fillStyle = '#4a4a4a';
+            ctx.fillRect(px, py, tileSize - 2, tileSize - 2);
+            // Cave entrance
+            ctx.fillStyle = '#000000';
+            ctx.beginPath();
+            ctx.arc(px + tileSize/2, py + tileSize/2, 12, 0, Math.PI * 2);
+            ctx.fill();
+            // Add cave symbol
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '14px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('🕳️', px + tileSize/2, py + tileSize/2 + 5);
+            break;
+            
+        case 'lighthouse':
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(px, py, tileSize - 2, tileSize - 2);
+            // Lighthouse tower
+            ctx.fillStyle = '#ff0000';
+            ctx.fillRect(px + 15, py + 5, 10, 25);
+            // Light
+            ctx.fillStyle = '#ffff00';
+            ctx.beginPath();
+            ctx.arc(px + 20, py + 10, 6, 0, Math.PI * 2);
+            ctx.fill();
+            break;
+            
+        case 'harbor':
+            ctx.fillStyle = '#8b7355';
+            ctx.fillRect(px, py, tileSize - 2, tileSize - 2);
+            // Add dock and shop symbol
+            ctx.fillStyle = '#654321';
+            ctx.fillRect(px + 10, py + 15, 20, 10);
+            ctx.fillStyle = '#000000';
+            ctx.font = '16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('🏪', px + tileSize/2, py + tileSize/2);
+            break;
+            
+        case 'deepwater':
+            ctx.fillStyle = '#003366';
+            ctx.fillRect(px, py, tileSize - 2, tileSize - 2);
+            break;
+            
+        default: // water
+            ctx.fillStyle = '#1a4c87';
+            ctx.fillRect(px, py, tileSize - 2, tileSize - 2);
+            break;
+    }
+}
+
+function drawShip(ctx, x, y, tileSize, color, label, isBot) {
+    const px = x * tileSize + 8;
+    const py = y * tileSize + 8;
+    
+    // Draw ship body
+    ctx.fillStyle = color;
+    ctx.fillRect(px, py + 10, 24, 14);
+    
+    // Draw mast
+    ctx.fillRect(px + 10, py, 4, 20);
+    
+    // Draw sail
+    ctx.fillStyle = isBot ? '#444444' : '#ffffff';
+    ctx.fillRect(px + 14, py + 2, 8, 12);
+    
+    // Draw label on ship
+    ctx.fillStyle = '#000000';
+    ctx.font = '12px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(label, px + 12, py + 18);
+}
+
+function startPirateGame() {
+    console.log('Starting Pirate Adventure...');
+    
+    // Ensure terrain is generated
+    if (!terrainSeeds) {
+        generateFixedTerrain();
+    }
+    
+    // Find beach tiles for ship spawning
+    const beachTiles = [];
+    for (let x = 0; x < 16; x++) {
+        for (let y = 0; y < 16; y++) {
+            if (getTileType(x, y) === 'beach') {
+                beachTiles.push({ x, y });
+            }
+        }
+    }
+    
+    pirateGame = {
+        players: [
+            { 
+                name: 'Player 1', 
+                color: '#ff4444', 
+                ships: 3, 
+                coins: 5, 
+                cards: 0,
+                items: {},
+                shipPositions: [
+                    beachTiles[0] ? { ...beachTiles[0], alive: true } : { x: 2, y: 2, alive: true },
+                    beachTiles[1] ? { ...beachTiles[1], alive: true } : { x: 3, y: 2, alive: true },
+                    beachTiles[2] ? { ...beachTiles[2], alive: true } : { x: 2, y: 3, alive: true }
+                ]
+            },
+            { 
+                name: 'Player 2', 
+                color: '#4444ff', 
+                ships: 3, 
+                coins: 5, 
+                cards: 0,
+                items: {},
+                shipPositions: [
+                    beachTiles[3] ? { ...beachTiles[3], alive: true } : { x: 12, y: 12, alive: true },
+                    beachTiles[4] ? { ...beachTiles[4], alive: true } : { x: 13, y: 12, alive: true },
+                    beachTiles[5] ? { ...beachTiles[5], alive: true } : { x: 12, y: 13, alive: true }
+                ]
+            }
+        ],
+        bots: [
+            {
+                name: 'Blackbeard',
+                color: '#8b0000',
+                ships: 2,
+                coins: 3,
+                shipPositions: [
+                    { x: 2, y: 13, alive: true },
+                    { x: 13, y: 2, alive: true }
+                ],
+                difficulty: 'medium'
+            },
+            {
+                name: 'Captain Hook',
+                color: '#4b0082',
+                ships: 2,
+                coins: 3,
+                shipPositions: [
+                    { x: 1, y: 8, alive: true },
+                    { x: 14, y: 8, alive: true }
+                ],
+                difficulty: 'easy'
+            }
+        ],
+        treasures: treasureSpawns.map(t => ({ ...t, collected: false })),
+        currentPlayer: 0,
+        turn: 1,
+        gamePhase: 'playing',
+        selectedShip: null,
+        showMoves: false,
+        actionTaken: false,
+        lighthouseActive: 0,
+        lighthouseOwner: -1
+    };
+    
+    gameStates.pirates.running = true;
+    
+    // Add click listener to canvas
+    const canvas = document.getElementById('pirateBoard');
+    canvas.addEventListener('click', handlePirateCanvasClick);
+    
+    // Update UI
+    document.getElementById('pirateTurn').textContent = pirateGame.turn;
+    document.getElementById('currentPiratePlayer').textContent = pirateGame.currentPlayer + 1;
+    
+    // Reset UI
+    selectedActionType = null;
+    actionPower = 0;
+    diceRolls = [];
+    document.getElementById('selectedAction').textContent = 'None';
+    document.getElementById('diceResult').textContent = '-';
+    document.getElementById('spinButton').disabled = false;
+    document.getElementById('executeButton').disabled = true;
+    
+    // Redraw board
+    drawPirateBoard(document.getElementById('pirateBoard').getContext('2d'));
+    
+    updatePiratePlayerStatus();
+    alert('Pirate Adventure started! Ships spawned on beaches. Spin the wheel to begin your turn!');
+}
+
+function pirateAction(action) {
+    if (!pirateGame || pirateGame.actionTaken) {
+        if (pirateGame.actionTaken) {
+            alert('You already took an action this turn! Click Next Turn.');
+        } else {
+            alert('Start the game first!');
+        }
+        return;
+    }
+    
+    const player = pirateGame.players[pirateGame.currentPlayer];
+    let message = '';
+    
+    switch (action) {
+        case 'move':
+            if (!pirateGame.selectedShip) {
+                alert('Select a ship first by clicking on it!');
+                return;
+            }
+            pirateGame.showMoves = true;
+            message = `Move power: ${actionPower}! Click on water tiles within range.`;
+            drawPirateBoard(document.getElementById('pirateBoard').getContext('2d'));
+            break;
+            
+        case 'coin':
+            const bonusCoins = Math.floor(actionPower / 2); // Dice power affects coin generation
+            const totalCoins = actionPower + bonusCoins;
+            player.coins += totalCoins;
+            message = `${player.name} earned ${totalCoins} coins! (Base: ${actionPower} + Bonus: ${bonusCoins})`;
+            pirateGame.actionTaken = true;
+            break;
+            
+        case 'card':
+            const cardCost = Math.max(1, 3 - Math.floor(actionPower / 3)); // Higher dice = cheaper cards
+            if (player.coins >= cardCost) {
+                player.coins -= cardCost;
+                player.cards++;
+                const cardTypes = ['Storm', 'Wind Boost', 'Extra Attack', 'Treasure Map', 'Safe Harbor', 'Cannon Upgrade'];
+                const cardDrawn = cardTypes[Math.floor(Math.random() * cardTypes.length)];
+                message = `${player.name} bought "${cardDrawn}" for ${cardCost} coins! (Dice power: ${actionPower})`;
+                pirateGame.actionTaken = true;
+            } else {
+                message = `Need ${cardCost} coins to buy a card! (Dice power affects cost)`;
+            }
+            break;
+            
+        case 'attack':
+            if (!pirateGame.selectedShip) {
+                alert('Select a ship first to attack with!');
+                return;
+            }
+            
+            const attackResult = performAttack(pirateGame.selectedShip, player, actionPower);
+            message = attackResult.message;
+            pirateGame.actionTaken = true;
+            break;
+    }
+    
+    updatePiratePlayerStatus();
+    if (message) alert(message);
+}
+
+function performAttack(attackingShip, attacker, attackPower) {
+    const targets = [];
+    const attackRange = Math.max(1, Math.floor(attackPower / 4)); // Higher dice = longer range
+    
+    // Find ships within attack range
+    for (let dx = -attackRange; dx <= attackRange; dx++) {
+        for (let dy = -attackRange; dy <= attackRange; dy++) {
+            if (dx === 0 && dy === 0) continue;
+            
+            const targetX = attackingShip.x + dx;
+            const targetY = attackingShip.y + dy;
+            const shipAtPos = getShipAt(targetX, targetY);
+            
+            if (shipAtPos && shipAtPos.owner !== attacker) {
+                targets.push(shipAtPos);
+            }
+        }
+    }
+    
+    if (targets.length === 0) {
+        return { message: `No enemy ships in range ${attackRange}! (Dice power: ${attackPower})` };
+    }
+    
+    // Attack random target
+    const target = targets[Math.floor(Math.random() * targets.length)];
+    const defenseRoll = Math.floor(Math.random() * 6) + 1;
+    
+    let message = `${attacker.name} attacks ${target.owner.name}! Attack: ${attackPower} vs Defense: ${defenseRoll}. `;
+    
+    if (attackPower > defenseRoll) {
+        target.ship.alive = false;
+        const coinsStolen = Math.min(target.owner.coins, 1 + Math.floor(attackPower / 3));
+        target.owner.coins -= coinsStolen;
+        attacker.coins += coinsStolen;
+        message += `Ship destroyed! Stole ${coinsStolen} coins.`;
+    } else {
+        message += 'Attack failed!';
+    }
+    
+    drawPirateBoard(document.getElementById('pirateBoard').getContext('2d'));
+    return { message };
+}
+
+function nextPirateTurn() {
+    if (!pirateGame) return;
+    
+    pirateGame.selectedShip = null;
+    pirateGame.showMoves = false;
+    pirateGame.actionTaken = false;
+    
+    // Reset wheel UI for next turn
+    selectedActionType = null;
+    actionPower = 0;
+    diceRolls = [];
+    document.getElementById('selectedAction').textContent = 'None';
+    document.getElementById('diceResult').textContent = '-';
+    document.getElementById('spinButton').disabled = false;
+    document.getElementById('diceButton').disabled = true;
+    document.getElementById('executeButton').disabled = true;
+    drawDice();
+    
+    pirateGame.currentPlayer = (pirateGame.currentPlayer + 1) % pirateGame.players.length;
+    if (pirateGame.currentPlayer === 0) {
+        pirateGame.turn++;
+        
+        // Reduce lighthouse timer
+        if (pirateGame.lighthouseActive > 0) {
+            pirateGame.lighthouseActive--;
+            if (pirateGame.lighthouseActive === 0) {
+                alert('Lighthouse beacon has faded...');
+            }
+        }
+        
+        // Bot turns after all players
+        setTimeout(() => {
+            processBotTurns();
+        }, 1000);
+    }
+    
+    document.getElementById('pirateTurn').textContent = pirateGame.turn;
+    document.getElementById('currentPiratePlayer').textContent = pirateGame.currentPlayer + 1;
+    
+    drawPirateBoard(document.getElementById('pirateBoard').getContext('2d'));
+    
+    // Check win condition
+    checkWinCondition();
+}
+
+function processBotTurns() {
+    pirateGame.bots.forEach((bot, index) => {
+        setTimeout(() => {
+            executeBotTurn(bot);
+        }, (index + 1) * 1500);
+    });
+}
+
+function executeBotTurn(bot) {
+    const aliveShips = bot.shipPositions.filter(s => s.alive);
+    if (aliveShips.length === 0) return;
+    
+    const action = Math.random();
+    
+    if (action < 0.4) {
+        // Move a random ship
+        const ship = aliveShips[Math.floor(Math.random() * aliveShips.length)];
+        const moves = [];
+        
+        for (let dx = -1; dx <= 1; dx++) {
+            for (let dy = -1; dy <= 1; dy++) {
+                const newX = ship.x + dx;
+                const newY = ship.y + dy;
+                if (isWaterTile(newX, newY) && !getShipAt(newX, newY)) {
+                    moves.push({ x: newX, y: newY });
+                }
+            }
+        }
+        
+        if (moves.length > 0) {
+            const move = moves[Math.floor(Math.random() * moves.length)];
+            ship.x = move.x;
+            ship.y = move.y;
+            
+            // Check for treasure
+            const treasure = getTreasureAt(move.x, move.y);
+            if (treasure) {
+                treasure.collected = true;
+                bot.coins += treasure.coins;
+            }
+        }
+    } else if (action < 0.7) {
+        // Roll for coins
+        const coinRoll = Math.floor(Math.random() * 6) + 1;
+        bot.coins += coinRoll;
+    } else {
+        // Try to attack
+        const ship = aliveShips[Math.floor(Math.random() * aliveShips.length)];
+        const targets = [];
+        
+        for (let dx = -1; dx <= 1; dx++) {
+            for (let dy = -1; dy <= 1; dy++) {
+                if (dx === 0 && dy === 0) continue;
+                
+                const targetX = ship.x + dx;
+                const targetY = ship.y + dy;
+                const shipAtPos = getShipAt(targetX, targetY);
+                
+                if (shipAtPos && shipAtPos.owner !== bot) {
+                    targets.push(shipAtPos);
+                }
+            }
+        }
+        
+        if (targets.length > 0) {
+            const target = targets[Math.floor(Math.random() * targets.length)];
+            const attackRoll = Math.floor(Math.random() * 6) + 1;
+            const defenseRoll = Math.floor(Math.random() * 6) + 1;
+            
+            if (attackRoll > defenseRoll) {
+                target.ship.alive = false;
+                const coinsStolen = Math.min(target.owner.coins, 2);
+                target.owner.coins -= coinsStolen;
+                bot.coins += coinsStolen;
+            }
+        }
+    }
+    
+    drawPirateBoard(document.getElementById('pirateBoard').getContext('2d'));
+    updatePiratePlayerStatus();
+}
+
+function checkWinCondition() {
+    const alivePlayers = pirateGame.players.filter(p => p.shipPositions.some(s => s.alive));
+    const aliveBots = pirateGame.bots.filter(b => b.shipPositions.some(s => s.alive));
+    
+    if (alivePlayers.length <= 1 && aliveBots.length <= 1) {
+        let winner = null;
+        
+        if (alivePlayers.length === 1) {
+            winner = alivePlayers[0].name;
+        } else if (aliveBots.length === 1) {
+            winner = aliveBots[0].name;
+        }
+        
+        if (winner) {
+            setTimeout(() => {
+                alert(`🏴‍☠️ ${winner} wins the pirate battle! 🏴‍☠️`);
+            }, 1000);
+        }
+    }
+}
+
+function updatePiratePlayerStatus() {
+    if (!pirateGame) return;
+    
+    const statusDiv = document.getElementById('playerStatus');
+    let html = '';
+    
+    pirateGame.players.forEach((player, index) => {
+        const aliveShips = player.shipPositions.filter(s => s.alive).length;
+        html += `<p class="mb-1">${player.name}: <span class="text-success">${aliveShips} ships</span> | <span class="text-warning">${player.coins} coins</span> | <span class="text-info">${player.cards || 0} cards</span></p>`;
+    });
+    
+    // Add bot status
+    pirateGame.bots.forEach(bot => {
+        const aliveShips = bot.shipPositions.filter(s => s.alive).length;
+        html += `<p class="mb-1 text-muted">${bot.name} (Bot): <span class="text-success">${aliveShips} ships</span> | <span class="text-warning">${bot.coins} coins</span></p>`;
+    });
+    
+    statusDiv.innerHTML = html;
+}
+
+// Helper functions for game mechanics
+function isWaterTile(x, y) {
+    if (x < 0 || x >= 16 || y < 0 || y >= 16) return false;
+    
+    const tileType = getTileType(x, y);
+    return tileType === 'water' || tileType === 'deepwater' || tileType === 'harbor';
+}
+
+function getShipAt(x, y) {
+    // Check player ships
+    for (let player of pirateGame.players) {
+        for (let ship of player.shipPositions) {
+            if (ship.alive && ship.x === x && ship.y === y) {
+                return { type: 'player', ship, owner: player };
+            }
+        }
+    }
+    
+    // Check bot ships
+    for (let bot of pirateGame.bots) {
+        for (let ship of bot.shipPositions) {
+            if (ship.alive && ship.x === x && ship.y === y) {
+                return { type: 'bot', ship, owner: bot };
+            }
+        }
+    }
+    
+    return null;
+}
+
+function getTreasureAt(x, y) {
+    return pirateGame.treasures.find(t => !t.collected && t.x === x && t.y === y);
+}
+
+function handlePirateCanvasClick(event) {
+    if (!pirateGame || pirateGame.actionTaken) return;
+    
+    const canvas = document.getElementById('pirateBoard');
+    const rect = canvas.getBoundingClientRect();
+    const x = Math.floor((event.clientX - rect.left) / 40);
+    const y = Math.floor((event.clientY - rect.top) / 40);
+    
+    const currentPlayer = pirateGame.players[pirateGame.currentPlayer];
+    const tileType = getTileType(x, y);
+    
+    // Check if player has a selected ship for proximity checks
+    if (!pirateGame.selectedShip && (tileType === 'harbor' || tileType === 'lighthouse' || tileType === 'cave' || tileType === 'forest')) {
+        alert('Select a ship first to interact with this tile!');
+        return;
+    }
+    
+    // Check proximity for special tile interactions
+    if (pirateGame.selectedShip) {
+        const ship = pirateGame.selectedShip;
+        const distance = Math.abs(ship.x - x) + Math.abs(ship.y - y);
+        
+        if (tileType === 'harbor' || tileType === 'lighthouse' || tileType === 'cave') {
+            if (distance > 1) {
+                alert('You must be adjacent to this location to interact with it!');
+                return;
+            }
+            
+            if (tileType === 'harbor') {
+                showShop('harbor');
+                return;
+            } else if (tileType === 'lighthouse') {
+                showShop('lighthouse');
+                return;
+            } else if (tileType === 'cave') {
+                showShop('cave');
+                return;
+            }
+        }
+        
+        // Forest chopping
+        if (tileType === 'forest') {
+            chopForest(x, y);
+            return;
+        }
+    }
+    
+    // If showing moves, try to move selected ship
+    if (pirateGame.showMoves && pirateGame.selectedShip) {
+        const distance = Math.abs(pirateGame.selectedShip.x - x) + Math.abs(pirateGame.selectedShip.y - y);
+        if (isWaterTile(x, y) && !getShipAt(x, y) && distance <= actionPower) {
+            // Move ship
+            pirateGame.selectedShip.x = x;
+            pirateGame.selectedShip.y = y;
+            
+            // Check for treasure
+            const treasure = getTreasureAt(x, y);
+            if (treasure) {
+                treasure.collected = true;
+                currentPlayer.coins += treasure.coins;
+                alert(`${currentPlayer.name} found treasure worth ${treasure.coins} coins!`);
+            }
+            
+            pirateGame.selectedShip = null;
+            pirateGame.showMoves = false;
+            pirateGame.actionTaken = true;
+            
+            // Auto-advance turn
+            setTimeout(() => {
+                nextPirateTurn();
+            }, 1500);
+            
+            drawPirateBoard(canvas.getContext('2d'));
+            updatePiratePlayerStatus();
+            return;
+        }
+    }
+    
+    // Try to select a ship
+    const shipAtPos = getShipAt(x, y);
+    if (shipAtPos && shipAtPos.type === 'player' && shipAtPos.owner === currentPlayer) {
+        pirateGame.selectedShip = shipAtPos.ship;
+        pirateGame.showMoves = false;
+        drawPirateBoard(canvas.getContext('2d'));
+    }
+}
+
+function resetPirateGame() {
+    pirateGame = null;
+    gameStates.pirates.running = false;
+    document.getElementById('pirateTurn').textContent = '1';
+    document.getElementById('currentPiratePlayer').textContent = '1';
+    
+    // Remove click listener
+    const canvas = document.getElementById('pirateBoard');
+    const newCanvas = canvas.cloneNode(true);
+    canvas.parentNode.replaceChild(newCanvas, canvas);
+    
+    // Reset player status display
+    const statusDiv = document.getElementById('playerStatus');
+    statusDiv.innerHTML = `
+        <p class="mb-1">Player 1: <span class="text-success">3 ships</span> | <span class="text-warning">5 coins</span></p>
+        <p class="mb-1">Player 2: <span class="text-success">3 ships</span> | <span class="text-warning">5 coins</span></p>
+    `;
+    
+    initializePirateCanvas();
+}
+
+// Utility Functions
+function gameOver(game) {
+    console.log('Game over:', game);
+    
+    switch (game) {
+        case 'snake':
+            gameStates.snake.running = false;
+            clearInterval(snakeInterval);
+            updateHighScore('snake', gameStates.snake.score);
+            setTimeout(() => {
+                alert(`Game Over! Final Score: ${gameStates.snake.score}`);
+            }, 100);
+            break;
+    }
+}
+
+function updateHighScore(game, score) {
+    const currentHigh = localStorage.getItem(`${game}HighScore`) || 0;
+    if (score > currentHigh) {
+        localStorage.setItem(`${game}HighScore`, score);
+        const element = document.getElementById(`${game}HighScore`);
+        if (element) {
+            element.textContent = score;
+        }
+    }
+}
+
+function loadHighScores() {
+    const games = ['snake', 'pong', 'memory', 'tetris', 'pirates'];
+    games.forEach(game => {
+        const highScore = localStorage.getItem(`${game}HighScore`) || 0;
+        const element = document.getElementById(`${game}HighScore`);
+        if (element) {
+            element.textContent = highScore;
+        }
+    });
+}
+
+// Chess Game Functions
+let chessState = {
+    board: [],
+    currentPlayer: 'white',
+    selectedSquare: null,
+    gameOver: false,
+    capturedPieces: { white: [], black: [] }
+};
+
+const CHESS_PIECES = {
+    'r': '♜', 'n': '♞', 'b': '♝', 'q': '♛', 'k': '♚', 'p': '♟',
+    'R': '♖', 'N': '♘', 'B': '♗', 'Q': '♕', 'K': '♔', 'P': '♙'
+};
+
+function initializeChess() {
+    const canvas = document.getElementById('chessBoard');
+    if (canvas) {
+        startChess();
+        canvas.addEventListener('click', handleChessClick);
+    }
+}
+
+function startChess() {
+    chessState.board = [
+        ['r','n','b','q','k','b','n','r'],
+        ['p','p','p','p','p','p','p','p'],
+        [null,null,null,null,null,null,null,null],
+        [null,null,null,null,null,null,null,null],
+        [null,null,null,null,null,null,null,null],
+        [null,null,null,null,null,null,null,null],
+        ['P','P','P','P','P','P','P','P'],
+        ['R','N','B','Q','K','B','N','R']
+    ];
+    chessState.currentPlayer = 'white';
+    chessState.selectedSquare = null;
+    chessState.gameOver = false;
+    chessState.capturedPieces = { white: [], black: [] };
+    
+    updateChessDisplay();
+    drawChessBoard();
+}
+
+function resetChess() {
+    startChess();
+}
+
+function drawChessBoard() {
+    const canvas = document.getElementById('chessBoard');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    const squareSize = 60;
+    
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw board squares
+    for (let row = 0; row < 8; row++) {
+        for (let col = 0; col < 8; col++) {
+            const isLight = (row + col) % 2 === 0;
+            ctx.fillStyle = isLight ? '#f0d9b5' : '#b58863';
+            
+            const x = col * squareSize;
+            const y = row * squareSize;
+            ctx.fillRect(x, y, squareSize, squareSize);
+            
+            // Highlight selected square
+            if (chessState.selectedSquare && 
+                chessState.selectedSquare.row === row && 
+                chessState.selectedSquare.col === col) {
+                ctx.fillStyle = 'rgba(255, 255, 0, 0.5)';
+                ctx.fillRect(x, y, squareSize, squareSize);
+            }
+            
+            // Draw piece if present
+            const piece = chessState.board[row][col];
+            if (piece) {
+                ctx.fillStyle = 'black';
+                ctx.font = '40px serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(
+                    CHESS_PIECES[piece],
+                    x + squareSize/2,
+                    y + squareSize/2
+                );
+            }
+        }
+    }
+}
+
+function handleChessClick(event) {
+    if (chessState.gameOver) return;
+    
+    const canvas = document.getElementById('chessBoard');
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    
+    const col = Math.floor(x / 60);
+    const row = Math.floor(y / 60);
+    
+    if (row < 0 || row > 7 || col < 0 || col > 7) return;
+    
+    if (chessState.selectedSquare) {
+        // Try to move piece
+        if (isValidChessMove(chessState.selectedSquare.row, chessState.selectedSquare.col, row, col)) {
+            makeChessMove(chessState.selectedSquare.row, chessState.selectedSquare.col, row, col);
+        }
+        chessState.selectedSquare = null;
+    } else {
+        // Select piece
+        const piece = chessState.board[row][col];
+        if (piece && isPieceOwnedByCurrentPlayer(piece)) {
+            chessState.selectedSquare = { row, col };
+        }
+    }
+    
+    drawChessBoard();
+}
+
+function isPieceOwnedByCurrentPlayer(piece) {
+    const isWhitePiece = piece === piece.toUpperCase();
+    return (chessState.currentPlayer === 'white' && isWhitePiece) ||
+           (chessState.currentPlayer === 'black' && !isWhitePiece);
+}
+
+function isValidChessMove(fromRow, fromCol, toRow, toCol) {
+    // Basic validation - in a full chess game, this would be much more complex
+    const piece = chessState.board[fromRow][fromCol];
+    const targetPiece = chessState.board[toRow][toCol];
+    
+    // Can't capture own piece
+    if (targetPiece && isPieceOwnedByCurrentPlayer(targetPiece)) {
+        return false;
+    }
+    
+    // Simple movement validation (simplified chess rules)
+    return true; // For demo purposes, allow all moves
+}
+
+function makeChessMove(fromRow, fromCol, toRow, toCol) {
+    const piece = chessState.board[fromRow][fromCol];
+    const capturedPiece = chessState.board[toRow][toCol];
+    
+    // Capture piece if present
+    if (capturedPiece) {
+        if (capturedPiece === capturedPiece.toUpperCase()) {
+            chessState.capturedPieces.black.push(capturedPiece);
+        } else {
+            chessState.capturedPieces.white.push(capturedPiece);
+        }
+    }
+    
+    // Move piece
+    chessState.board[toRow][toCol] = piece;
+    chessState.board[fromRow][fromCol] = null;
+    
+    // Switch player
+    chessState.currentPlayer = chessState.currentPlayer === 'white' ? 'black' : 'white';
+    updateChessDisplay();
+}
+
+function updateChessDisplay() {
+    document.getElementById('chessStatus').textContent = 
+        chessState.gameOver ? 'Game Over' : `${chessState.currentPlayer}'s Turn`;
+    document.getElementById('chessTurn').textContent = 
+        chessState.currentPlayer.charAt(0).toUpperCase() + chessState.currentPlayer.slice(1);
+    
+    // Update captured pieces
+    document.querySelector('#capturedWhite .captured-pieces').textContent = 
+        chessState.capturedPieces.white.map(p => CHESS_PIECES[p]).join(' ');
+    document.querySelector('#capturedBlack .captured-pieces').textContent = 
+        chessState.capturedPieces.black.map(p => CHESS_PIECES[p]).join(' ');
+}
+
+// Tic Tac Toe Game Functions
+let ticTacToeState = {
+    board: Array(9).fill(null),
+    currentPlayer: 'X',
+    gameOver: false,
+    vsComputer: false,
+    scores: { X: 0, O: 0, draw: 0 }
+};
+
+function initializeTicTacToe() {
+    const canvas = document.getElementById('ticTacToeBoard');
+    if (canvas) {
+        startTicTacToe();
+        canvas.addEventListener('click', handleTicTacToeClick);
+    }
+}
+
+function startTicTacToe() {
+    ticTacToeState.board = Array(9).fill(null);
+    ticTacToeState.currentPlayer = 'X';
+    ticTacToeState.gameOver = false;
+    updateTicTacToeDisplay();
+    drawTicTacToeBoard();
+}
+
+function toggleTicTacToeMode() {
+    ticTacToeState.vsComputer = !ticTacToeState.vsComputer;
+    document.getElementById('gameMode').textContent = 
+        ticTacToeState.vsComputer ? 'vs Computer' : '2 Players';
+    startTicTacToe();
+}
+
+function drawTicTacToeBoard() {
+    const canvas = document.getElementById('ticTacToeBoard');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw grid
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = 3;
+    
+    // Vertical lines
+    ctx.beginPath();
+    ctx.moveTo(100, 0);
+    ctx.lineTo(100, 300);
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.moveTo(200, 0);
+    ctx.lineTo(200, 300);
+    ctx.stroke();
+    
+    // Horizontal lines
+    ctx.beginPath();
+    ctx.moveTo(0, 100);
+    ctx.lineTo(300, 100);
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.moveTo(0, 200);
+    ctx.lineTo(300, 200);
+    ctx.stroke();
+    
+    // Draw X's and O's
+    ctx.font = '60px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    
+    for (let i = 0; i < 9; i++) {
+        if (ticTacToeState.board[i]) {
+            const col = i % 3;
+            const row = Math.floor(i / 3);
+            const x = col * 100 + 50;
+            const y = row * 100 + 50;
+            
+            ctx.fillStyle = ticTacToeState.board[i] === 'X' ? '#ff4444' : '#4444ff';
+            ctx.fillText(ticTacToeState.board[i], x, y);
+        }
+    }
+}
+
+function handleTicTacToeClick(event) {
+    if (ticTacToeState.gameOver) return;
+    
+    const canvas = document.getElementById('ticTacToeBoard');
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    
+    const col = Math.floor(x / 100);
+    const row = Math.floor(y / 100);
+    const index = row * 3 + col;
+    
+    if (ticTacToeState.board[index] || index < 0 || index > 8) return;
+    
+    ticTacToeState.board[index] = ticTacToeState.currentPlayer;
+    
+    if (checkTicTacToeWin()) {
+        ticTacToeState.scores[ticTacToeState.currentPlayer]++;
+        ticTacToeState.gameOver = true;
+        updateTicTacToeDisplay();
+        setTimeout(() => alert(`Player ${ticTacToeState.currentPlayer} wins!`), 100);
+    } else if (ticTacToeState.board.every(cell => cell)) {
+        ticTacToeState.scores.draw++;
+        ticTacToeState.gameOver = true;
+        updateTicTacToeDisplay();
+        setTimeout(() => alert('Draw!'), 100);
+    } else {
+        ticTacToeState.currentPlayer = ticTacToeState.currentPlayer === 'X' ? 'O' : 'X';
+        
+        if (ticTacToeState.vsComputer && ticTacToeState.currentPlayer === 'O') {
+            setTimeout(makeComputerMove, 500);
+        }
+    }
+    
+    updateTicTacToeDisplay();
+    drawTicTacToeBoard();
+}
+
+function makeComputerMove() {
+    if (ticTacToeState.gameOver) return;
+    
+    // Simple AI - random available move
+    const availableMoves = ticTacToeState.board
+        .map((cell, index) => cell === null ? index : null)
+        .filter(move => move !== null);
+    
+    if (availableMoves.length > 0) {
+        const randomMove = availableMoves[Math.floor(Math.random() * availableMoves.length)];
+        ticTacToeState.board[randomMove] = 'O';
+        
+        if (checkTicTacToeWin()) {
+            ticTacToeState.scores.O++;
+            ticTacToeState.gameOver = true;
+            setTimeout(() => alert('Computer wins!'), 100);
+        } else if (ticTacToeState.board.every(cell => cell)) {
+            ticTacToeState.scores.draw++;
+            ticTacToeState.gameOver = true;
+            setTimeout(() => alert('Draw!'), 100);
+        } else {
+            ticTacToeState.currentPlayer = 'X';
+        }
+        
+        updateTicTacToeDisplay();
+        drawTicTacToeBoard();
+    }
+}
+
+function checkTicTacToeWin() {
+    const winPatterns = [
+        [0,1,2], [3,4,5], [6,7,8], // rows
+        [0,3,6], [1,4,7], [2,5,8], // columns
+        [0,4,8], [2,4,6] // diagonals
+    ];
+    
+    return winPatterns.some(pattern => {
+        const [a,b,c] = pattern;
+        return ticTacToeState.board[a] && 
+               ticTacToeState.board[a] === ticTacToeState.board[b] && 
+               ticTacToeState.board[a] === ticTacToeState.board[c];
+    });
+}
+
+function updateTicTacToeDisplay() {
+    document.getElementById('ticTacToeStatus').textContent = 
+        ticTacToeState.gameOver ? 'Game Over' : `Player ${ticTacToeState.currentPlayer}'s Turn`;
+    document.getElementById('scoreX').textContent = ticTacToeState.scores.X;
+    document.getElementById('scoreO').textContent = ticTacToeState.scores.O;
+    document.getElementById('scoreDraw').textContent = ticTacToeState.scores.draw;
+}
+
+// Word Guess Game Functions
+let wordGuessState = {
+    words: {
+        'Animals': ['ELEPHANT', 'GIRAFFE', 'PENGUIN', 'DOLPHIN', 'KANGAROO', 'BUTTERFLY'],
+        'Countries': ['AUSTRALIA', 'BRAZIL', 'CANADA', 'DENMARK', 'EGYPT', 'FRANCE'],
+        'Food': ['PIZZA', 'HAMBURGER', 'SPAGHETTI', 'CHOCOLATE', 'STRAWBERRY', 'SANDWICH']
+    },
+    currentWord: '',
+    currentCategory: 'Animals',
+    guessedLetters: [],
+    wrongGuesses: 0,
+    maxWrongGuesses: 6,
+    score: 0,
+    gameOver: false
+};
+
+function initializeWordGuess() {
+    createAlphabetGrid();
+    startWordGuess();
+}
+
+function createAlphabetGrid() {
+    const container = document.querySelector('.alphabet-grid');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    for (let i = 65; i <= 90; i++) {
+        const letter = String.fromCharCode(i);
+        const button = document.createElement('button');
+        button.className = 'btn btn-outline-secondary btn-sm m-1';
+        button.textContent = letter;
+        button.onclick = () => guessLetter(letter);
+        button.id = `letter-${letter}`;
+        container.appendChild(button);
+    }
+}
+
+function startWordGuess() {
+    const categories = Object.keys(wordGuessState.words);
+    wordGuessState.currentCategory = categories[Math.floor(Math.random() * categories.length)];
+    const wordsInCategory = wordGuessState.words[wordGuessState.currentCategory];
+    wordGuessState.currentWord = wordsInCategory[Math.floor(Math.random() * wordsInCategory.length)];
+    wordGuessState.guessedLetters = [];
+    wordGuessState.wrongGuesses = 0;
+    wordGuessState.gameOver = false;
+    
+    // Reset alphabet buttons
+    for (let i = 65; i <= 90; i++) {
+        const letter = String.fromCharCode(i);
+        const button = document.getElementById(`letter-${letter}`);
+        if (button) {
+            button.disabled = false;
+            button.className = 'btn btn-outline-secondary btn-sm m-1';
+        }
+    }
+    
+    updateWordGuessDisplay();
+    drawHangman();
+}
+
+function guessLetter(letter) {
+    if (wordGuessState.gameOver || wordGuessState.guessedLetters.includes(letter)) return;
+    
+    wordGuessState.guessedLetters.push(letter);
+    const button = document.getElementById(`letter-${letter}`);
+    
+    if (wordGuessState.currentWord.includes(letter)) {
+        button.className = 'btn btn-success btn-sm m-1';
+        wordGuessState.score += 10;
+    } else {
+        button.className = 'btn btn-danger btn-sm m-1';
+        wordGuessState.wrongGuesses++;
+        drawHangman();
+    }
+    
+    button.disabled = true;
+    
+    // Check win/lose conditions
+    const wordRevealed = wordGuessState.currentWord.split('').every(letter => 
+        wordGuessState.guessedLetters.includes(letter));
+    
+    if (wordRevealed) {
+        wordGuessState.gameOver = true;
+        wordGuessState.score += 50;
+        setTimeout(() => alert('You won! +50 bonus points'), 100);
+    } else if (wordGuessState.wrongGuesses >= wordGuessState.maxWrongGuesses) {
+        wordGuessState.gameOver = true;
+        setTimeout(() => alert(`Game Over! The word was: ${wordGuessState.currentWord}`), 100);
+    }
+    
+    updateWordGuessDisplay();
+}
+
+function updateWordGuessDisplay() {
+    const displayWord = wordGuessState.currentWord.split('').map(letter => 
+        wordGuessState.guessedLetters.includes(letter) ? letter : '_').join(' ');
+    
+    document.getElementById('wordDisplay').textContent = displayWord;
+    document.getElementById('wordCategory').textContent = wordGuessState.currentCategory;
+    document.getElementById('guessesLeft').textContent = 
+        wordGuessState.maxWrongGuesses - wordGuessState.wrongGuesses;
+    document.getElementById('wordScore').textContent = wordGuessState.score;
+}
+
+function drawHangman() {
+    const canvas = document.getElementById('hangmanCanvas');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = 3;
+    
+    // Draw based on wrong guesses
+    if (wordGuessState.wrongGuesses >= 1) {
+        // Base
+        ctx.beginPath();
+        ctx.moveTo(10, 240);
+        ctx.lineTo(100, 240);
+        ctx.stroke();
+    }
+    if (wordGuessState.wrongGuesses >= 2) {
+        // Pole
+        ctx.beginPath();
+        ctx.moveTo(30, 240);
+        ctx.lineTo(30, 20);
+        ctx.stroke();
+    }
+    if (wordGuessState.wrongGuesses >= 3) {
+        // Top beam
+        ctx.beginPath();
+        ctx.moveTo(30, 20);
+        ctx.lineTo(120, 20);
+        ctx.stroke();
+    }
+    if (wordGuessState.wrongGuesses >= 4) {
+        // Noose
+        ctx.beginPath();
+        ctx.moveTo(120, 20);
+        ctx.lineTo(120, 50);
+        ctx.stroke();
+    }
+    if (wordGuessState.wrongGuesses >= 5) {
+        // Head
+        ctx.beginPath();
+        ctx.arc(120, 70, 20, 0, Math.PI * 2);
+        ctx.stroke();
+    }
+    if (wordGuessState.wrongGuesses >= 6) {
+        // Body and limbs
+        ctx.beginPath();
+        ctx.moveTo(120, 90);
+        ctx.lineTo(120, 180);
+        ctx.moveTo(120, 120);
+        ctx.lineTo(90, 140);
+        ctx.moveTo(120, 120);
+        ctx.lineTo(150, 140);
+        ctx.moveTo(120, 180);
+        ctx.lineTo(90, 210);
+        ctx.moveTo(120, 180);
+        ctx.lineTo(150, 210);
+        ctx.stroke();
+    }
+}
+
+function giveWordHint() {
+    if (wordGuessState.gameOver) return;
+    
+    const unguessedLetters = wordGuessState.currentWord.split('')
+        .filter(letter => !wordGuessState.guessedLetters.includes(letter));
+    
+    if (unguessedLetters.length > 0) {
+        const hintLetter = unguessedLetters[Math.floor(Math.random() * unguessedLetters.length)];
+        guessLetter(hintLetter);
+        wordGuessState.score -= 5; // Penalty for using hint
+        updateWordGuessDisplay();
+    }
+}
+
+// Strands Game Functions
+let strandsState = {
+    themes: {
+        'Ocean Creatures': ['WHALE', 'SHARK', 'DOLPHIN', 'OCTOPUS', 'STARFISH', 'JELLYFISH', 'SEAHORSE', 'CORAL'],
+        'Space Objects': ['PLANET', 'COMET', 'GALAXY', 'NEBULA', 'ASTEROID', 'METEOR', 'SATELLITE', 'BLACKHOLE'],
+        'Kitchen Items': ['SPOON', 'KNIFE', 'PLATE', 'OVEN', 'MIXER', 'BLENDER', 'SPATULA', 'REFRIGERATOR']
+    },
+    currentTheme: 'Ocean Creatures',
+    grid: [],
+    foundWords: [],
+    targetWords: [],
+    score: 0,
+    gridSize: 8,
+    selectedPath: []
+};
+
+function initializeStrands() {
+    startStrands();
+    const canvas = document.getElementById('strandsBoard');
+    if (canvas) {
+        canvas.addEventListener('mousedown', startStrandsSelection);
+        canvas.addEventListener('mousemove', continueStrandsSelection);
+        canvas.addEventListener('mouseup', endStrandsSelection);
+    }
+    
+    const input = document.getElementById('strandsInput');
+    if (input) {
+        input.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                submitStrandsWord();
+            }
+        });
+    }
+}
+
+function startStrands() {
+    const themes = Object.keys(strandsState.themes);
+    strandsState.currentTheme = themes[Math.floor(Math.random() * themes.length)];
+    strandsState.targetWords = [...strandsState.themes[strandsState.currentTheme]];
+    strandsState.foundWords = [];
+    strandsState.score = 0;
+    strandsState.selectedPath = [];
+    
+    generateStrandsGrid();
+    updateStrandsDisplay();
+    drawStrandsBoard();
+}
+
+function generateStrandsGrid() {
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    strandsState.grid = [];
+    
+    // Create random grid
+    for (let i = 0; i < strandsState.gridSize; i++) {
+        strandsState.grid[i] = [];
+        for (let j = 0; j < strandsState.gridSize; j++) {
+            strandsState.grid[i][j] = letters[Math.floor(Math.random() * letters.length)];
+        }
+    }
+    
+    // Place some target words in the grid (simplified placement)
+    strandsState.targetWords.forEach((word, index) => {
+        if (index < 4) { // Place first 4 words
+            placeWordInGrid(word);
+        }
+    });
+}
+
+function placeWordInGrid(word) {
+    const directions = [
+        [0, 1], [1, 0], [1, 1], [-1, 1] // horizontal, vertical, diagonal
+    ];
+    
+    let placed = false;
+    let attempts = 0;
+    
+    while (!placed && attempts < 50) {
+        const direction = directions[Math.floor(Math.random() * directions.length)];
+        const startRow = Math.floor(Math.random() * strandsState.gridSize);
+        const startCol = Math.floor(Math.random() * strandsState.gridSize);
+        
+        let canPlace = true;
+        for (let i = 0; i < word.length; i++) {
+            const row = startRow + direction[0] * i;
+            const col = startCol + direction[1] * i;
+            
+            if (row < 0 || row >= strandsState.gridSize || 
+                col < 0 || col >= strandsState.gridSize) {
+                canPlace = false;
+                break;
+            }
+        }
+        
+        if (canPlace) {
+            for (let i = 0; i < word.length; i++) {
+                const row = startRow + direction[0] * i;
+                const col = startCol + direction[1] * i;
+                strandsState.grid[row][col] = word[i];
+            }
+            placed = true;
+        }
+        
+        attempts++;
+    }
+}
+
+function drawStrandsBoard() {
+    const canvas = document.getElementById('strandsBoard');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    const cellSize = 50;
+    
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw grid
+    for (let i = 0; i < strandsState.gridSize; i++) {
+        for (let j = 0; j < strandsState.gridSize; j++) {
+            const x = j * cellSize;
+            const y = i * cellSize;
+            
+            // Background
+            ctx.fillStyle = '#f8f9fa';
+            ctx.fillRect(x, y, cellSize, cellSize);
+            
+            // Border
+            ctx.strokeStyle = '#dee2e6';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(x, y, cellSize, cellSize);
+            
+            // Letter
+            ctx.fillStyle = '#212529';
+            ctx.font = '20px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(
+                strandsState.grid[i][j],
+                x + cellSize/2,
+                y + cellSize/2
+            );
+        }
+    }
+    
+    // Highlight selected path
+    ctx.strokeStyle = '#007bff';
+    ctx.lineWidth = 3;
+    if (strandsState.selectedPath.length > 1) {
+        ctx.beginPath();
+        for (let i = 0; i < strandsState.selectedPath.length; i++) {
+            const {row, col} = strandsState.selectedPath[i];
+            const x = col * cellSize + cellSize/2;
+            const y = row * cellSize + cellSize/2;
+            
+            if (i === 0) {
+                ctx.moveTo(x, y);
+            } else {
+                ctx.lineTo(x, y);
+            }
+        }
+        ctx.stroke();
+    }
+}
+
+function startStrandsSelection(event) {
+    strandsState.selectedPath = [];
+    const {row, col} = getStrandsGridPosition(event);
+    if (row >= 0 && col >= 0) {
+        strandsState.selectedPath.push({row, col});
+        drawStrandsBoard();
+    }
+}
+
+function continueStrandsSelection(event) {
+    if (strandsState.selectedPath.length === 0) return;
+    
+    const {row, col} = getStrandsGridPosition(event);
+    if (row >= 0 && col >= 0) {
+        const lastPos = strandsState.selectedPath[strandsState.selectedPath.length - 1];
+        if (row !== lastPos.row || col !== lastPos.col) {
+            // Check if adjacent
+            const rowDiff = Math.abs(row - lastPos.row);
+            const colDiff = Math.abs(col - lastPos.col);
+            if (rowDiff <= 1 && colDiff <= 1) {
+                strandsState.selectedPath.push({row, col});
+                drawStrandsBoard();
+            }
+        }
+    }
+}
+
+function endStrandsSelection() {
+    if (strandsState.selectedPath.length >= 3) {
+        const word = strandsState.selectedPath
+            .map(pos => strandsState.grid[pos.row][pos.col])
+            .join('');
+        checkStrandsWord(word);
+    }
+    strandsState.selectedPath = [];
+    drawStrandsBoard();
+}
+
+function getStrandsGridPosition(event) {
+    const canvas = document.getElementById('strandsBoard');
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    
+    const col = Math.floor(x / 50);
+    const row = Math.floor(y / 50);
+    
+    return {row, col};
+}
+
+function submitStrandsWord() {
+    const input = document.getElementById('strandsInput');
+    const word = input.value.toUpperCase().trim();
+    input.value = '';
+    
+    if (word.length >= 3) {
+        checkStrandsWord(word);
+    }
+}
+
+function checkStrandsWord(word) {
+    if (strandsState.targetWords.includes(word) && !strandsState.foundWords.includes(word)) {
+        strandsState.foundWords.push(word);
+        strandsState.score += word.length * 10;
+        
+        const listItem = document.createElement('div');
+        listItem.className = 'list-group-item list-group-item-success';
+        listItem.textContent = word;
+        document.getElementById('foundWordsList').appendChild(listItem);
+        
+        if (strandsState.foundWords.length === strandsState.targetWords.length) {
+            setTimeout(() => alert('Congratulations! You found all words!'), 100);
+        }
+    }
+    
+    updateStrandsDisplay();
+}
+
+function updateStrandsDisplay() {
+    document.getElementById('strandsTheme').textContent = strandsState.currentTheme;
+    document.getElementById('strandsFound').textContent = strandsState.foundWords.length;
+    document.getElementById('strandsScore').textContent = strandsState.score;
+}
+
+console.log('Games script loaded successfully');
+</script>
+
+{% endblock %}

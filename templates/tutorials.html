@@ -1,0 +1,381 @@
+{% extends "base.html" %}
+
+{% block title %}Tutorials - Portfolio{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="text-center mb-5">
+            <h1 class="display-5 fw-bold mb-3">
+                <i class="fas fa-graduation-cap text-primary"></i> Educational Tutorials
+            </h1>
+            <p class="lead text-muted">Step-by-step guides and learning resources on various topics</p>
+        </div>
+
+        <!-- Tutorial Categories -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="btn-group w-100 tutorial-selector mb-4" role="group">
+                    <input type="radio" class="btn-check" name="tutorialCategory" id="programming" checked>
+                    <label class="btn btn-outline-primary" for="programming">
+                        <i class="fas fa-code me-2"></i>Programming
+                    </label>
+                    
+                    <input type="radio" class="btn-check" name="tutorialCategory" id="tech">
+                    <label class="btn btn-outline-primary" for="tech">
+                        <i class="fas fa-laptop me-2"></i>Technology
+                    </label>
+                    
+                    <input type="radio" class="btn-check" name="tutorialCategory" id="creative">
+                    <label class="btn btn-outline-primary" for="creative">
+                        <i class="fas fa-palette me-2"></i>Creative
+                    </label>
+                    
+                    <input type="radio" class="btn-check" name="tutorialCategory" id="productivity">
+                    <label class="btn btn-outline-primary" for="productivity">
+                        <i class="fas fa-tasks me-2"></i>Productivity
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Programming Tutorials -->
+        <div class="tutorial-category" id="programmingTutorials">
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow-lg h-100 border-0 bg-dark-gray">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="fab fa-python"></i> Python Basics</h5>
+                        </div>
+                        <div class="card-body text-light">
+                            <h6>Getting Started with Python Programming</h6>
+                            <p class="small text-muted">Learn the fundamentals of Python programming language</p>
+                            <div class="mb-3">
+                                <span class="badge bg-success me-2">Beginner</span>
+                                <span class="badge bg-info">30 mins</span>
+                            </div>
+                            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#pythonModal">
+                                Start Tutorial
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow-lg h-100 border-0 bg-dark-gray">
+                        <div class="card-header bg-warning text-dark">
+                            <h5 class="mb-0"><i class="fab fa-js"></i> JavaScript DOM</h5>
+                        </div>
+                        <div class="card-body text-light">
+                            <h6>Manipulating Web Pages with JavaScript</h6>
+                            <p class="small text-muted">Learn to interact with HTML elements dynamically</p>
+                            <div class="mb-3">
+                                <span class="badge bg-warning text-dark me-2">Intermediate</span>
+                                <span class="badge bg-info">45 mins</span>
+                            </div>
+                            <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#jsModal">
+                                Start Tutorial
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow-lg h-100 border-0 bg-dark-gray">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0"><i class="fab fa-git-alt"></i> Git Version Control</h5>
+                        </div>
+                        <div class="card-body text-light">
+                            <h6>Managing Code with Git and GitHub</h6>
+                            <p class="small text-muted">Essential version control for developers</p>
+                            <div class="mb-3">
+                                <span class="badge bg-success me-2">Beginner</span>
+                                <span class="badge bg-info">25 mins</span>
+                            </div>
+                            <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#gitModal">
+                                Start Tutorial
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow-lg h-100 border-0 bg-dark-gray">
+                        <div class="card-header bg-danger text-white">
+                            <h5 class="mb-0"><i class="fas fa-database"></i> SQL Fundamentals</h5>
+                        </div>
+                        <div class="card-body text-light">
+                            <h6>Database Queries and Management</h6>
+                            <p class="small text-muted">Learn to work with relational databases</p>
+                            <div class="mb-3">
+                                <span class="badge bg-warning text-dark me-2">Intermediate</span>
+                                <span class="badge bg-info">40 mins</span>
+                            </div>
+                            <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#sqlModal">
+                                Start Tutorial
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Technology Tutorials -->
+        <div class="tutorial-category" id="techTutorials" style="display: none;">
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow-lg h-100 border-0 bg-dark-gray">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0"><i class="fas fa-terminal"></i> Command Line Mastery</h5>
+                        </div>
+                        <div class="card-body text-light">
+                            <h6>Navigate and Control Your Computer via Terminal</h6>
+                            <p class="small text-muted">Essential command line skills for efficiency</p>
+                            <div class="mb-3">
+                                <span class="badge bg-success me-2">Beginner</span>
+                                <span class="badge bg-info">35 mins</span>
+                            </div>
+                            <ul class="small text-muted">
+                                <li>File and directory navigation</li>
+                                <li>File operations and permissions</li>
+                                <li>Process management</li>
+                                <li>Environment variables</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow-lg h-100 border-0 bg-dark-gray">
+                        <div class="card-header bg-secondary text-white">
+                            <h5 class="mb-0"><i class="fas fa-network-wired"></i> Home Networking</h5>
+                        </div>
+                        <div class="card-body text-light">
+                            <h6>Setting Up and Troubleshooting Networks</h6>
+                            <p class="small text-muted">Understand routers, WiFi, and network security</p>
+                            <div class="mb-3">
+                                <span class="badge bg-warning text-dark me-2">Intermediate</span>
+                                <span class="badge bg-info">50 mins</span>
+                            </div>
+                            <ul class="small text-muted">
+                                <li>Router configuration</li>
+                                <li>WiFi security settings</li>
+                                <li>Port forwarding basics</li>
+                                <li>Network troubleshooting</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Creative Tutorials -->
+        <div class="tutorial-category" id="creativeTutorials" style="display: none;">
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow-lg h-100 border-0 bg-dark-gray">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="fas fa-image"></i> Photo Editing</h5>
+                        </div>
+                        <div class="card-body text-light">
+                            <h6>Basic Photo Enhancement Techniques</h6>
+                            <p class="small text-muted">Improve your photos with simple editing</p>
+                            <div class="mb-3">
+                                <span class="badge bg-success me-2">Beginner</span>
+                                <span class="badge bg-info">40 mins</span>
+                            </div>
+                            <ul class="small text-muted">
+                                <li>Exposure and color correction</li>
+                                <li>Cropping and composition</li>
+                                <li>Filters and effects</li>
+                                <li>Exporting for different uses</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow-lg h-100 border-0 bg-dark-gray">
+                        <div class="card-header bg-warning text-dark">
+                            <h5 class="mb-0"><i class="fas fa-music"></i> Music Production</h5>
+                        </div>
+                        <div class="card-body text-light">
+                            <h6>Creating Music with Digital Audio Workstations</h6>
+                            <p class="small text-muted">Start your journey into music creation</p>
+                            <div class="mb-3">
+                                <span class="badge bg-warning text-dark me-2">Intermediate</span>
+                                <span class="badge bg-info">60 mins</span>
+                            </div>
+                            <ul class="small text-muted">
+                                <li>DAW basics and setup</li>
+                                <li>Recording and editing audio</li>
+                                <li>MIDI and virtual instruments</li>
+                                <li>Mixing and effects</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Productivity Tutorials -->
+        <div class="tutorial-category" id="productivityTutorials" style="display: none;">
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow-lg h-100 border-0 bg-dark-gray">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0"><i class="fas fa-clock"></i> Time Management</h5>
+                        </div>
+                        <div class="card-body text-light">
+                            <h6>Effective Strategies for Managing Your Time</h6>
+                            <p class="small text-muted">Boost productivity with proven techniques</p>
+                            <div class="mb-3">
+                                <span class="badge bg-success me-2">Beginner</span>
+                                <span class="badge bg-info">30 mins</span>
+                            </div>
+                            <ul class="small text-muted">
+                                <li>Pomodoro Technique</li>
+                                <li>Priority matrix methods</li>
+                                <li>Calendar management</li>
+                                <li>Eliminating distractions</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow-lg h-100 border-0 bg-dark-gray">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0"><i class="fas fa-table"></i> Spreadsheet Mastery</h5>
+                        </div>
+                        <div class="card-body text-light">
+                            <h6>Advanced Excel/Sheets Techniques</h6>
+                            <p class="small text-muted">Automate tasks and analyze data effectively</p>
+                            <div class="mb-3">
+                                <span class="badge bg-warning text-dark me-2">Intermediate</span>
+                                <span class="badge bg-info">45 mins</span>
+                            </div>
+                            <ul class="small text-muted">
+                                <li>Formulas and functions</li>
+                                <li>Data visualization</li>
+                                <li>Pivot tables and analysis</li>
+                                <li>Automation with macros</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tutorial Modal Example -->
+<div class="modal fade" id="pythonModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content bg-dark text-light">
+            <div class="modal-header border-dark">
+                <h5 class="modal-title"><i class="fab fa-python"></i> Python Basics Tutorial</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="tutorial-content">
+                    <h6>Step 1: Installing Python</h6>
+                    <p>Download Python from <a href="https://python.org" target="_blank" class="text-primary">python.org</a> and follow the installation wizard.</p>
+                    
+                    <h6 class="mt-4">Step 2: Your First Python Program</h6>
+                    <pre class="bg-secondary p-3 rounded"><code># Hello World in Python
+print("Hello, World!")
+
+# Variables and data types
+name = "Python"
+version = 3.9
+is_easy = True
+
+print(f"Language: {name}")
+print(f"Version: {version}")
+print(f"Is it easy? {is_easy}")</code></pre>
+
+                    <h6 class="mt-4">Step 3: Basic Operations</h6>
+                    <pre class="bg-secondary p-3 rounded"><code># Mathematical operations
+x = 10
+y = 5
+
+addition = x + y        # 15
+subtraction = x - y     # 5
+multiplication = x * y  # 50
+division = x / y        # 2.0
+
+# String operations
+greeting = "Hello"
+name = "World"
+message = greeting + " " + name + "!"
+print(message)  # Hello World!</code></pre>
+
+                    <h6 class="mt-4">Step 4: Control Structures</h6>
+                    <pre class="bg-secondary p-3 rounded"><code># If statements
+age = 18
+
+if age >= 18:
+    print("You are an adult")
+else:
+    print("You are a minor")
+
+# Loops
+for i in range(5):
+    print(f"Count: {i}")
+
+# Lists
+fruits = ["apple", "banana", "orange"]
+for fruit in fruits:
+    print(f"I like {fruit}")</code></pre>
+
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-lightbulb"></i> Practice Exercise</h6>
+                        <p>Try creating a simple calculator that can add, subtract, multiply, and divide two numbers!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.tutorial-selector .btn-check:checked + .btn {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+    color: white;
+}
+
+.tutorial-category {
+    transition: opacity 0.3s ease-in-out;
+}
+
+pre {
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 0.9em;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const categoryRadios = document.querySelectorAll('input[name="tutorialCategory"]');
+    const categories = document.querySelectorAll('.tutorial-category');
+    
+    categoryRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            // Hide all categories
+            categories.forEach(category => {
+                category.style.display = 'none';
+            });
+            
+            // Show selected category
+            const selectedCategory = this.id + 'Tutorials';
+            const targetCategory = document.getElementById(selectedCategory);
+            if (targetCategory) {
+                targetCategory.style.display = 'block';
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

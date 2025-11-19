@@ -1,0 +1,682 @@
+{% extends "base.html" %}
+
+{% block title %}Music - Portfolio{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="text-center mb-5">
+            <h1 class="display-5 fw-bold mb-3">
+                <i class="fas fa-music text-success"></i> My Music
+            </h1>
+            <p class="lead text-muted">Discover my favorite tracks, artists, and the soundtracks that inspire me</p>
+        </div>
+
+        <!-- Now Playing Section -->
+        <div class="card shadow-lg mb-5 now-playing">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-play-circle me-2"></i> Now Playing
+                    <small class="float-end"><i class="fas fa-volume-up"></i></small>
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-4">
+                        <div class="now-playing-video">
+                            <div class="ratio ratio-16x9">
+                                <iframe id="nowPlayingPlayer" 
+                                        src="https://www.youtube.com/embed/9S_1gyRKwaY?enablejsapi=1" 
+                                        title="Now Playing Video" 
+                                        frameborder="0" 
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                                        allowfullscreen>
+                                </iframe>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="track-info">
+                            <h4 class="track-title text-blue-glow mb-1">Your Track Title</h4>
+                            <h6 class="artist-name text-muted mb-3">by -bAStIAN-</h6>
+                            <p class="track-description mb-3">
+                                This is your featured track playing directly from YouTube. You can update this 
+                                description to match your actual video content. The embedded player allows 
+                                visitors to watch and listen without leaving your website.
+                            </p>
+                            
+                            <!-- Track Controls -->
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div class="now-playing-controls">
+                                    <button class="btn btn-outline-light btn-sm me-2" onclick="switchTrack('Lu07IcTJ2FI', 'Track 2 Title')">
+                                        <i class="fas fa-step-backward"></i>
+                                    </button>
+                                    <button class="btn btn-success btn-sm me-2" onclick="togglePlayPause()">
+                                        <i class="fas fa-pause" id="playPauseIcon"></i>
+                                    </button>
+                                    <button class="btn btn-outline-light btn-sm me-2" onclick="switchTrack('VXnuUW-WGhg', 'Track 3 Title')">
+                                        <i class="fas fa-step-forward"></i>
+                                    </button>
+                                    <button class="btn btn-outline-light btn-sm me-2" onclick="openInModal()">
+                                        <i class="fas fa-expand"></i>
+                                    </button>
+                                </div>
+                                
+                                <div class="track-actions">
+                                    <a href="https://www.youtube.com/@-bAStIAN-" target="_blank" class="btn btn-outline-danger btn-sm me-2">
+                                        <i class="fab fa-youtube"></i>
+                                    </a>
+                                    <button class="btn btn-outline-primary btn-sm" onclick="shareTrack()">
+                                        <i class="fas fa-share"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="track-meta">
+                                <small class="text-muted">
+                                    <i class="fas fa-eye me-1"></i> <span id="viewCount">Loading...</span> views
+                                    <span class="mx-2">•</span>
+                                    <i class="fab fa-youtube me-1"></i> YouTube
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Music Categories -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-list"></i> Browse Music</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check" name="musicCategory" id="allMusic" checked>
+                            <label class="btn btn-outline-info" for="allMusic">All</label>
+                            
+                            <input type="radio" class="btn-check" name="musicCategory" id="favorites">
+                            <label class="btn btn-outline-info" for="favorites">Favorites</label>
+                            
+                            <input type="radio" class="btn-check" name="musicCategory" id="playlists">
+                            <label class="btn btn-outline-info" for="playlists">Playlists</label>
+                            
+                            <input type="radio" class="btn-check" name="musicCategory" id="recent">
+                            <label class="btn btn-outline-info" for="recent">Recent</label>
+                            
+                            <input type="radio" class="btn-check" name="musicCategory" id="genres">
+                            <label class="btn btn-outline-info" for="genres">Genres</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Favorite Tracks -->
+        <div class="card shadow mb-4 music-section" data-section="favorites">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0"><i class="fas fa-star"></i> Favorite Tracks</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-lg-4 mb-3">
+                        <div class="track-card">
+                            <div class="d-flex align-items-center p-3 border rounded">
+                                <div class="track-cover me-3">
+                                    <i class="fas fa-music fa-2x text-primary"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1 text-blue-glow">Midnight City</h6>
+                                    <small class="text-muted d-block">M83</small>
+                                    <small class="text-muted">Electronic • 2011</small>
+                                </div>
+                                <div class="track-actions">
+                                    <button class="btn btn-sm btn-outline-success">
+                                        <i class="fas fa-play"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-4 mb-3">
+                        <div class="track-card">
+                            <div class="d-flex align-items-center p-3 border rounded">
+                                <div class="track-cover me-3">
+                                    <i class="fas fa-music fa-2x text-danger"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1 text-blue-glow">Blinding Lights</h6>
+                                    <small class="text-muted d-block">The Weeknd</small>
+                                    <small class="text-muted">Pop • 2020</small>
+                                </div>
+                                <div class="track-actions">
+                                    <button class="btn btn-sm btn-outline-success">
+                                        <i class="fas fa-play"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-4 mb-3">
+                        <div class="track-card">
+                            <div class="d-flex align-items-center p-3 border rounded">
+                                <div class="track-cover me-3">
+                                    <i class="fas fa-music fa-2x text-warning"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1 text-blue-glow">Resonance</h6>
+                                    <small class="text-muted d-block">HOME</small>
+                                    <small class="text-muted">Synthwave • 2014</small>
+                                </div>
+                                <div class="track-actions">
+                                    <button class="btn btn-sm btn-outline-success">
+                                        <i class="fas fa-play"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Playlists -->
+        <div class="card shadow mb-4 music-section" data-section="playlists">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-list-ul"></i> My Playlists</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="playlist-card card h-100">
+                            <div class="playlist-cover p-4 text-center bg-gradient">
+                                <i class="fas fa-headphones fa-3x text-blue-glow mb-2"></i>
+                                <h6 class="text-blue-glow mb-0">Coding Focus</h6>
+                            </div>
+                            <div class="card-body">
+                                <p class="text-sm text-muted mb-2">Perfect background music for programming sessions</p>
+                                <div class="playlist-stats">
+                                    <small class="text-muted">
+                                        <i class="fas fa-music me-1"></i> 47 tracks
+                                        <span class="mx-2">•</span>
+                                        <i class="fas fa-clock me-1"></i> 3h 12m
+                                    </small>
+                                </div>
+                                <div class="playlist-actions mt-3">
+                                    <button class="btn btn-sm btn-success w-100 mb-2">
+                                        <i class="fas fa-play"></i> Play
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-primary w-100">
+                                        <i class="fas fa-list"></i> View Tracks
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="playlist-card card h-100">
+                            <div class="playlist-cover p-4 text-center bg-gradient">
+                                <i class="fas fa-gamepad fa-3x text-success mb-2"></i>
+                                <h6 class="text-blue-glow mb-0">Gaming Vibes</h6>
+                            </div>
+                            <div class="card-body">
+                                <p class="text-sm text-muted mb-2">Epic soundtracks and energetic tracks for gaming</p>
+                                <div class="playlist-stats">
+                                    <small class="text-muted">
+                                        <i class="fas fa-music me-1"></i> 63 tracks
+                                        <span class="mx-2">•</span>
+                                        <i class="fas fa-clock me-1"></i> 4h 28m
+                                    </small>
+                                </div>
+                                <div class="playlist-actions mt-3">
+                                    <button class="btn btn-sm btn-success w-100 mb-2">
+                                        <i class="fas fa-play"></i> Play
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-primary w-100">
+                                        <i class="fas fa-list"></i> View Tracks
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="playlist-card card h-100">
+                            <div class="playlist-cover p-4 text-center bg-gradient">
+                                <i class="fas fa-moon fa-3x text-warning mb-2"></i>
+                                <h6 class="text-blue-glow mb-0">Chill Nights</h6>
+                            </div>
+                            <div class="card-body">
+                                <p class="text-sm text-muted mb-2">Relaxing tracks for late-night moments</p>
+                                <div class="playlist-stats">
+                                    <small class="text-muted">
+                                        <i class="fas fa-music me-1"></i> 32 tracks
+                                        <span class="mx-2">•</span>
+                                        <i class="fas fa-clock me-1"></i> 2h 15m
+                                    </small>
+                                </div>
+                                <div class="playlist-actions mt-3">
+                                    <button class="btn btn-sm btn-success w-100 mb-2">
+                                        <i class="fas fa-play"></i> Play
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-primary w-100">
+                                        <i class="fas fa-list"></i> View Tracks
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Music Stats -->
+        <div class="card shadow mb-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Music Statistics</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3 mb-3">
+                        <div class="stat-card p-3">
+                            <i class="fas fa-music fa-2x text-primary mb-2"></i>
+                            <h4 class="text-primary">[X,XXX]</h4>
+                            <small class="text-muted">Songs Played</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="stat-card p-3">
+                            <i class="fas fa-clock fa-2x text-success mb-2"></i>
+                            <h4 class="text-success">[XXX]h</h4>
+                            <small class="text-muted">Listening Time</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="stat-card p-3">
+                            <i class="fas fa-list fa-2x text-warning mb-2"></i>
+                            <h4 class="text-warning">[XX]</h4>
+                            <small class="text-muted">Playlists Created</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="stat-card p-3">
+                            <i class="fas fa-heart fa-2x text-danger mb-2"></i>
+                            <h4 class="text-danger">[XXX]</h4>
+                            <small class="text-muted">Liked Songs</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Music Links -->
+        <div class="card shadow">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="fab fa-youtube"></i> My YouTube Music Channel</h5>
+            </div>
+            <div class="card-body text-center">
+                <div class="row align-items-center mb-4">
+                    <div class="col-md-4">
+                        <div class="youtube-channel-info">
+                            <i class="fab fa-youtube fa-4x text-danger mb-3"></i>
+                            <h5 class="text-blue-glow">ZjadowSide Music</h5>
+                            <p class="text-muted">My original music uploads and covers</p>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="channel-stats">
+                            <div class="row text-center">
+                                <div class="col-4">
+                                    <div class="stat-item p-3">
+                                        <h4 class="text-danger">[XX]</h4>
+                                        <small class="text-muted">Videos</small>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="stat-item p-3">
+                                        <h4 class="text-success">[XXX]</h4>
+                                        <small class="text-muted">Subscribers</small>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="stat-item p-3">
+                                        <h4 class="text-warning">[X,XXX]</h4>
+                                        <small class="text-muted">Views</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="youtube-actions mb-4">
+                    <a href="https://www.youtube.com/@-bAStIAN-" target="_blank" class="btn btn-danger btn-lg me-3 mb-2">
+                        <i class="fab fa-youtube me-2"></i> Visit Channel
+                    </a>
+                    <a href="https://www.youtube.com/@-bAStIAN-?sub_confirmation=1" target="_blank" class="btn btn-outline-danger btn-lg mb-2">
+                        <i class="fas fa-bell me-2"></i> Subscribe
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Featured Videos/Tracks -->
+        <div class="card shadow mt-4">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0"><i class="fas fa-play-circle me-2"></i> Featured Videos & Tracks</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <!-- Embedded Video Example -->
+                    <div class="col-lg-6 mb-4">
+                        <div class="video-embed">
+                            <h6 class="text-blue-glow mb-3">Latest Upload</h6>
+                            <div class="embed-responsive embed-responsive-16by9 mb-3">
+                                <iframe class="embed-responsive-item" 
+                                        src="https://www.youtube.com/embed/9S_1gyRKwaY" 
+                                        title="YouTube video player" 
+                                        frameborder="0" 
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                                        allowfullscreen>
+                                </iframe>
+                            </div>
+                            <p class="text-muted small">Latest video from your channel</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Second Featured Video -->
+                    <div class="col-lg-6 mb-4">
+                        <div class="video-embed">
+                            <h6 class="text-blue-glow mb-3">Featured Video</h6>
+                            <div class="embed-responsive embed-responsive-16by9 mb-3">
+                                <iframe class="embed-responsive-item" 
+                                        src="https://www.youtube.com/embed/Lu07IcTJ2FI" 
+                                        title="YouTube video player" 
+                                        frameborder="0" 
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                                        allowfullscreen>
+                                </iframe>
+                            </div>
+                            <p class="text-muted small">Featured track from your collection</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Video Gallery -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <h6 class="text-blue-glow mb-3">Video Gallery</h6>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <div class="video-thumbnail">
+                                    <div class="card">
+                                        <div class="card-img-top bg-dark d-flex align-items-center justify-content-center" style="height: 150px;">
+                                            <i class="fas fa-play-circle fa-3x text-white"></i>
+                                        </div>
+                                        <div class="card-body">
+                                            <h6 class="card-title">Video 1</h6>
+                                            <p class="card-text small text-muted">Click to watch in popup player</p>
+                                            <button class="btn btn-primary btn-sm" onclick="playEmbeddedVideo('9S_1gyRKwaY')">
+                                                <i class="fas fa-play me-1"></i> Watch
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="video-thumbnail">
+                                    <div class="card">
+                                        <div class="card-img-top bg-dark d-flex align-items-center justify-content-center" style="height: 150px;">
+                                            <i class="fas fa-play-circle fa-3x text-white"></i>
+                                        </div>
+                                        <div class="card-body">
+                                            <h6 class="card-title">Video 2</h6>
+                                            <p class="card-text small text-muted">Click to watch in popup player</p>
+                                            <button class="btn btn-primary btn-sm" onclick="playEmbeddedVideo('Lu07IcTJ2FI')">
+                                                <i class="fas fa-play me-1"></i> Watch
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="video-thumbnail">
+                                    <div class="card">
+                                        <div class="card-img-top bg-dark d-flex align-items-center justify-content-center" style="height: 150px;">
+                                            <i class="fas fa-play-circle fa-3x text-white"></i>
+                                        </div>
+                                        <div class="card-body">
+                                            <h6 class="card-title">Video 3</h6>
+                                            <p class="card-text small text-muted">Click to watch in popup player</p>
+                                            <button class="btn btn-primary btn-sm" onclick="playEmbeddedVideo('VXnuUW-WGhg')">
+                                                <i class="fas fa-play me-1"></i> Watch
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Now Playing functionality
+let currentVideoId = '9S_1gyRKwaY';
+let currentVideoTitle = 'Your Track Title';
+
+// Now Playing controls
+function switchTrack(videoId, title) {
+    currentVideoId = videoId;
+    currentVideoTitle = title;
+    
+    const iframe = document.getElementById('nowPlayingPlayer');
+    iframe.src = `https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=1`;
+    
+    document.querySelector('.track-title').textContent = title;
+    
+    // Update play/pause button
+    const playPauseIcon = document.getElementById('playPauseIcon');
+    playPauseIcon.classList.remove('fa-play');
+    playPauseIcon.classList.add('fa-pause');
+}
+
+function togglePlayPause() {
+    const playPauseIcon = document.getElementById('playPauseIcon');
+    const iframe = document.getElementById('nowPlayingPlayer');
+    
+    if (playPauseIcon.classList.contains('fa-pause')) {
+        // Pause video by reloading without autoplay
+        iframe.src = `https://www.youtube.com/embed/${currentVideoId}?enablejsapi=1`;
+        playPauseIcon.classList.remove('fa-pause');
+        playPauseIcon.classList.add('fa-play');
+    } else {
+        // Play video with autoplay
+        iframe.src = `https://www.youtube.com/embed/${currentVideoId}?enablejsapi=1&autoplay=1`;
+        playPauseIcon.classList.remove('fa-play');
+        playPauseIcon.classList.add('fa-pause');
+    }
+}
+
+function openInModal() {
+    playEmbeddedVideo(currentVideoId);
+}
+
+function shareTrack() {
+    const url = `https://www.youtube.com/watch?v=${currentVideoId}`;
+    if (navigator.share) {
+        navigator.share({
+            title: currentVideoTitle,
+            url: url
+        });
+    } else {
+        navigator.clipboard.writeText(url).then(() => {
+            alert('Video link copied to clipboard!');
+        });
+    }
+}
+
+// Video player function for embedded videos
+function playEmbeddedVideo(videoId) {
+    const modalHtml = `
+        <div class="modal fade" id="videoModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content bg-dark">
+                    <div class="modal-header border-secondary">
+                        <h5 class="modal-title text-white">Video Player</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="ratio ratio-16x9">
+                            <iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1" 
+                                    title="YouTube video player" 
+                                    frameborder="0" 
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                                    allowfullscreen>
+                            </iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Remove existing modal if present
+    const existingModal = document.getElementById('videoModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Add modal to page
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('videoModal'));
+    modal.show();
+    
+    // Clean up when modal is hidden
+    document.getElementById('videoModal').addEventListener('hidden.bs.modal', function () {
+        this.remove();
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Music category filtering
+    const categoryButtons = document.querySelectorAll('input[name="musicCategory"]');
+    const musicSections = document.querySelectorAll('.music-section');
+    
+    categoryButtons.forEach(button => {
+        button.addEventListener('change', function() {
+            const selectedCategory = this.id.replace('allMusic', 'all');
+            
+            musicSections.forEach(section => {
+                if (selectedCategory === 'all' || section.getAttribute('data-section') === selectedCategory) {
+                    section.style.display = 'block';
+                    section.style.animation = 'fadeIn 0.5s ease';
+                } else {
+                    section.style.display = 'none';
+                }
+            });
+        });
+    });
+    
+    // Music player controls
+    const playButtons = document.querySelectorAll('.music-controls .btn');
+    playButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const icon = this.querySelector('i');
+            if (icon.classList.contains('fa-play')) {
+                icon.classList.remove('fa-play');
+                icon.classList.add('fa-pause');
+                this.classList.remove('btn-outline-success');
+                this.classList.add('btn-success');
+            } else if (icon.classList.contains('fa-pause')) {
+                icon.classList.remove('fa-pause');
+                icon.classList.add('fa-play');
+                this.classList.remove('btn-success');
+                this.classList.add('btn-outline-success');
+            }
+        });
+    });
+    
+    // Enhanced audio player controls
+    const audioPlayers = document.querySelectorAll('audio');
+    audioPlayers.forEach(audio => {
+        audio.addEventListener('loadstart', function() {
+            this.style.filter = 'hue-rotate(200deg)';
+        });
+        
+        audio.addEventListener('play', function() {
+            // Pause other audio players
+            audioPlayers.forEach(otherAudio => {
+                if (otherAudio !== this && !otherAudio.paused) {
+                    otherAudio.pause();
+                }
+            });
+        });
+    });
+    
+    // Add music-specific styling
+    const style = document.createElement('style');
+    style.textContent = `
+        .now-playing {
+            background: linear-gradient(135deg, var(--dark-gray), var(--metal-gray));
+            border: 1px solid var(--blue-accent);
+        }
+        
+        .track-card, .playlist-card {
+            transition: all 0.3s ease;
+        }
+        
+        .track-card:hover, .playlist-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .playlist-cover {
+            background: var(--metal-shine) !important;
+        }
+        
+        .bg-gradient {
+            background: linear-gradient(45deg, var(--dark-gray), var(--metal-gray)) !important;
+        }
+        
+        .video-embed iframe {
+            width: 100%;
+            height: 250px;
+            border-radius: 8px;
+        }
+        
+        .audio-player audio {
+            border-radius: 5px;
+            background: var(--dark-gray);
+        }
+        
+        .video-thumbnail .card {
+            transition: all 0.3s ease;
+        }
+        
+        .video-thumbnail .card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    `;
+    document.head.appendChild(style);
+});
+</script>
+{% endblock %}

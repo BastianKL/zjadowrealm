@@ -1,0 +1,280 @@
+{% extends "base.html" %}
+
+{% block title %}Game Reviews - Portfolio{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="text-center mb-5">
+            <h1 class="display-5 fw-bold mb-3">
+                <i class="fas fa-gamepad text-primary"></i> Game Reviews
+            </h1>
+            <p class="lead text-muted">Honest reviews and thoughts on games I've played</p>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h6 class="mb-2">Filter by Genre:</h6>
+                        <div class="btn-group" role="group">
+                            <input type="radio" class="btn-check" name="genre" id="all" checked>
+                            <label class="btn btn-outline-primary btn-sm" for="all">All</label>
+                            
+                            <input type="radio" class="btn-check" name="genre" id="action">
+                            <label class="btn btn-outline-primary btn-sm" for="action">Action</label>
+                            
+                            <input type="radio" class="btn-check" name="genre" id="rpg">
+                            <label class="btn btn-outline-primary btn-sm" for="rpg">RPG</label>
+                            
+                            <input type="radio" class="btn-check" name="genre" id="indie">
+                            <label class="btn btn-outline-primary btn-sm" for="indie">Indie</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <h6 class="mb-2">Sort by:</h6>
+                        <select class="form-select form-select-sm d-inline-block w-auto">
+                            <option>Latest Reviews</option>
+                            <option>Highest Rated</option>
+                            <option>Most Played</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Reviews -->
+        <div class="reviews-container">
+            <!-- Review 1 -->
+            <div class="card shadow mb-4 game-review" data-genre="action">
+                <div class="row g-0">
+                    <div class="col-md-3">
+                        <div class="game-image p-4 text-center bg-light h-100 d-flex align-items-center justify-content-center">
+                            <div>
+                                <i class="fas fa-image fa-3x text-muted"></i>
+                                <p class="mt-2 mb-0 text-muted">Game Cover</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title mb-0">Amazing Action Game</h5>
+                                <div class="rating">
+                                    <span class="badge bg-success">9/10</span>
+                                </div>
+                            </div>
+                            <div class="game-meta mb-3">
+                                <span class="badge bg-primary me-2">Action</span>
+                                <span class="badge bg-secondary me-2">Adventure</span>
+                                <small class="text-muted">Played on: PC | Hours: 45+</small>
+                            </div>
+                            <p class="card-text">
+                                This game absolutely blew me away with its incredible combat system and stunning visuals. 
+                                The story is engaging and the character development is top-notch. Highly recommend for 
+                                anyone who enjoys action-adventure games.
+                            </p>
+                            <div class="review-details">
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <strong>Pros:</strong>
+                                        <ul class="list-unstyled ms-3">
+                                            <li>• Excellent combat mechanics</li>
+                                            <li>• Beautiful graphics</li>
+                                            <li>• Engaging storyline</li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <strong>Cons:</strong>
+                                        <ul class="list-unstyled ms-3">
+                                            <li>• Some repetitive missions</li>
+                                            <li>• Minor bugs occasionally</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <small class="text-muted">Reviewed on: November 15, 2025</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Review 2 -->
+            <div class="card shadow mb-4 game-review" data-genre="rpg">
+                <div class="row g-0">
+                    <div class="col-md-3">
+                        <div class="game-image p-4 text-center bg-light h-100 d-flex align-items-center justify-content-center">
+                            <div>
+                                <i class="fas fa-image fa-3x text-muted"></i>
+                                <p class="mt-2 mb-0 text-muted">Game Cover</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title mb-0">Epic Fantasy RPG</h5>
+                                <div class="rating">
+                                    <span class="badge bg-warning">8/10</span>
+                                </div>
+                            </div>
+                            <div class="game-meta mb-3">
+                                <span class="badge bg-info me-2">RPG</span>
+                                <span class="badge bg-secondary me-2">Fantasy</span>
+                                <small class="text-muted">Played on: PC | Hours: 120+</small>
+                            </div>
+                            <p class="card-text">
+                                A massive RPG with incredible depth and world-building. The character customization 
+                                is extensive and the quest system keeps you engaged for hundreds of hours. Some pacing 
+                                issues in the middle, but overall a fantastic experience.
+                            </p>
+                            <div class="review-details">
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <strong>Pros:</strong>
+                                        <ul class="list-unstyled ms-3">
+                                            <li>• Massive open world</li>
+                                            <li>• Deep character progression</li>
+                                            <li>• Rich lore and story</li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <strong>Cons:</strong>
+                                        <ul class="list-unstyled ms-3">
+                                            <li>• Slow pacing at times</li>
+                                            <li>• Overwhelming for newcomers</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <small class="text-muted">Reviewed on: November 10, 2025</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Review 3 -->
+            <div class="card shadow mb-4 game-review" data-genre="indie">
+                <div class="row g-0">
+                    <div class="col-md-3">
+                        <div class="game-image p-4 text-center bg-light h-100 d-flex align-items-center justify-content-center">
+                            <div>
+                                <i class="fas fa-image fa-3x text-muted"></i>
+                                <p class="mt-2 mb-0 text-muted">Game Cover</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title mb-0">Hidden Indie Gem</h5>
+                                <div class="rating">
+                                    <span class="badge bg-success">9.5/10</span>
+                                </div>
+                            </div>
+                            <div class="game-meta mb-3">
+                                <span class="badge bg-success me-2">Indie</span>
+                                <span class="badge bg-secondary me-2">Platformer</span>
+                                <small class="text-muted">Played on: PC | Hours: 15+</small>
+                            </div>
+                            <p class="card-text">
+                                This small indie game proves that you don't need a massive budget to create something 
+                                truly special. The art style is unique, the soundtrack is phenomenal, and the gameplay 
+                                mechanics are innovative. A must-play for indie game enthusiasts.
+                            </p>
+                            <div class="review-details">
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <strong>Pros:</strong>
+                                        <ul class="list-unstyled ms-3">
+                                            <li>• Unique art style</li>
+                                            <li>• Amazing soundtrack</li>
+                                            <li>• Creative gameplay</li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <strong>Cons:</strong>
+                                        <ul class="list-unstyled ms-3">
+                                            <li>• Short gameplay duration</li>
+                                            <li>• Limited replay value</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <small class="text-muted">Reviewed on: November 5, 2025</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <nav aria-label="Review pagination">
+            <ul class="pagination justify-content-center">
+                <li class="page-item disabled">
+                    <a class="page-link" href="#">Previous</a>
+                </li>
+                <li class="page-item active">
+                    <a class="page-link" href="#">1</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="#">2</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="#">3</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="#">Next</a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Call to Action -->
+        <div class="text-center mt-5">
+            <div class="alert alert-primary">
+                <h6><i class="fas fa-comment"></i> Have a Game Recommendation?</h6>
+                <p class="mb-3">I'm always looking for new games to play and review!</p>
+                <a href="{{ url_for('discord') }}" class="btn btn-primary">
+                    <i class="fas fa-envelope"></i> Contact Me
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Genre filtering
+    const genreButtons = document.querySelectorAll('input[name="genre"]');
+    const reviewCards = document.querySelectorAll('.game-review');
+    
+    genreButtons.forEach(button => {
+        button.addEventListener('change', function() {
+            const selectedGenre = this.id;
+            
+            reviewCards.forEach(card => {
+                if (selectedGenre === 'all' || card.getAttribute('data-genre') === selectedGenre) {
+                    card.style.display = 'block';
+                    card.style.animation = 'fadeIn 0.5s ease';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    });
+    
+    // Add CSS animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    `;
+    document.head.appendChild(style);
+});
+</script>
+{% endblock %}
