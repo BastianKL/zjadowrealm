@@ -1,4 +1,4 @@
-# Portfolio Website
+# ZjadowRealm Portfolio
 
 A modern, responsive Flask-based portfolio website featuring multiple sections for showcasing your personal brand, gaming profile, reviews, music, diary, and daily thoughts.
 
