@@ -17,9 +17,11 @@
             <div class="card-header bg-success text-white">
                 <h5 class="mb-0">
                     <i class="fas fa-play-circle me-2"></i> Now Playing
-                    <small class="float-end">
-                        <i id="volumeIcon" class="fas fa-volume-up" onclick="toggleMute()" style="cursor: pointer;" title="Toggle Mute"></i>
-                    </small>
+                    <div class="float-end d-flex align-items-center">
+                        <i class="fas fa-volume-down me-2" style="cursor: pointer;" onclick="lowerVolume()"></i>
+                        <span id="volumeLevel" class="me-2 small">50%</span>
+                        <i class="fas fa-volume-up" style="cursor: pointer;" onclick="raiseVolume()"></i>
+                    </div>
                 </h5>
             </div>
             <div class="card-body">
@@ -64,9 +66,6 @@
                                     <button class="btn btn-outline-light btn-sm me-2" onclick="nextTrack()">
                                         <i class="fas fa-step-forward"></i>
                                     </button>
-                                    <button class="btn btn-outline-light btn-sm me-2" onclick="openInModal()">
-                                        <i class="fas fa-expand"></i>
-                                    </button>
                                 </div>
                                 
                                 <div class="track-actions">
@@ -92,208 +91,59 @@
             </div>
         </div>
 
-        <!-- Music Categories -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="card shadow">
-                    <div class="card-header bg-info text-white">
-                        <h5 class="mb-0"><i class="fas fa-list"></i> Browse Music</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="btn-group w-100" role="group">
-                            <input type="radio" class="btn-check" name="musicCategory" id="allMusic" checked>
-                            <label class="btn btn-outline-info" for="allMusic">All</label>
-                            
-                            <input type="radio" class="btn-check" name="musicCategory" id="favorites">
-                            <label class="btn btn-outline-info" for="favorites">Favorites</label>
-                            
-                            <input type="radio" class="btn-check" name="musicCategory" id="playlists">
-                            <label class="btn btn-outline-info" for="playlists">Playlists</label>
-                            
-                            <input type="radio" class="btn-check" name="musicCategory" id="recent">
-                            <label class="btn btn-outline-info" for="recent">Recent</label>
-                            
-                            <input type="radio" class="btn-check" name="musicCategory" id="genres">
-                            <label class="btn btn-outline-info" for="genres">Genres</label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Favorite Tracks -->
-        <div class="card shadow mb-4 music-section" data-section="favorites">
-            <div class="card-header bg-warning text-dark">
-                <h5 class="mb-0"><i class="fas fa-star"></i> Favorite Tracks</h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-lg-4 mb-3">
-                        <div class="track-card">
-                            <div class="d-flex align-items-center p-3 border rounded">
-                                <div class="track-cover me-3">
-                                    <i class="fas fa-music fa-2x text-primary"></i>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <h6 class="mb-1 text-blue-glow">Go Ahead</h6>
-                                    <small class="text-muted d-block">JoHassa</small>
-                                    <small class="text-muted">Breakbeat/Rock 2024</small>
-                                </div>
-                                <div class="track-actions">
-                                    <button class="btn btn-sm btn-outline-success">
-                                        <i class="fas fa-play"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-lg-4 mb-3">
-                        <div class="track-card">
-                            <div class="d-flex align-items-center p-3 border rounded">
-                                <div class="track-cover me-3">
-                                    <i class="fas fa-music fa-2x text-danger"></i>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <h6 class="mb-1 text-blue-glow">Blinding Lights</h6>
-                                    <small class="text-muted d-block">The Weeknd</small>
-                                    <small class="text-muted">Pop • 2020</small>
-                                </div>
-                                <div class="track-actions">
-                                    <button class="btn btn-sm btn-outline-success">
-                                        <i class="fas fa-play"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-lg-4 mb-3">
-                        <div class="track-card">
-                            <div class="d-flex align-items-center p-3 border rounded">
-                                <div class="track-cover me-3">
-                                    <i class="fas fa-music fa-2x text-warning"></i>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <h6 class="mb-1 text-blue-glow">Resonance</h6>
-                                    <small class="text-muted d-block">HOME</small>
-                                    <small class="text-muted">Synthwave • 2014</small>
-                                </div>
-                                <div class="track-actions">
-                                    <button class="btn btn-sm btn-outline-success">
-                                        <i class="fas fa-play"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Playlists -->
-        <div class="card shadow mb-4 music-section" data-section="playlists">
+        <!-- Artists I Adore -->
+        <div class="card shadow mb-5">
             <div class="card-header bg-primary text-white">
-                <h5 class="mb-0"><i class="fas fa-list-ul"></i> My Playlists</h5>
+                <h5 class="mb-0"><i class="fas fa-heart"></i> Artists I Adore</h5>
             </div>
             <div class="card-body">
                 <div class="row">
-                    <div class="col-md-6 col-lg-4 mb-3">
-                        <div class="playlist-card card h-100">
-                            <div class="playlist-cover p-4 text-center bg-gradient">
-                                <i class="fas fa-dumbbell fa-3x text-danger mb-2"></i>
-                                <h6 class="text-blue-glow mb-0">Training Focus</h6>
-                            </div>
-                            <div class="card-body">
-                                <p class="text-sm text-muted mb-2">High-energy tracks to power through workouts</p>
-                                <div class="playlist-stats">
-                                    <small class="text-muted">
-                                        <i class="fas fa-music me-1"></i> 45 tracks
-                                        <span class="mx-2">•</span>
-                                        <i class="fas fa-clock me-1"></i> 3h 20m
-                                    </small>
-                                </div>
-                                <div class="playlist-actions mt-3">
-                                    <button class="btn btn-sm btn-success w-100 mb-2">
-                                        <i class="fas fa-play"></i> Play
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-primary w-100">
-                                        <i class="fas fa-list"></i> View Tracks
-                                    </button>
-                                </div>
-                            </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="artist-card text-center p-4 border rounded">
+                            <i class="fas fa-music fa-3x text-primary mb-3"></i>
+                            <h5 class="text-blue-glow">Waterflame</h5>
+                            <p class="text-muted mb-3">Electronic & Video Game Music Producer</p>
+                            <a href="https://www.youtube.com/@Waterflame89" target="_blank" class="btn btn-outline-primary">
+                                <i class="fab fa-youtube me-1"></i> Visit Channel
+                            </a>
                         </div>
                     </div>
-                    
-                    <div class="col-md-6 col-lg-4 mb-3">
-                        <div class="playlist-card card h-100">
-                            <div class="playlist-cover p-4 text-center bg-gradient">
-                                <i class="fas fa-gamepad fa-3x text-success mb-2"></i>
-                                <h6 class="text-blue-glow mb-0">Gaming Focus</h6>
-                            </div>
-                            <div class="card-body">
-                                <p class="text-sm text-muted mb-2">Epic soundtracks and energetic tracks for gaming</p>
-                                <div class="playlist-stats">
-                                    <small class="text-muted">
-                                        <i class="fas fa-music me-1"></i> 38 tracks
-                                        <span class="mx-2">•</span>
-                                        <i class="fas fa-clock me-1"></i> 2h 45m
-                                    </small>
-                                </div>
-                                <div class="playlist-actions mt-3">
-                                    <button class="btn btn-sm btn-success w-100 mb-2">
-                                        <i class="fas fa-play"></i> Play
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-primary w-100">
-                                        <i class="fas fa-list"></i> View Tracks
-                                    </button>
-                                </div>
-                            </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="artist-card text-center p-4 border rounded">
+                            <i class="fas fa-guitar fa-3x text-success mb-3"></i>
+                            <h5 class="text-blue-glow">JoHassa</h5>
+                            <p class="text-muted mb-3">Electronic & Rock Music Artist</p>
+                            <a href="https://www.youtube.com/@JoHassaMusic" target="_blank" class="btn btn-outline-success">
+                                <i class="fab fa-youtube me-1"></i> Visit Channel
+                            </a>
                         </div>
                     </div>
-                    
-                    <div class="col-md-6 col-lg-4 mb-3">
-                        <div class="playlist-card card h-100">
-                            <div class="playlist-cover p-4 text-center bg-gradient">
-                                <i class="fas fa-coffee fa-3x text-warning mb-2"></i>
-                                <h6 class="text-blue-glow mb-0">Everyday Focus</h6>
-                            </div>
-                            <div class="card-body">
-                                <p class="text-sm text-muted mb-2">Perfect background music for daily activities</p>
-                                <div class="playlist-stats">
-                                    <small class="text-muted">
-                                        <i class="fas fa-music me-1"></i> 52 tracks
-                                        <span class="mx-2">•</span>
-                                        <i class="fas fa-clock me-1"></i> 3h 55m
-                                    </small>
-                                </div>
-                                <div class="playlist-actions mt-3">
-                                    <button class="btn btn-sm btn-success w-100 mb-2">
-                                        <i class="fas fa-play"></i> Play
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-primary w-100">
-                                        <i class="fas fa-list"></i> View Tracks
-                                    </button>
-                                </div>
-                            </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="artist-card text-center p-4 border rounded">
+                            <i class="fas fa-headphones fa-3x text-warning mb-3"></i>
+                            <h5 class="text-blue-glow">Turq</h5>
+                            <p class="text-muted mb-3">Electronic Music Producer</p>
+                            <a href="https://www.youtube.com/@TurqMusic" target="_blank" class="btn btn-outline-warning">
+                                <i class="fab fa-youtube me-1"></i> Visit Channel
+                            </a>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- YouTube Channel -->
-        <div class="card shadow mb-4">
+        <!-- My YouTube Channel -->
+        <div class="card shadow mb-5">
             <div class="card-header bg-danger text-white">
-                <h5 class="mb-0"><i class="fab fa-youtube"></i> My YouTube Music Channel</h5>
+                <h5 class="mb-0"><i class="fab fa-youtube"></i> My YouTube Channel</h5>
             </div>
             <div class="card-body text-center">
                 <div class="row align-items-center mb-4">
                     <div class="col-md-4">
                         <div class="youtube-channel-info">
                             <i class="fab fa-youtube fa-4x text-danger mb-3"></i>
-                            <h5 class="text-blue-glow">ZjadowRealm Music</h5>
-                            <p class="text-muted">My original music uploads and covers</p>
+                            <h5 class="text-blue-glow">-bAStIAN-</h5>
+                            <p class="text-muted">My music uploads and covers</p>
                         </div>
                     </div>
                     <div class="col-md-8">
@@ -301,20 +151,20 @@
                             <div class="row text-center">
                                 <div class="col-4">
                                     <div class="stat-item p-3">
-                                        <h4 class="text-danger">[XX]</h4>
+                                        <h4 class="text-danger">10</h4>
                                         <small class="text-muted">Videos</small>
                                     </div>
                                 </div>
                                 <div class="col-4">
                                     <div class="stat-item p-3">
-                                        <h4 class="text-success">[XXX]</h4>
+                                        <h4 class="text-success">Growing</h4>
                                         <small class="text-muted">Subscribers</small>
                                     </div>
                                 </div>
                                 <div class="col-4">
                                     <div class="stat-item p-3">
-                                        <h4 class="text-warning">[X,XXX]</h4>
-                                        <small class="text-muted">Views</small>
+                                        <h4 class="text-warning">Active</h4>
+                                        <small class="text-muted">Creator</small>
                                     </div>
                                 </div>
                             </div>
@@ -333,640 +183,529 @@
             </div>
         </div>
 
-        <!-- Music Videos -->
-        <div class="card shadow mb-4 music-section" data-section="videos">
-            <div class="card-header bg-danger text-white">
-                <h5 class="mb-0"><i class="fab fa-youtube"></i> Music Videos</h5>
+        <!-- Selected Tracks -->
+        <div class="card shadow mb-4">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0"><i class="fas fa-list"></i> Selected Tracks</h5>
             </div>
             <div class="card-body">
-                <div class="row" id="videoGallery">
+                <div class="row" id="selectedTracks">
                     <div class="col-md-6 col-lg-4 mb-4">
-                        <div class="video-card" onclick="switchTrack('9S_1gyRKwaY', 'Perfect - Ed Sheeran Cover', 'A beautiful acoustic cover of Ed Sheerans Perfect. This intimate performance showcases the emotional depth of this beloved song.')">
+                        <div class="track-card" onclick="switchTrack('9S_1gyRKwaY', 'Perfect - Ed Sheeran Cover', 'A beautiful acoustic cover of Ed Sheerans Perfect. This intimate performance showcases the emotional depth of this beloved song.')">
                             <div class="video-thumbnail">
                                 <img src="https://img.youtube.com/vi/9S_1gyRKwaY/hqdefault.jpg" alt="Perfect Cover" class="img-fluid rounded">
                                 <div class="video-overlay">
                                     <i class="fas fa-play-circle fa-3x text-white"></i>
                                 </div>
+                                <div class="track-info-overlay">
+                                    <h6 class="text-white mb-1">Perfect - Ed Sheeran Cover</h6>
+                                    <small class="text-light">by -bAStIAN-</small>
+                                </div>
                             </div>
-                            <h6 class="mt-2 text-blue-glow">Perfect - Ed Sheeran</h6>
-                            <small class="text-muted">Acoustic Cover</small>
                         </div>
                     </div>
-                    
+
                     <div class="col-md-6 col-lg-4 mb-4">
-                        <div class="video-card" onclick="switchTrack('Lu07IcTJ2FI', 'Original Song - Midnight Dreams', 'An original composition that takes you on a journey through late-night thoughts and dreams.')">
+                        <div class="track-card" onclick="switchTrack('Lu07IcTJ2FI', 'Original Song - Midnight Dreams', 'An original composition that takes you on a journey through late-night thoughts and dreams.')">
                             <div class="video-thumbnail">
                                 <img src="https://img.youtube.com/vi/Lu07IcTJ2FI/hqdefault.jpg" alt="Midnight Dreams" class="img-fluid rounded">
                                 <div class="video-overlay">
                                     <i class="fas fa-play-circle fa-3x text-white"></i>
                                 </div>
+                                <div class="track-info-overlay">
+                                    <h6 class="text-white mb-1">Midnight Dreams</h6>
+                                    <small class="text-light">Original by -bAStIAN-</small>
+                                </div>
                             </div>
-                            <h6 class="mt-2 text-blue-glow">Midnight Dreams</h6>
-                            <small class="text-muted">Original Song</small>
                         </div>
                     </div>
-                    
+
                     <div class="col-md-6 col-lg-4 mb-4">
-                        <div class="video-card" onclick="switchTrack('VXnuUW-WGhg', 'Acoustic Session - Wonderwall', 'A stripped-down acoustic version of the classic Oasis hit with a personal touch.')">
+                        <div class="track-card" onclick="switchTrack('VXnuUW-WGhg', 'Acoustic Session - Wonderwall', 'A stripped-down acoustic version of the classic Oasis hit with a personal touch.')">
                             <div class="video-thumbnail">
-                                <img src="https://img.youtube.com/vi/VXnuUW-WGhg/hqdefault.jpg" alt="Wonderwall Cover" class="img-fluid rounded">
+                                <img src="https://img.youtube.com/vi/VXnuUW-WGhg/hqdefault.jpg" alt="Wonderwall Acoustic" class="img-fluid rounded">
                                 <div class="video-overlay">
                                     <i class="fas fa-play-circle fa-3x text-white"></i>
                                 </div>
+                                <div class="track-info-overlay">
+                                    <h6 class="text-white mb-1">Wonderwall - Acoustic</h6>
+                                    <small class="text-light">Cover by -bAStIAN-</small>
+                                </div>
                             </div>
-                            <h6 class="mt-2 text-blue-glow">Wonderwall</h6>
-                            <small class="text-muted">Acoustic Cover</small>
                         </div>
                     </div>
-                    
+
                     <div class="col-md-6 col-lg-4 mb-4">
-                        <div class="video-card" onclick="switchTrack('dQw4w9WgXcQ', 'Never Gonna Give You Up Cover', 'A modern take on the classic Rick Astley hit with contemporary arrangement.')">
+                        <div class="track-card" onclick="switchTrack('dQw4w9WgXcQ', 'Never Gonna Give You Up Cover', 'A modern take on the classic Rick Astley hit with contemporary arrangement.')">
                             <div class="video-thumbnail">
                                 <img src="https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg" alt="Never Gonna Give You Up" class="img-fluid rounded">
                                 <div class="video-overlay">
                                     <i class="fas fa-play-circle fa-3x text-white"></i>
                                 </div>
+                                <div class="track-info-overlay">
+                                    <h6 class="text-white mb-1">Never Gonna Give You Up</h6>
+                                    <small class="text-light">Cover by -bAStIAN-</small>
+                                </div>
                             </div>
-                            <h6 class="mt-2 text-blue-glow">Never Gonna Give You Up</h6>
-                            <small class="text-muted">Cover Version</small>
                         </div>
                     </div>
-                    
+
                     <div class="col-md-6 col-lg-4 mb-4">
-                        <div class="video-card" onclick="switchTrack('kJQP7kiw5Fk', 'Despacito - Acoustic', 'A soulful acoustic interpretation of the global hit with Spanish guitar influences.')">
+                        <div class="track-card" onclick="switchTrack('kJQP7kiw5Fk', 'Despacito - Acoustic', 'A soulful acoustic interpretation of the global hit with Spanish guitar influences.')">
                             <div class="video-thumbnail">
-                                <img src="https://img.youtube.com/vi/kJQP7kiw5Fk/hqdefault.jpg" alt="Despacito Cover" class="img-fluid rounded">
+                                <img src="https://img.youtube.com/vi/kJQP7kiw5Fk/hqdefault.jpg" alt="Despacito Acoustic" class="img-fluid rounded">
                                 <div class="video-overlay">
                                     <i class="fas fa-play-circle fa-3x text-white"></i>
                                 </div>
+                                <div class="track-info-overlay">
+                                    <h6 class="text-white mb-1">Despacito - Acoustic</h6>
+                                    <small class="text-light">Cover by -bAStIAN-</small>
+                                </div>
                             </div>
-                            <h6 class="mt-2 text-blue-glow">Despacito</h6>
-                            <small class="text-muted">Acoustic Version</small>
                         </div>
                     </div>
-                    
+
                     <div class="col-md-6 col-lg-4 mb-4">
-                        <div class="video-card" onclick="switchTrack('9bZkp7q19f0', 'Gangnam Style Remix', 'An electronic remix of the viral K-pop hit with modern production elements.')">
+                        <div class="track-card" onclick="switchTrack('9bZkp7q19f0', 'Gangnam Style Remix', 'An electronic remix of the viral K-pop hit with modern production elements.')">
                             <div class="video-thumbnail">
                                 <img src="https://img.youtube.com/vi/9bZkp7q19f0/hqdefault.jpg" alt="Gangnam Style Remix" class="img-fluid rounded">
                                 <div class="video-overlay">
                                     <i class="fas fa-play-circle fa-3x text-white"></i>
                                 </div>
+                                <div class="track-info-overlay">
+                                    <h6 class="text-white mb-1">Gangnam Style Remix</h6>
+                                    <small class="text-light">Remix by -bAStIAN-</small>
+                                </div>
                             </div>
-                            <h6 class="mt-2 text-blue-glow">Gangnam Style</h6>
-                            <small class="text-muted">Electronic Remix</small>
                         </div>
                     </div>
-                    
+
                     <div class="col-md-6 col-lg-4 mb-4">
-                        <div class="video-card" onclick="switchTrack('e9iLobg8WHo', 'Deep Focus Mix', 'A calming deep focus mix perfect for concentration and productivity.')">
+                        <div class="track-card" onclick="switchTrack('e9iLobg8WHo', 'Deep Focus Mix', 'A calming deep focus mix perfect for concentration and productivity.')">
                             <div class="video-thumbnail">
                                 <img src="https://img.youtube.com/vi/e9iLobg8WHo/hqdefault.jpg" alt="Deep Focus Mix" class="img-fluid rounded">
                                 <div class="video-overlay">
                                     <i class="fas fa-play-circle fa-3x text-white"></i>
                                 </div>
+                                <div class="track-info-overlay">
+                                    <h6 class="text-white mb-1">Deep Focus Mix</h6>
+                                    <small class="text-light">Mix by -bAStIAN-</small>
+                                </div>
                             </div>
-                            <h6 class="mt-2 text-blue-glow">Deep Focus Mix</h6>
-                            <small class="text-muted">Ambient/Study</small>
                         </div>
                     </div>
-                    
+
                     <div class="col-md-6 col-lg-4 mb-4">
-                        <div class="video-card" onclick="switchTrack('e6sc03r5ejI', 'Chill Electronic Vibes', 'Relaxing electronic beats for a chill atmosphere.')">
+                        <div class="track-card" onclick="switchTrack('e6sc03r5ejI', 'Chill Electronic Vibes', 'Relaxing electronic beats for a chill atmosphere.')">
                             <div class="video-thumbnail">
                                 <img src="https://img.youtube.com/vi/e6sc03r5ejI/hqdefault.jpg" alt="Chill Electronic" class="img-fluid rounded">
                                 <div class="video-overlay">
                                     <i class="fas fa-play-circle fa-3x text-white"></i>
                                 </div>
+                                <div class="track-info-overlay">
+                                    <h6 class="text-white mb-1">Chill Electronic Vibes</h6>
+                                    <small class="text-light">Original by -bAStIAN-</small>
+                                </div>
                             </div>
-                            <h6 class="mt-2 text-blue-glow">Chill Electronic</h6>
-                            <small class="text-muted">Electronic/Ambient</small>
                         </div>
                     </div>
-                    
+
                     <div class="col-md-6 col-lg-4 mb-4">
-                        <div class="video-card" onclick="switchTrack('pYwK6r2Nmm0', 'Upbeat Energy Track', 'High-energy music to boost motivation and mood.')">
+                        <div class="track-card" onclick="switchTrack('pYwK6r2Nmm0', 'Upbeat Energy Track', 'High-energy music to boost motivation and mood.')">
                             <div class="video-thumbnail">
                                 <img src="https://img.youtube.com/vi/pYwK6r2Nmm0/hqdefault.jpg" alt="Upbeat Energy" class="img-fluid rounded">
                                 <div class="video-overlay">
                                     <i class="fas fa-play-circle fa-3x text-white"></i>
                                 </div>
+                                <div class="track-info-overlay">
+                                    <h6 class="text-white mb-1">Upbeat Energy Track</h6>
+                                    <small class="text-light">Original by -bAStIAN-</small>
+                                </div>
                             </div>
-                            <h6 class="mt-2 text-blue-glow">Upbeat Energy</h6>
-                            <small class="text-muted">Electronic/Dance</small>
                         </div>
                     </div>
-                    
+
                     <div class="col-md-6 col-lg-4 mb-4">
-                        <div class="video-card" onclick="switchTrack('RffcTeucykY', 'Melodic Journey', 'A beautiful melodic journey through soundscapes.')">
+                        <div class="track-card" onclick="switchTrack('RffcTeucykY', 'Melodic Journey', 'A beautiful melodic journey through soundscapes.')">
                             <div class="video-thumbnail">
                                 <img src="https://img.youtube.com/vi/RffcTeucykY/hqdefault.jpg" alt="Melodic Journey" class="img-fluid rounded">
                                 <div class="video-overlay">
                                     <i class="fas fa-play-circle fa-3x text-white"></i>
                                 </div>
-                            </div>
-                            <h6 class="mt-2 text-blue-glow">Melodic Journey</h6>
-                            <small class="text-muted">Ambient/Melodic</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        <!-- Music Links -->
-        <div class="card shadow">
-            <div class="card-header bg-danger text-white">
-                <h5 class="mb-0"><i class="fab fa-youtube"></i> My YouTube Music Channel</h5>
-            </div>
-            <div class="card-body text-center">
-                <div class="row align-items-center mb-4">
-                    <div class="col-md-4">
-                        <div class="youtube-channel-info">
-                            <i class="fab fa-youtube fa-4x text-danger mb-3"></i>
-                            <h5 class="text-blue-glow">ZjadowSide Music</h5>
-                            <p class="text-muted">My original music uploads and covers</p>
-                        </div>
-                    </div>
-                    <div class="col-md-8">
-                        <div class="channel-stats">
-                            <div class="row text-center">
-                                <div class="col-4">
-                                    <div class="stat-item p-3">
-                                        <h4 class="text-danger">[XX]</h4>
-                                        <small class="text-muted">Videos</small>
-                                    </div>
-                                </div>
-                                <div class="col-4">
-                                    <div class="stat-item p-3">
-                                        <h4 class="text-success">[XXX]</h4>
-                                        <small class="text-muted">Subscribers</small>
-                                    </div>
-                                </div>
-                                <div class="col-4">
-                                    <div class="stat-item p-3">
-                                        <h4 class="text-warning">[X,XXX]</h4>
-                                        <small class="text-muted">Views</small>
-                                    </div>
+                                <div class="track-info-overlay">
+                                    <h6 class="text-white mb-1">Melodic Journey</h6>
+                                    <small class="text-light">Original by -bAStIAN-</small>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                
-                <div class="youtube-actions mb-4">
-                    <a href="https://www.youtube.com/@-bAStIAN-" target="_blank" class="btn btn-danger btn-lg me-3 mb-2">
-                        <i class="fab fa-youtube me-2"></i> Visit Channel
-                    </a>
-                    <a href="https://www.youtube.com/@-bAStIAN-?sub_confirmation=1" target="_blank" class="btn btn-outline-danger btn-lg mb-2">
-                        <i class="fas fa-bell me-2"></i> Subscribe
-                    </a>
                 </div>
             </div>
         </div>
     </div>
 </div>
-{% endblock %}
 
-{% block scripts %}
-<script>
-// Playlist data
-const playlist = [
-    {
-        id: '9S_1gyRKwaY',
-        title: 'Perfect - Ed Sheeran Cover',
-        description: 'A beautiful acoustic cover of Ed Sheeran\'s "Perfect". This intimate performance showcases the emotional depth of this beloved song with a personal touch.',
-        thumbnail: 'https://img.youtube.com/vi/9S_1gyRKwaY/maxresdefault.jpg'
-    },
-    {
-        id: 'Lu07IcTJ2FI', 
-        title: 'Midnight Dreams',
-        description: 'An original composition that takes you on a journey through late-night thoughts and dreams.',
-        thumbnail: 'https://img.youtube.com/vi/Lu07IcTJ2FI/maxresdefault.jpg'
-    },
-    {
-        id: 'VXnuUW-WGhg',
-        title: 'Wonderwall - Acoustic',
-        description: 'A stripped-down acoustic version of the classic Oasis hit with a personal touch.',
-        thumbnail: 'https://img.youtube.com/vi/VXnuUW-WGhg/maxresdefault.jpg'
-    },
-    {
-        id: 'dQw4w9WgXcQ',
-        title: 'Never Gonna Give You Up Cover',
-        description: 'A modern take on the classic Rick Astley hit with contemporary arrangement.',
-        thumbnail: 'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg'
-    },
-    {
-        id: 'kJQP7kiw5Fk',
-        title: 'Despacito - Acoustic',
-        description: 'A soulful acoustic interpretation of the global hit with Spanish guitar influences.',
-        thumbnail: 'https://img.youtube.com/vi/kJQP7kiw5Fk/maxresdefault.jpg'
-    },
-    {
-        id: '9bZkp7q19f0',
-        title: 'Gangnam Style Remix',
-        description: 'An electronic remix of the viral K-pop hit with modern production elements.',
-        thumbnail: 'https://img.youtube.com/vi/9bZkp7q19f0/maxresdefault.jpg'
-    },
-    {
-        id: 'e9iLobg8WHo',
-        title: 'Deep Focus Mix',
-        description: 'A calming deep focus mix perfect for concentration and productivity.',
-        thumbnail: 'https://img.youtube.com/vi/e9iLobg8WHo/maxresdefault.jpg'
-    },
-    {
-        id: 'e6sc03r5ejI',
-        title: 'Chill Electronic Vibes',
-        description: 'Relaxing electronic beats for a chill atmosphere.',
-        thumbnail: 'https://img.youtube.com/vi/e6sc03r5ejI/maxresdefault.jpg'
-    },
-    {
-        id: 'pYwK6r2Nmm0',
-        title: 'Upbeat Energy Track',
-        description: 'High-energy music to boost motivation and mood.',
-        thumbnail: 'https://img.youtube.com/vi/pYwK6r2Nmm0/maxresdefault.jpg'
-    },
-    {
-        id: 'RffcTeucykY',
-        title: 'Melodic Journey',
-        description: 'A beautiful melodic journey through soundscapes.',
-        thumbnail: 'https://img.youtube.com/vi/RffcTeucykY/maxresdefault.jpg'
+<style>
+/* Track Card Styles */
+.track-card {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+}
+
+.track-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.video-thumbnail {
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+}
+
+.video-thumbnail img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.track-card:hover .video-thumbnail img {
+    transform: scale(1.05);
+}
+
+.video-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.track-card:hover .video-overlay {
+    opacity: 1;
+}
+
+.track-info-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,0.8));
+    color: white;
+    padding: 20px 15px 15px;
+}
+
+/* Artist Card Styles */
+.artist-card {
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.artist-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+/* Video Player Styles */
+.video-player-container {
+    position: relative;
+    background: #000;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.video-thumbnail-img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 2;
+}
+
+.video-iframe {
+    display: none;
+    z-index: 3;
+}
+
+.video-iframe.active {
+    display: block;
+}
+
+.video-thumbnail-img.hidden {
+    display: none;
+}
+
+/* Now Playing Styles */
+.now-playing {
+    border-left: 5px solid #28a745;
+}
+
+.now-playing-controls .btn {
+    min-width: 40px;
+}
+
+/* Volume Control Styles */
+.volume-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.volume-controls i {
+    transition: color 0.3s ease;
+}
+
+.volume-controls i:hover {
+    color: #fff;
+}
+
+/* YouTube Channel Stats */
+.stat-item {
+    border-radius: 8px;
+    background: rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+}
+
+.stat-item:hover {
+    background: rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .video-thumbnail img {
+        height: 150px;
     }
+    
+    .track-info-overlay {
+        padding: 15px 10px 10px;
+    }
+    
+    .now-playing-controls {
+        margin-bottom: 15px;
+    }
+    
+    .track-actions {
+        justify-content: center;
+        width: 100%;
+    }
+}
+</style>
+
+<script>
+// Track management
+let currentVideoId = '9S_1gyRKwaY';
+let currentVolume = 50;
+let isPlaying = false;
+let currentTrackIndex = 0;
+
+// Track playlist
+const tracks = [
+    { id: '9S_1gyRKwaY', title: 'Perfect - Ed Sheeran Cover', description: 'A beautiful acoustic cover of Ed Sheerans Perfect. This intimate performance showcases the emotional depth of this beloved song.' },
+    { id: 'Lu07IcTJ2FI', title: 'Original Song - Midnight Dreams', description: 'An original composition that takes you on a journey through late-night thoughts and dreams.' },
+    { id: 'VXnuUW-WGhg', title: 'Acoustic Session - Wonderwall', description: 'A stripped-down acoustic version of the classic Oasis hit with a personal touch.' },
+    { id: 'dQw4w9WgXcQ', title: 'Never Gonna Give You Up Cover', description: 'A modern take on the classic Rick Astley hit with contemporary arrangement.' },
+    { id: 'kJQP7kiw5Fk', title: 'Despacito - Acoustic', description: 'A soulful acoustic interpretation of the global hit with Spanish guitar influences.' },
+    { id: '9bZkp7q19f0', title: 'Gangnam Style Remix', description: 'An electronic remix of the viral K-pop hit with modern production elements.' },
+    { id: 'e9iLobg8WHo', title: 'Deep Focus Mix', description: 'A calming deep focus mix perfect for concentration and productivity.' },
+    { id: 'e6sc03r5ejI', title: 'Chill Electronic Vibes', description: 'Relaxing electronic beats for a chill atmosphere.' },
+    { id: 'pYwK6r2Nmm0', title: 'Upbeat Energy Track', description: 'High-energy music to boost motivation and mood.' },
+    { id: 'RffcTeucykY', title: 'Melodic Journey', description: 'A beautiful melodic journey through soundscapes.' }
 ];
 
-let currentTrackIndex = 0;
-let isPlaying = false;
-let isMuted = false;
-let player = null;
-let savedPosition = 0;
-
-// Load YouTube Player API
-function loadYouTubeAPI() {
-    if (!window.YT) {
-        console.log('Loading YouTube API...');
-        const tag = document.createElement('script');
-        tag.src = 'https://www.youtube.com/iframe_api';
-        tag.onload = function() {
-            console.log('YouTube API script loaded');
-        };
-        tag.onerror = function() {
-            console.error('Failed to load YouTube API');
-        };
-        const firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-    } else {
-        console.log('YouTube API already loaded');
-    }
-}
-
-// YouTube API ready callback
-function onYouTubeIframeAPIReady() {
-    console.log('YouTube API is ready');
-    // API is loaded and ready
-    // If we have a pending video to play, play it now
-    if (currentTrackIndex >= 0 && !isPlaying) {
-        // API is now ready, we can use it for future video plays
-    }
-}
-
+// Switch track function
 function switchTrack(videoId, title, description) {
-    // Save current position if player exists
-    if (player && isPlaying) {
-        try {
-            savedPosition = player.getCurrentTime();
-        } catch (e) {
-            savedPosition = 0;
-        }
-    }
+    currentVideoId = videoId;
     
-    // Find the track index
-    currentTrackIndex = playlist.findIndex(track => track.id === videoId);
-    if (currentTrackIndex === -1) currentTrackIndex = 0;
-    
-    // Reset saved position for new track
-    savedPosition = 0;
+    // Update current track index
+    currentTrackIndex = tracks.findIndex(track => track.id === videoId);
     
     // Update UI
     updateTrackInfo(title, description);
-    updateThumbnail(playlist[currentTrackIndex].thumbnail);
+    updateVideoPlayer(videoId);
     
-    // Reset play state
-    isPlaying = false;
-    document.getElementById('playPauseIcon').className = 'fas fa-play';
-    
-    // Hide iframe and show thumbnail
-    document.getElementById('nowPlayingPlayer').style.display = 'none';
-    document.querySelector('.video-container').style.display = 'block';
-    
-    // Destroy existing player
-    if (player) {
-        player.destroy();
-        player = null;
-    }
-    
-    // Automatically start playing the new track
-    setTimeout(() => {
-        playCurrentVideo();
-    }, 100);
+    // Start playing
+    playVideo();
 }
 
-function toggleMute() {
-    const volumeIcon = document.getElementById('volumeIcon');
-    
-    isMuted = !isMuted;
-    
-    if (isMuted) {
-        volumeIcon.className = 'fas fa-volume-mute';
-        volumeIcon.title = 'Unmute';
-        if (player && isPlaying) {
-            player.mute();
-        }
-    } else {
-        volumeIcon.className = 'fas fa-volume-up';
-        volumeIcon.title = 'Toggle Mute';
-        if (player && isPlaying) {
-            player.unMute();
-        }
-    }
-}
-
+// Update track information
 function updateTrackInfo(title, description) {
     document.getElementById('currentTrackTitle').textContent = title;
     document.getElementById('currentTrackDescription').textContent = description;
-}
-
-function updateThumbnail(thumbnailUrl) {
-    document.getElementById('videoThumbnail').src = thumbnailUrl;
-}
-
-function playCurrentVideo() {
-    console.log('playCurrentVideo called, isPlaying:', isPlaying);
     
-    if (!isPlaying) {
-        const iframe = document.getElementById('nowPlayingPlayer');
-        const videoContainer = document.querySelector('.video-container');
-        const currentTrack = playlist[currentTrackIndex];
-        
-        console.log('Playing track:', currentTrack.title, 'ID:', currentTrack.id);
-        
-        iframe.style.display = 'block';
-        videoContainer.style.display = 'none';
-        
-        // Always use iframe method for reliability
-        let videoUrl = `https://www.youtube.com/embed/${currentTrack.id}?autoplay=1&enablejsapi=1&start=${Math.floor(savedPosition)}&rel=0`;
-        if (isMuted) {
-            videoUrl += '&mute=1';
-        }
-        
-        console.log('Loading video URL:', videoUrl);
-        iframe.src = videoUrl;
-        
-        isPlaying = true;
-        document.getElementById('playPauseIcon').className = 'fas fa-pause';
-        
-        // Try to create YouTube player for enhanced controls if API is available
-        if (window.YT && window.YT.Player) {
-            setTimeout(() => {
-                try {
-                    if (player) {
-                        player.destroy();
-                    }
-                    player = new YT.Player('nowPlayingPlayer', {
-                        events: {
-                            onReady: function(event) {
-                                console.log('YouTube player ready');
-                                if (isMuted) {
-                                    event.target.mute();
-                                }
-                            },
-                            onStateChange: function(event) {
-                                console.log('Player state changed:', event.data);
-                                if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.ENDED) {
-                                    isPlaying = false;
-                                    document.getElementById('playPauseIcon').className = 'fas fa-play';
-                                    try {
-                                        savedPosition = event.target.getCurrentTime();
-                                    } catch (e) {
-                                        savedPosition = 0;
-                                    }
-                                } else if (event.data === YT.PlayerState.PLAYING) {
-                                    isPlaying = true;
-                                    document.getElementById('playPauseIcon').className = 'fas fa-pause';
-                                }
-                            }
-                        }
-                    });
-                } catch (e) {
-                    console.error('Error creating YouTube player:', e);
-                }
-            }, 1000);
-        }
-    }
+    // Update thumbnail
+    document.getElementById('videoThumbnail').src = `https://img.youtube.com/vi/${currentVideoId}/maxresdefault.jpg`;
+    
+    // Simulate view count (in real app, this would come from YouTube API)
+    const viewCount = Math.floor(Math.random() * 100000) + 1000;
+    document.getElementById('viewCount').textContent = viewCount.toLocaleString();
 }
 
+// Update video player
+function updateVideoPlayer(videoId) {
+    const iframe = document.getElementById('nowPlayingPlayer');
+    const thumbnail = document.getElementById('videoThumbnail');
+    
+    // Hide thumbnail and show iframe
+    thumbnail.classList.add('hidden');
+    iframe.classList.add('active');
+    iframe.src = `https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=1&volume=${currentVolume}`;
+}
+
+// Play video
+function playVideo() {
+    const thumbnail = document.getElementById('videoThumbnail');
+    const iframe = document.getElementById('nowPlayingPlayer');
+    
+    thumbnail.classList.add('hidden');
+    iframe.classList.add('active');
+    iframe.src = `https://www.youtube.com/embed/${currentVideoId}?enablejsapi=1&autoplay=1&volume=${currentVolume}`;
+    
+    isPlaying = true;
+    document.getElementById('playPauseIcon').className = 'fas fa-pause';
+}
+
+// Toggle play/pause
 function togglePlayPause() {
-    if (!isPlaying) {
-        // Start playing the current track
-        playCurrentVideo();
-    } else {
-        // Pause the current track
-        if (player && typeof player.pauseVideo === 'function') {
-            try {
-                savedPosition = player.getCurrentTime();
-                player.pauseVideo();
-            } catch (e) {
-                console.error('Error pausing via API:', e);
-                // Fallback: hide the iframe
-                document.getElementById('nowPlayingPlayer').style.display = 'none';
-                document.querySelector('.video-container').style.display = 'block';
-            }
-        } else {
-            // Fallback for iframe
-            document.getElementById('nowPlayingPlayer').style.display = 'none';
-            document.querySelector('.video-container').style.display = 'block';
-            document.getElementById('nowPlayingPlayer').src = 'about:blank';
-        }
-        
+    const iframe = document.getElementById('nowPlayingPlayer');
+    const thumbnail = document.getElementById('videoThumbnail');
+    const icon = document.getElementById('playPauseIcon');
+    
+    if (isPlaying) {
+        // Pause - show thumbnail
+        iframe.classList.remove('active');
+        iframe.src = 'about:blank';
+        thumbnail.classList.remove('hidden');
+        icon.className = 'fas fa-play';
         isPlaying = false;
-        document.getElementById('playPauseIcon').className = 'fas fa-play';
+    } else {
+        // Play - show video
+        playVideo();
     }
 }
 
-function nextTrack() {
-    currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
-    const track = playlist[currentTrackIndex];
-    switchTrack(track.id, track.title, track.description);
-}
-
+// Previous track
 function previousTrack() {
-    currentTrackIndex = currentTrackIndex === 0 ? playlist.length - 1 : currentTrackIndex - 1;
-    const track = playlist[currentTrackIndex];
+    if (currentTrackIndex > 0) {
+        currentTrackIndex--;
+    } else {
+        currentTrackIndex = tracks.length - 1; // Loop to last track
+    }
+    
+    const track = tracks[currentTrackIndex];
     switchTrack(track.id, track.title, track.description);
 }
 
+// Next track
+function nextTrack() {
+    if (currentTrackIndex < tracks.length - 1) {
+        currentTrackIndex++;
+    } else {
+        currentTrackIndex = 0; // Loop to first track
+    }
+    
+    const track = tracks[currentTrackIndex];
+    switchTrack(track.id, track.title, track.description);
+}
+
+// Volume control functions
+function lowerVolume() {
+    if (currentVolume > 0) {
+        currentVolume = Math.max(0, currentVolume - 10);
+        updateVolume();
+    }
+}
+
+function raiseVolume() {
+    if (currentVolume < 100) {
+        currentVolume = Math.min(100, currentVolume + 10);
+        updateVolume();
+    }
+}
+
+function updateVolume() {
+    document.getElementById('volumeLevel').textContent = currentVolume + '%';
+    
+    // Update iframe volume if playing
+    const iframe = document.getElementById('nowPlayingPlayer');
+    if (isPlaying) {
+        // Note: Direct volume control requires YouTube API, this is a simplified version
+        iframe.src = `https://www.youtube.com/embed/${currentVideoId}?enablejsapi=1&autoplay=1&volume=${currentVolume}`;
+    }
+}
+
+// Share track function
 function shareTrack() {
-    const track = playlist[currentTrackIndex];
-    const shareText = `Check out this music: ${track.title} - https://youtube.com/watch?v=${track.id}`;
+    const url = `https://www.youtube.com/watch?v=${currentVideoId}`;
+    const title = document.getElementById('currentTrackTitle').textContent;
+    
     if (navigator.share) {
         navigator.share({
-            title: track.title,
-            text: shareText,
-            url: `https://youtube.com/watch?v=${track.id}`
+            title: title,
+            url: url
         });
     } else {
-        navigator.clipboard.writeText(shareText).then(() => {
-            alert('Share link copied to clipboard!');
+        // Fallback: copy to clipboard
+        navigator.clipboard.writeText(url).then(() => {
+            alert('Link copied to clipboard!');
         });
     }
 }
 
-function playEmbeddedVideo(videoId) {
-    const modalHtml = `
-        <div class="modal fade" id="videoModal" tabindex="-1">
-            <div class="modal-dialog modal-xl">
-                <div class="modal-content bg-dark">
-                    <div class="modal-header border-secondary">
-                        <h5 class="modal-title text-white">Video Player</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="ratio ratio-16x9">
-                            <iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1" 
-                                    title="Video player" 
-                                    frameborder="0" 
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                                    allowfullscreen>
-                            </iframe>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    const existingModal = document.getElementById('videoModal');
-    if (existingModal) {
-        existingModal.remove();
-    }
-    
-    document.body.insertAdjacentHTML('beforeend', modalHtml);
-    const modal = new bootstrap.Modal(document.getElementById('videoModal'));
-    modal.show();
-    
-    document.getElementById('videoModal').addEventListener('hidden.bs.modal', function () {
-        this.remove();
-    });
-}
-
-function openInModal() {
-    const track = playlist[currentTrackIndex];
-    playEmbeddedVideo(track.id);
-}
-
+// Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
-    // Load YouTube API for enhanced video control
-    loadYouTubeAPI();
+    // Update initial track info
+    updateTrackInfo('Perfect - Ed Sheeran Cover', 'A beautiful acoustic cover of Ed Sheerans Perfect. This intimate performance showcases the emotional depth of this beloved song.');
     
-    // Initialize with first track
-    const firstTrack = playlist[0];
-    updateTrackInfo(firstTrack.title, firstTrack.description);
-    updateThumbnail(firstTrack.thumbnail);
+    // Update volume display
+    document.getElementById('volumeLevel').textContent = currentVolume + '%';
     
-    // Music category filtering
-    const categoryButtons = document.querySelectorAll('input[name="musicCategory"]');
-    const musicSections = document.querySelectorAll('.music-section');
-    
-    categoryButtons.forEach(button => {
-        button.addEventListener('change', function() {
-            const selectedCategory = this.id.replace('allMusic', 'all');
-            
-            musicSections.forEach(section => {
-                if (selectedCategory === 'all' || section.getAttribute('data-section') === selectedCategory) {
-                    section.style.display = 'block';
-                    section.style.animation = 'fadeIn 0.5s ease';
-                } else {
-                    section.style.display = 'none';
-                }
-            });
+    // Add hover effects to track cards
+    const trackCards = document.querySelectorAll('.track-card');
+    trackCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-5px)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
         });
     });
-    
-    // Add music-specific styling
-    const style = document.createElement('style');
-    style.textContent = `
-        .now-playing {
-            background: linear-gradient(135deg, var(--dark-gray), var(--metal-gray));
-            border: 1px solid var(--blue-accent);
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    if (e.target.tagName.toLowerCase() !== 'input' && e.target.tagName.toLowerCase() !== 'textarea') {
+        switch(e.code) {
+            case 'Space':
+                e.preventDefault();
+                togglePlayPause();
+                break;
+            case 'ArrowLeft':
+                e.preventDefault();
+                previousTrack();
+                break;
+            case 'ArrowRight':
+                e.preventDefault();
+                nextTrack();
+                break;
+            case 'ArrowUp':
+                e.preventDefault();
+                raiseVolume();
+                break;
+            case 'ArrowDown':
+                e.preventDefault();
+                lowerVolume();
+                break;
         }
-        
-        .video-player-container {
-            position: relative;
-        }
-        
-        .video-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 2;
-        }
-        
-        .video-iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 3;
-            display: none;
-        }
-        
-        .video-thumbnail-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        .video-card {
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .video-card:hover {
-            transform: translateY(-3px);
-        }
-        
-        .video-card .video-thumbnail {
-            position: relative;
-        }
-        
-        .video-card .video-overlay {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        
-        .video-card:hover .video-overlay {
-            opacity: 1;
-        }
-        
-        .track-card, .playlist-card {
-            transition: all 0.3s ease;
-        }
-        
-        .track-card:hover, .playlist-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-    `;
-    document.head.appendChild(style);
+    }
 });
 </script>
 {% endblock %}
