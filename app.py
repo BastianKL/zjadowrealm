@@ -4,6 +4,9 @@ import os
 
 app = Flask(__name__)
 
+# Updated: Force deployment refresh 2025-11-20
+print("Starting Zjadow Realm Flask application...")
+
 @app.route('/')
 def home():
     """Home page with overview"""
