@@ -77,5 +77,5 @@ def minecraft():
 if __name__ == '__main__':
     # For deployment, use environment variables
     port = int(os.environ.get('PORT', 5000))
-    debug = os.environ.get('FLASK_ENV') == 'development'
-    app.run(debug=debug, host='0.0.0.0', port=port)
+    debug = os.environ.get('FLASK_ENV', 'development') == 'development'
+    app.run(debug=True, host='0.0.0.0', port=port)  # Always use debug=True for local development
