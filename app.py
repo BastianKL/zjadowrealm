@@ -77,6 +77,11 @@ def minecraft():
     """Minecraft blog page"""
     return render_template('minecraft.html')
 
+@app.route('/dinner-recipes')
+def dinner_recipes():
+    """Simple dinner recipes for everyday cooking"""
+    return render_template('dinner_recipes.html')
+
 if __name__ == '__main__':
     # For deployment, use environment variables
     port = int(os.environ.get('PORT', 5000))

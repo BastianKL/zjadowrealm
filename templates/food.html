@@ -4,127 +4,300 @@
 
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-lg-8">
+    <div class="col-lg-10">
         <div class="text-center mb-5">
             <h1 class="display-5 fw-bold mb-3">
                 <i class="fas fa-utensils text-success"></i> Zjadow Diet
             </h1>
-            <p class="lead text-muted">My simple daily eating routine</p>
+            <p class="lead text-muted">My simple daily eating routine and nutritional supplements</p>
         </div>
 
-        <!-- Daily Routine -->
-        <div class="card shadow-lg border-0 bg-dark-gray">
-            <div class="card-header bg-success text-white text-center">
-                <h4 class="mb-0">Everyday is the same</h4>
-            </div>
-            <div class="card-body text-light">
-                
-                <!-- Morning Meal -->
-                <div class="meal-section mb-5">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="meal-icon me-3">
-                            <i class="fas fa-sun fa-2x text-warning"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-warning mb-1">Morning Meal</h3>
-                            <small class="text-muted">Start of the day</small>
-                        </div>
+        <div class="row">
+            <!-- Left Column - Food & Drinks -->
+            <div class="col-lg-8">
+                <div class="card shadow-lg border-0 bg-dark-gray">
+                    <div class="card-header bg-success text-white text-center">
+                        <h4 class="mb-0">Daily Meals & Drinks</h4>
                     </div>
-                    <div class="meal-content ps-5">
-                        <ul class="list-unstyled">
-                            <li class="mb-2">
-                                <i class="fas fa-bowl-rice text-info me-2"></i>
-                                <span>Bowl of Oats with milk</span>
-                            </li>
-                            <li class="mb-2">
-                                <i class="fas fa-apple-alt text-danger me-2"></i>
-                                <span>1 fruit</span>
-                            </li>
-                            <li class="mb-2">
-                                <i class="fas fa-glass-water text-primary me-2"></i>
-                                <span>3 glasses of water</span>
-                            </li>
-                        </ul>
+                    <div class="card-body text-light">
+                        
+                        <!-- Morning Meal -->
+                        <div class="meal-section mb-5">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="meal-icon me-3">
+                                    <i class="fas fa-sun fa-2x text-warning"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-warning mb-1">Morning Meal</h3>
+                                    <small class="text-muted">Start of the day</small>
+                                </div>
+                            </div>
+                            <div class="meal-content ps-5">
+                                <ul class="list-unstyled">
+                                    <li class="mb-2 d-flex align-items-center">
+                                        <i class="fas fa-bowl-rice text-info me-2"></i>
+                                        <span id="oats-text">Bowl of Oats with milk</span>
+                                        <button class="btn btn-outline-info btn-sm ms-3" onclick="swapOats()">
+                                            <i class="fas fa-exchange-alt"></i> Swap
+                                        </button>
+                                    </li>
+                                    <li class="mb-2 d-flex align-items-center">
+                                        <i class="fas fa-apple-alt text-danger me-2"></i>
+                                        <span id="fruit-text">1 fruit</span>
+                                        <button class="btn btn-outline-danger btn-sm ms-3" onclick="swapFruit()">
+                                            <i class="fas fa-exchange-alt"></i> Swap
+                                        </button>
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="fas fa-glass-water text-primary me-2"></i>
+                                        <span>3 glasses of water</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Noon Meal -->
+                        <div class="meal-section mb-5">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="meal-icon me-3">
+                                    <i class="fas fa-sun fa-2x text-success"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-success mb-1">Noon Meal</h3>
+                                    <small class="text-muted">Main meal of the day</small>
+                                </div>
+                            </div>
+                            <div class="meal-content ps-5">
+                                <ul class="list-unstyled">
+                                    <li class="mb-2">
+                                        <i class="fas fa-bread-slice text-warning me-2"></i>
+                                        <span>6 Pieces of Rye Bread with meat slices and cheese</span>
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="fas fa-egg text-warning me-2"></i>
+                                        <span>2 eggs</span>
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="fas fa-glass-water text-primary me-2"></i>
+                                        <span>3 glasses of water</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Evening Meal -->
+                        <div class="meal-section mb-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="meal-icon me-3">
+                                    <i class="fas fa-moon fa-2x text-info"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-info mb-1">Evening Meal</h3>
+                                    <small class="text-muted">Flexible dinner</small>
+                                </div>
+                            </div>
+                            <div class="meal-content ps-5">
+                                <ul class="list-unstyled">
+                                    <li class="mb-2 d-flex align-items-center">
+                                        <i class="fas fa-utensils text-secondary me-2"></i>
+                                        <span>Anything</span>
+                                        <a href="/dinner-recipes" class="btn btn-outline-info btn-sm ms-3">
+                                            <i class="fas fa-book"></i> Recipe Ideas
+                                        </a>
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="fas fa-glass-water text-primary me-2"></i>
+                                        <span>2 glasses of water</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="card-footer bg-secondary text-center">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Simple and consistent daily nutrition - use swap buttons for variety!
+                        </small>
                     </div>
                 </div>
 
-                <hr class="my-4">
-
-                <!-- Noon Meal -->
-                <div class="meal-section mb-5">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="meal-icon me-3">
-                            <i class="fas fa-sun fa-2x text-warning"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-warning mb-1">Noon Meal</h3>
-                            <small class="text-muted">Main meal of the day</small>
-                        </div>
-                    </div>
-                    <div class="meal-content ps-5">
-                        <ul class="list-unstyled">
-                            <li class="mb-2">
-                                <i class="fas fa-bread-slice text-warning me-2"></i>
-                                <span>6 Pieces of Rye Bread with meat slices and cheese</span>
-                            </li>
-                            <li class="mb-2">
-                                <i class="fas fa-egg text-warning me-2"></i>
-                                <span>2 eggs</span>
-                            </li>
-                            <li class="mb-2">
-                                <i class="fas fa-glass-water text-primary me-2"></i>
-                                <span>3 glasses of water</span>
-                            </li>
-                        </ul>
+                <!-- Daily Water Summary -->
+                <div class="card shadow mt-4 bg-dark-gray border-primary">
+                    <div class="card-body text-center">
+                        <h5 class="text-primary mb-3">
+                            <i class="fas fa-tint"></i> Daily Water Intake
+                        </h5>
+                        <h2 class="text-info">8 glasses total</h2>
+                        <small class="text-muted">3 + 3 + 2 = 8 glasses of water per day</small>
                     </div>
                 </div>
+            </div>
 
-                <hr class="my-4">
-
-                <!-- Evening Meal -->
-                <div class="meal-section mb-4">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="meal-icon me-3">
-                            <i class="fas fa-moon fa-2x text-info"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-info mb-1">Evening Meal</h3>
-                            <small class="text-muted">Flexible dinner</small>
-                        </div>
+            <!-- Right Column - Vitamins & Minerals -->
+            <div class="col-lg-4">
+                <div class="card shadow-lg border-0 bg-dark-gray">
+                    <div class="card-header bg-warning text-dark text-center">
+                        <h4 class="mb-0">Vitamins & Minerals</h4>
                     </div>
-                    <div class="meal-content ps-5">
-                        <ul class="list-unstyled">
-                            <li class="mb-2">
-                                <i class="fas fa-utensils text-secondary me-2"></i>
-                                <span>Anything</span>
-                            </li>
-                            <li class="mb-2">
-                                <i class="fas fa-glass-water text-primary me-2"></i>
-                                <span>2 glasses of water</span>
-                            </li>
-                        </ul>
+                    <div class="card-body text-light">
+                        
+                        <!-- Morning Supplements -->
+                        <div class="supplement-section mb-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="me-3">
+                                    <i class="fas fa-sun fa-lg text-warning"></i>
+                                </div>
+                                <div>
+                                    <h5 class="text-warning mb-0">Morning</h5>
+                                    <small class="text-muted">With breakfast</small>
+                                </div>
+                            </div>
+                            <ul class="list-unstyled ps-4">
+                                <li class="mb-2">
+                                    <i class="fas fa-pills text-info me-2"></i>
+                                    <span class="small">Vitamin D3 (1000-2000 IU)</span>
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-pills text-success me-2"></i>
+                                    <span class="small">B-Complex Vitamin</span>
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-pills text-warning me-2"></i>
+                                    <span class="small">Vitamin C (500mg)</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <hr class="my-3">
+
+                        <!-- Noon Supplements -->
+                        <div class="supplement-section mb-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="me-3">
+                                    <i class="fas fa-sun fa-lg text-success"></i>
+                                </div>
+                                <div>
+                                    <h5 class="text-success mb-0">Noon</h5>
+                                    <small class="text-muted">With lunch</small>
+                                </div>
+                            </div>
+                            <ul class="list-unstyled ps-4">
+                                <li class="mb-2">
+                                    <i class="fas fa-pills text-danger me-2"></i>
+                                    <span class="small">Iron (if needed)</span>
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-pills text-primary me-2"></i>
+                                    <span class="small">Zinc (15mg)</span>
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-pills text-info me-2"></i>
+                                    <span class="small">Magnesium (200mg)</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <hr class="my-3">
+
+                        <!-- Evening Supplements -->
+                        <div class="supplement-section mb-3">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="me-3">
+                                    <i class="fas fa-moon fa-lg text-info"></i>
+                                </div>
+                                <div>
+                                    <h5 class="text-info mb-0">Evening</h5>
+                                    <small class="text-muted">With dinner</small>
+                                </div>
+                            </div>
+                            <ul class="list-unstyled ps-4">
+                                <li class="mb-2">
+                                    <i class="fas fa-pills text-warning me-2"></i>
+                                    <span class="small">Omega-3 Fish Oil</span>
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-pills text-success me-2"></i>
+                                    <span class="small">Vitamin E (400 IU)</span>
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-pills text-secondary me-2"></i>
+                                    <span class="small">Calcium (500mg)</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                    </div>
+                    <div class="card-footer bg-warning text-dark text-center">
+                        <small>
+                            <i class="fas fa-exclamation-triangle me-1"></i>
+                            <strong>Note:</strong> Consult with a healthcare professional for personalized supplement advice.
+                        </small>
                     </div>
                 </div>
-
-            </div>
-            <div class="card-footer bg-secondary text-center">
-                <small class="text-muted">
-                    <i class="fas fa-info-circle me-1"></i>
-                    This is basically it - simple and consistent daily nutrition.
-                </small>
-            </div>
-        </div>
-
-        <!-- Daily Water Summary -->
-        <div class="card shadow mt-4 bg-dark-gray border-primary">
-            <div class="card-body text-center">
-                <h5 class="text-primary mb-3">
-                    <i class="fas fa-tint"></i> Daily Water Intake
-                </h5>
-                <h2 class="text-info">8 glasses total</h2>
-                <small class="text-muted">3 + 3 + 2 = 8 glasses of water per day</small>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+// Swap functions for food variety
+let oatsSwapped = false;
+let fruitSwapped = false;
+
+function swapOats() {
+    const oatsText = document.getElementById('oats-text');
+    if (oatsSwapped) {
+        oatsText.textContent = 'Bowl of Oats with milk';
+        oatsSwapped = false;
+    } else {
+        oatsText.textContent = 'Roll with Liver Pâté and Gherkins';
+        oatsSwapped = true;
+    }
+}
+
+function swapFruit() {
+    const fruitText = document.getElementById('fruit-text');
+    if (fruitSwapped) {
+        fruitText.textContent = '1 fruit';
+        fruitSwapped = false;
+    } else {
+        fruitText.textContent = '1 Glass of Fruit Juice';
+        fruitSwapped = true;
+    }
+}
+</script>
+
+<style>
+/* Custom styles for the diet page */
+.supplement-section {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 8px;
+    padding: 15px;
+}
+
+.meal-section {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.btn-outline-info:hover, .btn-outline-danger:hover {
+    transform: translateY(-1px);
+}
+
+.supplement-section ul li {
+    transition: all 0.3s ease;
+}
+
+.supplement-section ul li:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    padding: 2px 8px;
+}
+</style>
 {% endblock %}
