@@ -9,7 +9,12 @@ from models import db, User, Recipe, GameReview, MovieReview, MusicTrack
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///zjadowrealm.db')
+
+# Handle DATABASE_URL (Render uses postgresql:// but SQLAlchemy needs postgresql+psycopg2://)
+database_url = os.environ.get('DATABASE_URL', 'sqlite:///zjadowrealm.db')
+if database_url.startswith('postgres://'):
+    database_url = database_url.replace('postgres://', 'postgresql://', 1)
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize extensions
@@ -17,6 +22,30 @@ db.init_app(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
+
+# Create tables on startup
+with app.app_context():
+    db.create_all()
+    # Create admin user if it doesn't exist
+    admin = User.query.filter_by(username='ZjadowPotato').first()
+    if not admin:
+        # Check if email already exists (from old admin account)
+        old_admin = User.query.filter_by(email='admin@zjadowrealm.com').first()
+        if old_admin and old_admin.username != 'ZjadowPotato':
+            # Delete old admin account
+            db.session.delete(old_admin)
+            db.session.commit()
+        
+        admin = User(
+            username='ZjadowPotato',
+            email='admin@zjadowrealm.com',
+            is_admin=True,
+            is_approved=True
+        )
+        admin.set_password('ZjadowPotato')
+        db.session.add(admin)
+        db.session.commit()
+        print("Admin user created: username='ZjadowPotato', password='ZjadowPotato'")
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -594,31 +623,6 @@ def dinner_recipes():
     return render_template('dinner_recipes.html')
 
 if __name__ == '__main__':
-    # Create database tables
-    with app.app_context():
-        db.create_all()
-        
-        # Create admin user if it doesn't exist
-        admin = User.query.filter_by(username='ZjadowPotato').first()
-        if not admin:
-            # Check if email already exists (from old admin account)
-            old_admin = User.query.filter_by(email='admin@zjadowrealm.com').first()
-            if old_admin and old_admin.username != 'ZjadowPotato':
-                # Delete old admin account
-                db.session.delete(old_admin)
-                db.session.commit()
-            
-            admin = User(
-                username='ZjadowPotato',
-                email='admin@zjadowrealm.com',
-                is_admin=True,
-                is_approved=True
-            )
-            admin.set_password('ZjadowPotato')
-            db.session.add(admin)
-            db.session.commit()
-            print("Admin user created: username='ZjadowPotato', password='ZjadowPotato'")
-    
     # For deployment, use environment variables
     port = int(os.environ.get('PORT', 5000))
     debug = os.environ.get('FLASK_ENV', 'development') == 'development'
