@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Recipe - Admin - ZjadowRealm{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="display-5">
+                <i class="fas fa-edit text-primary me-3"></i>Edit Recipe
+            </h1>
+            <p class="lead text-muted">{{ recipe.title }}</p>
+        </div>
+        <div class="col-auto">
+            <a href="{{ url_for('admin_recipes') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Recipes
+            </a>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-body p-4">
+                    <form method="POST" action="{{ url_for('admin_edit_recipe', recipe_id=recipe.id) }}">
+                        <div class="row mb-3">
+                            <div class="col-md-8">
+                                <label for="title" class="form-label">Recipe Title *</label>
+                                <input type="text" class="form-control" id="title" name="title" value="{{ recipe.title }}" required>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="icon" class="form-label">Icon</label>
+                                <input type="text" class="form-control" id="icon" name="icon" value="{{ recipe.icon }}">
+                            </div>
+                            <div class="col-md-2">
+                                <label for="color" class="form-label">Color</label>
+                                <select class="form-select" id="color" name="color">
+                                    <option value="primary" {% if recipe.color == 'primary' %}selected{% endif %}>Blue</option>
+                                    <option value="success" {% if recipe.color == 'success' %}selected{% endif %}>Green</option>
+                                    <option value="danger" {% if recipe.color == 'danger' %}selected{% endif %}>Red</option>
+                                    <option value="warning" {% if recipe.color == 'warning' %}selected{% endif %}>Yellow</option>
+                                    <option value="info" {% if recipe.color == 'info' %}selected{% endif %}>Cyan</option>
+                                    <option value="dark" {% if recipe.color == 'dark' %}selected{% endif %}>Dark</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="prep_time" class="form-label">Prep Time</label>
+                                <input type="text" class="form-control" id="prep_time" name="prep_time" value="{{ recipe.prep_time }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="cook_time" class="form-label">Cook Time</label>
+                                <input type="text" class="form-control" id="cook_time" name="cook_time" value="{{ recipe.cook_time }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="servings" class="form-label">Servings</label>
+                                <input type="text" class="form-control" id="servings" name="servings" value="{{ recipe.servings }}">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="ingredients" class="form-label">Ingredients (one per line) *</label>
+                            <textarea class="form-control" id="ingredients" name="ingredients" rows="8" required>{{ recipe.ingredients }}</textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="instructions" class="form-label">Instructions (one step per line) *</label>
+                            <textarea class="form-control" id="instructions" name="instructions" rows="10" required>{{ recipe.instructions }}</textarea>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save me-2"></i>Update Recipe
+                            </button>
+                            <a href="{{ url_for('admin_recipes') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-1"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h5><i class="fas fa-info-circle me-2"></i>Recipe Info</h5>
+                    <p class="small mb-2"><strong>Created:</strong> {{ recipe.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                    <p class="small mb-2"><strong>Updated:</strong> {{ recipe.updated_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                    <p class="small mb-0"><strong>Recipe ID:</strong> {{ recipe.id }}</p>
+                </div>
+            </div>
+            
+            <div class="card bg-danger text-white mt-3">
+                <div class="card-body">
+                    <h5><i class="fas fa-exclamation-triangle me-2"></i>Danger Zone</h5>
+                    <p class="small mb-3">Once deleted, recipes cannot be recovered.</p>
+                    <a href="{{ url_for('admin_delete_recipe', recipe_id=recipe.id) }}" 
+                       class="btn btn-light w-100"
+                       onclick="return confirm('Are you sure you want to delete this recipe? This cannot be undone!')">
+                        <i class="fas fa-trash me-2"></i>Delete Recipe
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

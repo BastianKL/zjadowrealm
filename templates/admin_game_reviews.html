@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Game Reviews - Admin - ZjadowRealm{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="display-5">
+                <i class="fas fa-gamepad text-success me-3"></i>Manage Game Reviews
+            </h1>
+        </div>
+        <div class="col-auto">
+            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+            </a>
+            <a href="{{ url_for('admin_add_game_review') }}" class="btn btn-success">
+                <i class="fas fa-plus me-2"></i>Add New Review
+            </a>
+        </div>
+    </div>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    <div class="row">
+        {% if reviews %}
+            {% for review in reviews %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        {% if review.image_url %}
+                        <img src="{{ review.image_url }}" class="card-img-top" alt="{{ review.title }}" style="height: 200px; object-fit: cover;">
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ review.title }}</h5>
+                            <div class="mb-2">
+                                <span class="badge bg-warning text-dark">
+                                    <i class="fas fa-star"></i> {{ review.rating }}/10
+                                </span>
+                                {% if review.platform %}
+                                <span class="badge bg-info">{{ review.platform }}</span>
+                                {% endif %}
+                                {% if review.genre %}
+                                <span class="badge bg-secondary">{{ review.genre }}</span>
+                                {% endif %}
+                            </div>
+                            <p class="card-text small">{{ review.review_text[:100] }}{% if review.review_text|length > 100 %}...{% endif %}</p>
+                            <p class="small text-muted mb-0">{{ review.created_at.strftime('%Y-%m-%d') }}</p>
+                        </div>
+                        <div class="card-footer bg-light">
+                            <div class="btn-group w-100">
+                                <a href="{{ url_for('admin_edit_game_review', review_id=review.id) }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                                <a href="{{ url_for('admin_delete_game_review', review_id=review.id) }}" 
+                                   class="btn btn-sm btn-outline-danger"
+                                   onclick="return confirm('Delete review for {{ review.title }}?')">
+                                    <i class="fas fa-trash"></i> Delete
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="alert alert-info text-center py-5">
+                    <i class="fas fa-gamepad fa-3x mb-3"></i>
+                    <h4>No Game Reviews Yet</h4>
+                    <p class="mb-3">Start by adding your first game review!</p>
+                    <a href="{{ url_for('admin_add_game_review') }}" class="btn btn-success">
+                        <i class="fas fa-plus me-2"></i>Add First Review
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

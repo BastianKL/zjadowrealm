@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - ZjadowRealm{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="display-4">
+                <i class="fas fa-crown text-warning me-3"></i>Admin Dashboard
+            </h1>
+            <p class="lead text-muted">Manage users and content for ZjadowRealm</p>
+        </div>
+    </div>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    <!-- Statistics Overview -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">Recipes</h6>
+                            <h2 class="mb-0">{{ recipes_count }}</h2>
+                        </div>
+                        <i class="fas fa-utensils fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">Game Reviews</h6>
+                            <h2 class="mb-0">{{ game_reviews_count }}</h2>
+                        </div>
+                        <i class="fas fa-gamepad fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">Movie Reviews</h6>
+                            <h2 class="mb-0">{{ movie_reviews_count }}</h2>
+                        </div>
+                        <i class="fas fa-film fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card bg-warning text-dark">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">Music Tracks</h6>
+                            <h2 class="mb-0">{{ music_tracks_count }}</h2>
+                        </div>
+                        <i class="fas fa-music fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Pending User Approvals -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0">
+                        <i class="fas fa-user-clock me-2"></i>Pending User Approvals
+                        <span class="badge bg-dark float-end">{{ pending_users|length }}</span>
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% if pending_users %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Username</th>
+                                        <th>Email</th>
+                                        <th>Registered</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for user in pending_users %}
+                                        <tr>
+                                            <td>
+                                                <i class="fas fa-user me-2"></i>{{ user.username }}
+                                            </td>
+                                            <td>
+                                                <i class="fas fa-envelope me-2"></i>{{ user.email }}
+                                            </td>
+                                            <td>
+                                                <i class="fas fa-calendar me-2"></i>{{ user.created_at.strftime('%Y-%m-%d %H:%M') }}
+                                            </td>
+                                            <td>
+                                                <a href="{{ url_for('approve_user', user_id=user.id) }}" 
+                                                   class="btn btn-sm btn-success me-2"
+                                                   onclick="return confirm('Approve user {{ user.username }}?')">
+                                                    <i class="fas fa-check me-1"></i>Approve
+                                                </a>
+                                                <a href="{{ url_for('reject_user', user_id=user.id) }}" 
+                                                   class="btn btn-sm btn-danger"
+                                                   onclick="return confirm('Reject and delete user {{ user.username }}?')">
+                                                    <i class="fas fa-times me-1"></i>Reject
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                            <p class="lead">No pending user approvals</p>
+                            <p class="text-muted">All users have been reviewed</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Content Management -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-edit me-2"></i>Content Management
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="list-group">
+                                <a href="{{ url_for('admin_recipes') }}" class="list-group-item list-group-item-action">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <i class="fas fa-utensils me-2 text-primary"></i>
+                                            <strong>Manage Recipes</strong>
+                                        </div>
+                                        <span class="badge bg-primary rounded-pill">{{ recipes_count }}</span>
+                                    </div>
+                                </a>
+                                <a href="{{ url_for('admin_game_reviews') }}" class="list-group-item list-group-item-action">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <i class="fas fa-gamepad me-2 text-success"></i>
+                                            <strong>Manage Game Reviews</strong>
+                                        </div>
+                                        <span class="badge bg-success rounded-pill">{{ game_reviews_count }}</span>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="list-group">
+                                <a href="{{ url_for('admin_movie_reviews') }}" class="list-group-item list-group-item-action">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <i class="fas fa-film me-2 text-info"></i>
+                                            <strong>Manage Movie Reviews</strong>
+                                        </div>
+                                        <span class="badge bg-info rounded-pill">{{ movie_reviews_count }}</span>
+                                    </div>
+                                </a>
+                                <a href="{{ url_for('admin_music') }}" class="list-group-item list-group-item-action">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <i class="fas fa-music me-2 text-warning"></i>
+                                            <strong>Manage Music Tracks</strong>
+                                        </div>
+                                        <span class="badge bg-warning rounded-pill">{{ music_tracks_count }}</span>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info mt-3 mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Coming Soon:</strong> Individual content management pages are being developed. You'll be able to add, edit, and delete content directly from the admin panel.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .opacity-50 {
+        opacity: 0.5;
+    }
+    
+    .card {
+        transition: transform 0.2s;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .list-group-item {
+        transition: all 0.2s;
+    }
+    
+    .list-group-item:hover {
+        background-color: #f8f9fa;
+        transform: translateX(5px);
+    }
+</style>
+{% endblock %}

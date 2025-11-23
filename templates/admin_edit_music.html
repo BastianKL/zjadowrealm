@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Music Track - Admin - ZjadowRealm{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="display-5"><i class="fas fa-edit text-primary me-3"></i>Edit Music Track</h1>
+            <p class="lead text-muted">{{ track.title }}</p>
+        </div>
+        <div class="col-auto">
+            <a href="{{ url_for('admin_music') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back
+            </a>
+        </div>
+    </div>
+    
+    <div class="card shadow">
+        <div class="card-body p-4">
+            <form method="POST">
+                <div class="mb-3">
+                    <label for="title" class="form-label">Track Title *</label>
+                    <input type="text" class="form-control" id="title" name="title" value="{{ track.title }}" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="artist" class="form-label">Artist</label>
+                    <input type="text" class="form-control" id="artist" name="artist" value="{{ track.artist }}">
+                </div>
+                
+                <div class="mb-3">
+                    <label for="video_id" class="form-label">YouTube Video ID *</label>
+                    <input type="text" class="form-control" id="video_id" name="video_id" value="{{ track.video_id }}" required>
+                    <small class="text-muted">The ID from the YouTube URL</small>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea class="form-control" id="description" name="description" rows="4">{{ track.description }}</textarea>
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-save me-2"></i>Update Track
+                    </button>
+                    <a href="{{ url_for('admin_music') }}" class="btn btn-outline-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

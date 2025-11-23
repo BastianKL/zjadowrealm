@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Music Tracks - Admin - ZjadowRealm{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="display-5"><i class="fas fa-music text-warning me-3"></i>Manage Music Tracks</h1>
+        </div>
+        <div class="col-auto">
+            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+            </a>
+            <a href="{{ url_for('admin_add_music') }}" class="btn btn-success">
+                <i class="fas fa-plus me-2"></i>Add New Track
+            </a>
+        </div>
+    </div>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    <div class="row">
+        {% if tracks %}
+            {% for track in tracks %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="ratio ratio-16x9">
+                            <img src="https://img.youtube.com/vi/{{ track.video_id }}/mqdefault.jpg" class="card-img-top" alt="{{ track.title }}">
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">{{ track.title }}</h5>
+                            <p class="text-muted mb-2"><i class="fas fa-user me-1"></i>{{ track.artist }}</p>
+                            <p class="card-text small">{{ track.description[:80] }}{% if track.description and track.description|length > 80 %}...{% endif %}</p>
+                            <p class="small text-muted mb-0">{{ track.created_at.strftime('%Y-%m-%d') }}</p>
+                        </div>
+                        <div class="card-footer bg-light">
+                            <div class="btn-group w-100">
+                                <a href="{{ url_for('admin_edit_music', track_id=track.id) }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                                <a href="{{ url_for('admin_delete_music', track_id=track.id) }}" 
+                                   class="btn btn-sm btn-outline-danger"
+                                   onclick="return confirm('Delete track {{ track.title }}?')">
+                                    <i class="fas fa-trash"></i> Delete
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="alert alert-info text-center py-5">
+                    <i class="fas fa-music fa-3x mb-3"></i>
+                    <h4>No Music Tracks Yet</h4>
+                    <a href="{{ url_for('admin_add_music') }}" class="btn btn-success mt-3">
+                        <i class="fas fa-plus me-2"></i>Add First Track
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
