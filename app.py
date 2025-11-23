@@ -502,78 +502,93 @@ def admin_delete_music(track_id):
     flash(f'Music track "{title}" deleted successfully!', 'info')
     return redirect(url_for('admin_music'))
 
-# Public routes
+# Public routes (all require login)
 @app.route('/')
+@login_required
 def home():
     """Home page with overview"""
     return render_template('index.html')
 
 @app.route('/about')
+@login_required
 def about():
     """Personal description page"""
     return render_template('about.html')
 
 @app.route('/discord')
+@login_required
 def discord():
     """Discord community and server information page"""
     return render_template('discord.html')
 
 @app.route('/steam')
+@login_required
 def steam():
     """Steam profile page"""
     return render_template('steam.html')
 
 @app.route('/game-reviews')
+@login_required
 def game_reviews():
     """Game reviews page"""
     return render_template('game_reviews.html')
 
 @app.route('/movie-reviews')
+@login_required
 def movie_reviews():
     """Movie reviews page"""
     return render_template('movie_reviews.html')
 
 @app.route('/music')
+@login_required
 def music():
     """Music page"""
     return render_template('music.html')
 
 @app.route('/games')
+@login_required
 def games():
     """Browser games page"""
     return render_template('games.html')
 
 @app.route('/training')
+@login_required
 def training():
     """Training programs and fitness routines"""
     return render_template('training.html')
 
 @app.route('/food')
+@login_required
 def food():
     """Nutrition and dietary recommendations"""
     return render_template('food.html')
 
 @app.route('/tutorials')
+@login_required
 def tutorials():
     """Educational tutorials on various subjects"""
     return render_template('tutorials.html')
 
 @app.route('/tools')
+@login_required
 def tools():
     """Utility tools and calculators"""
     return render_template('tools.html')
 
 @app.route('/game-blog')
+@login_required
 def game_blog():
     """Game development blog and documentation"""
     return render_template('game_blog.html')
 
 @app.route('/minecraft')
+@login_required
 def minecraft():
     """Minecraft blog page"""
     return render_template('minecraft.html')
 
 @app.route('/dinner-recipes')
+@login_required
 def dinner_recipes():
     """Simple dinner recipes for everyday cooking"""
     return render_template('dinner_recipes.html')
