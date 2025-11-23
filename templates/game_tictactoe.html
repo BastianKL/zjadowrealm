@@ -1,0 +1,249 @@
+{% extends "base.html" %}
+
+{% block title %}Tic Tac Toe - ZjadowRealm{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <div class="mb-3">
+                <a href="{{ url_for('games') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Games
+                </a>
+            </div>
+
+            <!-- Tic Tac Toe Game -->
+            <div class="card shadow-lg">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-hashtag me-2"></i>Tic Tac Toe
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row justify-content-center">
+                        <div class="col-md-6">
+                            <div class="text-center">
+                                <canvas id="ticTacToeBoard" width="300" height="300" class="border rounded game-canvas"></canvas>
+                                <div class="mt-3">
+                                    <h5 id="ticTacToeStatus">Player X's Turn</h5>
+                                    <button class="btn btn-info" onclick="startTicTacToe()">New Game</button>
+                                    <button class="btn btn-warning" onclick="toggleTicTacToeMode()">vs Computer</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="tic-tac-toe-stats">
+                                <h6>Game Mode: <span id="gameMode">2 Players</span></h6>
+                                <h6>Score:</h6>
+                                <ul class="list-unstyled">
+                                    <li>Player X: <span id="scoreX">0</span></li>
+                                    <li>Player O: <span id="scoreO">0</span></li>
+                                    <li>Draws: <span id="scoreDraw">0</span></li>
+                                </ul>
+                                <small class="text-muted">
+                                    Click on any empty square to make your move.
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.game-canvas {
+    background-color: #f8f9fa;
+    max-width: 100%;
+    height: auto;
+    cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    #ticTacToeBoard {
+        width: 100%;
+        height: auto;
+    }
+}
+</style>
+
+<script>
+// Tic Tac Toe game state
+let ticTacToeState = {
+    board: Array(9).fill(null),
+    currentPlayer: 'X',
+    gameOver: false,
+    vsComputer: false,
+    scores: { X: 0, O: 0, draw: 0 }
+};
+
+// Load page
+document.addEventListener('DOMContentLoaded', function() {
+    initializeTicTacToe();
+});
+
+function initializeTicTacToe() {
+    const canvas = document.getElementById('ticTacToeBoard');
+    if (canvas) {
+        startTicTacToe();
+        canvas.addEventListener('click', handleTicTacToeClick);
+    }
+}
+
+function startTicTacToe() {
+    ticTacToeState.board = Array(9).fill(null);
+    ticTacToeState.currentPlayer = 'X';
+    ticTacToeState.gameOver = false;
+    updateTicTacToeDisplay();
+    drawTicTacToeBoard();
+}
+
+function toggleTicTacToeMode() {
+    ticTacToeState.vsComputer = !ticTacToeState.vsComputer;
+    document.getElementById('gameMode').textContent = 
+        ticTacToeState.vsComputer ? 'vs Computer' : '2 Players';
+    startTicTacToe();
+}
+
+function drawTicTacToeBoard() {
+    const canvas = document.getElementById('ticTacToeBoard');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw grid
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = 3;
+    
+    // Vertical lines
+    ctx.beginPath();
+    ctx.moveTo(100, 0);
+    ctx.lineTo(100, 300);
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.moveTo(200, 0);
+    ctx.lineTo(200, 300);
+    ctx.stroke();
+    
+    // Horizontal lines
+    ctx.beginPath();
+    ctx.moveTo(0, 100);
+    ctx.lineTo(300, 100);
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.moveTo(0, 200);
+    ctx.lineTo(300, 200);
+    ctx.stroke();
+    
+    // Draw X's and O's
+    ctx.font = '60px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    
+    for (let i = 0; i < 9; i++) {
+        if (ticTacToeState.board[i]) {
+            const col = i % 3;
+            const row = Math.floor(i / 3);
+            const x = col * 100 + 50;
+            const y = row * 100 + 50;
+            
+            ctx.fillStyle = ticTacToeState.board[i] === 'X' ? '#ff4444' : '#4444ff';
+            ctx.fillText(ticTacToeState.board[i], x, y);
+        }
+    }
+}
+
+function handleTicTacToeClick(event) {
+    if (ticTacToeState.gameOver) return;
+    
+    const canvas = document.getElementById('ticTacToeBoard');
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    
+    const col = Math.floor(x / 100);
+    const row = Math.floor(y / 100);
+    const index = row * 3 + col;
+    
+    if (ticTacToeState.board[index] || index < 0 || index > 8) return;
+    
+    ticTacToeState.board[index] = ticTacToeState.currentPlayer;
+    
+    if (checkTicTacToeWin()) {
+        ticTacToeState.scores[ticTacToeState.currentPlayer]++;
+        ticTacToeState.gameOver = true;
+        updateTicTacToeDisplay();
+        setTimeout(() => alert(`Player ${ticTacToeState.currentPlayer} wins!`), 100);
+    } else if (ticTacToeState.board.every(cell => cell)) {
+        ticTacToeState.scores.draw++;
+        ticTacToeState.gameOver = true;
+        updateTicTacToeDisplay();
+        setTimeout(() => alert('Draw!'), 100);
+    } else {
+        ticTacToeState.currentPlayer = ticTacToeState.currentPlayer === 'X' ? 'O' : 'X';
+        
+        if (ticTacToeState.vsComputer && ticTacToeState.currentPlayer === 'O') {
+            setTimeout(makeComputerMove, 500);
+        }
+    }
+    
+    updateTicTacToeDisplay();
+    drawTicTacToeBoard();
+}
+
+function makeComputerMove() {
+    if (ticTacToeState.gameOver) return;
+    
+    const availableMoves = ticTacToeState.board
+        .map((cell, index) => cell === null ? index : null)
+        .filter(move => move !== null);
+    
+    if (availableMoves.length > 0) {
+        const randomMove = availableMoves[Math.floor(Math.random() * availableMoves.length)];
+        ticTacToeState.board[randomMove] = 'O';
+        
+        if (checkTicTacToeWin()) {
+            ticTacToeState.scores.O++;
+            ticTacToeState.gameOver = true;
+            setTimeout(() => alert('Computer wins!'), 100);
+        } else if (ticTacToeState.board.every(cell => cell)) {
+            ticTacToeState.scores.draw++;
+            ticTacToeState.gameOver = true;
+            setTimeout(() => alert('Draw!'), 100);
+        } else {
+            ticTacToeState.currentPlayer = 'X';
+        }
+        
+        updateTicTacToeDisplay();
+        drawTicTacToeBoard();
+    }
+}
+
+function checkTicTacToeWin() {
+    const winPatterns = [
+        [0,1,2], [3,4,5], [6,7,8], // rows
+        [0,3,6], [1,4,7], [2,5,8], // columns
+        [0,4,8], [2,4,6] // diagonals
+    ];
+    
+    return winPatterns.some(pattern => {
+        const [a,b,c] = pattern;
+        return ticTacToeState.board[a] && 
+               ticTacToeState.board[a] === ticTacToeState.board[b] && 
+               ticTacToeState.board[a] === ticTacToeState.board[c];
+    });
+}
+
+function updateTicTacToeDisplay() {
+    document.getElementById('ticTacToeStatus').textContent = 
+        ticTacToeState.gameOver ? 'Game Over' : `Player ${ticTacToeState.currentPlayer}'s Turn`;
+    document.getElementById('scoreX').textContent = ticTacToeState.scores.X;
+    document.getElementById('scoreO').textContent = ticTacToeState.scores.O;
+    document.getElementById('scoreDraw').textContent = ticTacToeState.scores.draw;
+}
+</script>
+{% endblock %}

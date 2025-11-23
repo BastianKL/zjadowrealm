@@ -577,8 +577,62 @@ def music():
 @app.route('/games')
 @login_required
 def games():
-    """Browser games page"""
-    return render_template('games.html')
+    """Games hub page"""
+    return render_template('games_hub.html')
+
+@app.route('/games/snake')
+@login_required
+def game_snake():
+    """Snake game"""
+    return render_template('game_snake.html')
+
+@app.route('/games/pong')
+@login_required
+def game_pong():
+    """Pong game"""
+    return render_template('game_pong.html')
+
+@app.route('/games/memory')
+@login_required
+def game_memory():
+    """Memory game"""
+    return render_template('game_memory.html')
+
+@app.route('/games/tetris')
+@login_required
+def game_tetris():
+    """Tetris game"""
+    return render_template('game_tetris.html')
+
+@app.route('/games/pirates')
+@login_required
+def game_pirates():
+    """Pirate Adventure game"""
+    return render_template('game_pirates.html')
+
+@app.route('/games/chess')
+@login_required
+def game_chess():
+    """Chess game"""
+    return render_template('game_chess.html')
+
+@app.route('/games/tictactoe')
+@login_required
+def game_tictactoe():
+    """Tic Tac Toe game"""
+    return render_template('game_tictactoe.html')
+
+@app.route('/games/wordguess')
+@login_required
+def game_wordguess():
+    """Word Guess game"""
+    return render_template('game_wordguess.html')
+
+@app.route('/games/strands')
+@login_required
+def game_strands():
+    """Strands game"""
+    return render_template('game_strands.html')
 
 @app.route('/training')
 @login_required

@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block title %}ZjadowRealm - Browser Games{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="text-center mb-5">
+        <h1 class="display-4 fw-bold mb-3">
+            <i class="fas fa-gamepad text-success"></i> Browser Games
+        </h1>
+        <p class="lead text-muted">Quick games to play while browsing my portfolio!</p>
+    </div>
+
+    <div class="row g-4">
+        <!-- Snake Game Card -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-lg game-card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-circle-dot me-2"></i>Snake</h5>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <p class="card-text">Classic snake game - eat the food and grow longer without hitting yourself or the walls!</p>
+                    <div class="mt-auto">
+                        <a href="{{ url_for('game_snake') }}" class="btn btn-success w-100">
+                            <i class="fas fa-play me-2"></i>Play Snake
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pong Game Card -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-lg game-card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-table-tennis me-2"></i>Pong</h5>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <p class="card-text">Classic two-player pong game. Control the paddle and don't let the ball past you!</p>
+                    <div class="mt-auto">
+                        <a href="{{ url_for('game_pong') }}" class="btn btn-primary w-100">
+                            <i class="fas fa-play me-2"></i>Play Pong
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Memory Game Card -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-lg game-card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-brain me-2"></i>Memory</h5>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <p class="card-text">Test your memory by matching pairs of cards. How fast can you complete it?</p>
+                    <div class="mt-auto">
+                        <a href="{{ url_for('game_memory') }}" class="btn btn-info w-100">
+                            <i class="fas fa-play me-2"></i>Play Memory
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tetris Game Card -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-lg game-card">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="fas fa-th me-2"></i>Tetris</h5>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <p class="card-text">Classic Tetris - rotate and fit falling blocks to clear lines and score points!</p>
+                    <div class="mt-auto">
+                        <a href="{{ url_for('game_tetris') }}" class="btn btn-warning w-100">
+                            <i class="fas fa-play me-2"></i>Play Tetris
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pirate Adventure Card -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-lg game-card">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0"><i class="fas fa-ship me-2"></i>Pirate Adventure</h5>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <p class="card-text">Text-based adventure game. Navigate the seas, make choices, and find treasure!</p>
+                    <div class="mt-auto">
+                        <a href="{{ url_for('game_pirates') }}" class="btn btn-danger w-100">
+                            <i class="fas fa-play me-2"></i>Play Pirate Adventure
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chess Card -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-lg game-card">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="fas fa-chess me-2"></i>Chess</h5>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <p class="card-text">Play chess against yourself or a friend. Classic board game strategy!</p>
+                    <div class="mt-auto">
+                        <a href="{{ url_for('game_chess') }}" class="btn btn-dark w-100">
+                            <i class="fas fa-play me-2"></i>Play Chess
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tic Tac Toe Card -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-lg game-card">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="fas fa-hashtag me-2"></i>Tic Tac Toe</h5>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <p class="card-text">Classic Xs and Os game. Play against the computer and try to get three in a row!</p>
+                    <div class="mt-auto">
+                        <a href="{{ url_for('game_tictactoe') }}" class="btn btn-secondary w-100">
+                            <i class="fas fa-play me-2"></i>Play Tic Tac Toe
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Word Guess Card -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-lg game-card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-spell-check me-2"></i>Word Guess</h5>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <p class="card-text">Guess the hidden word letter by letter. How many tries will it take you?</p>
+                    <div class="mt-auto">
+                        <a href="{{ url_for('game_wordguess') }}" class="btn btn-success w-100">
+                            <i class="fas fa-play me-2"></i>Play Word Guess
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Strands Card -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-lg game-card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-project-diagram me-2"></i>Strands</h5>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <p class="card-text">Find themed words in a grid of letters. Connect letters to form words!</p>
+                    <div class="mt-auto">
+                        <a href="{{ url_for('game_strands') }}" class="btn btn-primary w-100">
+                            <i class="fas fa-play me-2"></i>Play Strands
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.game-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.game-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3) !important;
+}
+
+.card-body p {
+    min-height: 60px;
+}
+</style>
+{% endblock %}

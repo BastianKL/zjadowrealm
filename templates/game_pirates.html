@@ -1,0 +1,1007 @@
+{% extends "base.html" %}
+
+{% block title %}Pirate Adventure - ZjadowRealm{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-3">
+    <div class="row">
+        <div class="col-12">
+            <div class="mb-3">
+                <a href="{{ url_for('games') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Games
+                </a>
+            </div>
+
+            <!-- Pirate Adventure Game -->
+            <div class="card shadow-lg">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-ship me-2"></i>Pirate Adventure
+                        <span class="float-end">Turn: <span id="pirateTurn">1</span> | Player: <span id="currentPiratePlayer">1</span></span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-8">
+                            <div class="game-area">
+                                <canvas id="pirateBoard" width="640" height="640" class="border rounded game-canvas"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="action-wheel mb-3">
+                                <h6><i class="fas fa-cog"></i> Spinning Action Wheel</h6>
+                                <div class="text-center mb-3">
+                                    <canvas id="actionWheelCanvas" width="200" height="200" style="border: 2px solid #333; border-radius: 50%; cursor: pointer;"></canvas>
+                                    <div class="mt-2">
+                                        <button class="btn btn-warning" onclick="spinActionWheel()" id="spinButton">
+                                            <i class="fas fa-sync-alt"></i> Spin Wheel!
+                                        </button>
+                                    </div>
+                                    <div class="mt-2">
+                                        <strong>Selected Action: <span id="selectedAction">None</span></strong>
+                                    </div>
+                                </div>
+                                
+                                <div class="dice-area mb-3">
+                                    <h6><i class="fas fa-dice"></i> Action Dice</h6>
+                                    <div class="text-center">
+                                        <canvas id="diceCanvas" width="120" height="60" style="border: 1px solid #666;"></canvas>
+                                        <div class="mt-2">
+                                            <button class="btn btn-info btn-sm" onclick="rollActionDice()" id="diceButton" disabled>
+                                                <i class="fas fa-dice-d6"></i> Roll Dice
+                                            </button>
+                                        </div>
+                                        <div class="mt-1">
+                                            <small>Dice Result: <span id="diceResult">-</span></small>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="action-execute mb-3">
+                                    <button class="btn btn-success w-100" onclick="executeSelectedAction()" id="executeButton" disabled>
+                                        <i class="fas fa-play"></i> Execute Action
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="player-info mb-3">
+                                <h6><i class="fas fa-users"></i> Player Status</h6>
+                                <div id="playerStatus">
+                                    <p class="mb-1">Player 1: <span class="text-success">3 ships</span> | <span class="text-warning">5 coins</span></p>
+                                    <p class="mb-1">Player 2: <span class="text-success">3 ships</span> | <span class="text-warning">5 coins</span></p>
+                                </div>
+                            </div>
+                            
+                            <div class="hotbar-section mt-3">
+                                <h6><i class="fas fa-toolbox"></i> Supply Hotbar</h6>
+                                <div class="hotbar d-flex gap-1 mb-2" id="supplyHotbar">
+                                    <div class="hotbar-slot empty">Empty</div>
+                                    <div class="hotbar-slot empty">Empty</div>
+                                    <div class="hotbar-slot empty">Empty</div>
+                                    <div class="hotbar-slot empty">Empty</div>
+                                </div>
+                                <button class="btn btn-sm btn-outline-primary" onclick="buyHotbarSlot('supply')">
+                                    <i class="fas fa-plus"></i> Buy Slot (3g)
+                                </button>
+                            </div>
+                            
+                            <div class="card-hotbar-section mt-3">
+                                <h6><i class="fas fa-hand-holding"></i> Card Hotbar</h6>
+                                <div class="hotbar d-flex gap-1 mb-2" id="cardHotbar">
+                                    <div class="hotbar-slot empty">Empty</div>
+                                    <div class="hotbar-slot empty">Empty</div>
+                                    <div class="hotbar-slot empty">Empty</div>
+                                    <div class="hotbar-slot empty">Empty</div>
+                                </div>
+                                <button class="btn btn-sm btn-outline-info" onclick="buyHotbarSlot('card')">
+                                    <i class="fas fa-plus"></i> Buy Slot (3g)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="game-controls mb-3">
+                        <button class="btn btn-dark me-2" onclick="startPirateGame()">
+                            <i class="fas fa-play"></i> Start Adventure
+                        </button>
+                        <button class="btn btn-warning me-2" onclick="nextPirateTurn()">
+                            <i class="fas fa-forward"></i> Next Turn
+                        </button>
+                        <button class="btn btn-danger" onclick="resetPirateGame()">
+                            <i class="fas fa-redo"></i> Reset Game
+                        </button>
+                    </div>
+                    <p class="text-muted">Multiplayer pirate adventure! Use the action wheel to take turns.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.game-canvas {
+    background: #1a4c87;
+    max-width: 100%;
+    height: auto;
+}
+
+.hotbar {
+    border: 2px solid #666;
+    border-radius: 5px;
+    padding: 5px;
+    background: #f8f9fa;
+}
+
+.hotbar-slot {
+    width: 50px;
+    height: 50px;
+    border: 2px solid #999;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    font-size: 11px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.hotbar-slot.empty {
+    color: #999;
+    font-style: italic;
+}
+
+.hotbar-slot.filled {
+    background: #e7f3ff;
+    border-color: #007bff;
+    color: #007bff;
+    font-weight: bold;
+}
+
+.shop-dialog {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border: 3px solid #333;
+    border-radius: 10px;
+    padding: 20px;
+    z-index: 1000;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+.shop-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 999;
+}
+
+@media (max-width: 768px) {
+    #pirateBoard {
+        width: 100%;
+        height: auto;
+    }
+}
+</style>
+
+<script>
+// Pirate game variables
+let pirateGame = null;
+let wheelRotation = 0;
+let wheelSpinning = false;
+let selectedActionType = null;
+let diceRolls = [];
+let actionPower = 0;
+
+// Action wheel configuration
+const wheelActions = [
+    { name: 'Move', color: '#0066ff', icon: '⛵' },
+    { name: 'Coin', color: '#00cc00', icon: '💰' },
+    { name: 'Card', color: '#8800ff', icon: '🃏' },
+    { name: 'Attack', color: '#ff0000', icon: '⚔️' }
+];
+
+// Fixed terrain layouts
+let terrainSeeds = null;
+let islandLayout = null;
+let treasureSpawns = null;
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    initializePirateCanvas();
+});
+
+function initializePirateCanvas() {
+    const canvas = document.getElementById('pirateBoard');
+    if (canvas) {
+        if (!terrainSeeds) {
+            generateFixedTerrain();
+        }
+        const ctx = canvas.getContext('2d');
+        drawPirateBoard(ctx);
+    }
+    
+    const wheelCanvas = document.getElementById('actionWheelCanvas');
+    if (wheelCanvas) {
+        drawActionWheel();
+    }
+    
+    const diceCanvas = document.getElementById('diceCanvas');
+    if (diceCanvas) {
+        drawDice();
+    }
+}
+
+function generateFixedTerrain() {
+    terrainSeeds = {
+        stones: [],
+        trees: [],
+        sand: []
+    };
+    
+    for (let i = 0; i < 15; i++) {
+        terrainSeeds.stones.push({
+            x: Math.random() * 30,
+            y: Math.random() * 30,
+            size: 4 + Math.random() * 6
+        });
+    }
+    
+    for (let i = 0; i < 8; i++) {
+        terrainSeeds.trees.push({
+            x: Math.random() * 30,
+            y: Math.random() * 30
+        });
+    }
+    
+    for (let i = 0; i < 20; i++) {
+        terrainSeeds.sand.push({
+            x: Math.random() * 30,
+            y: Math.random() * 30,
+            size: 2 + Math.random() * 3
+        });
+    }
+    
+    islandLayout = generateNaturalIslands();
+    
+    treasureSpawns = [
+        { x: 7, y: 6, coins: 4 },
+        { x: 8, y: 9, coins: 3 },
+        { x: 2, y: 13, coins: 5 },
+        { x: 13, y: 2, coins: 5 },
+        { x: 1, y: 1, coins: 6 },
+        { x: 14, y: 14, coins: 6 }
+    ];
+}
+
+function generateNaturalIslands() {
+    const layout = {};
+    
+    const centerIsland = new Set();
+    for (let x = 5; x < 11; x++) {
+        for (let y = 5; y < 11; y++) {
+            const distFromCenter = Math.sqrt((x - 8) ** 2 + (y - 8) ** 2);
+            if (distFromCenter < 2.5 + Math.random() * 0.8) {
+                centerIsland.add(`${x},${y}`);
+            }
+        }
+    }
+    
+    const beaches = new Set();
+    centerIsland.forEach(pos => {
+        const [x, y] = pos.split(',').map(Number);
+        for (let dx = -1; dx <= 1; dx++) {
+            for (let dy = -1; dy <= 1; dy++) {
+                const bx = x + dx, by = y + dy;
+                if (bx >= 0 && bx < 16 && by >= 0 && by < 16 && !centerIsland.has(`${bx},${by}`)) {
+                    if (Math.random() < 0.6) beaches.add(`${bx},${by}`);
+                }
+            }
+        }
+    });
+    
+    const forests = new Set();
+    centerIsland.forEach(pos => {
+        const [x, y] = pos.split(',').map(Number);
+        let isEdge = false;
+        for (let dx = -1; dx <= 1; dx++) {
+            for (let dy = -1; dy <= 1; dy++) {
+                const adjX = x + dx, adjY = y + dy;
+                if (adjX >= 0 && adjX < 16 && adjY >= 0 && adjY < 16) {
+                    if (!centerIsland.has(`${adjX},${adjY}`) || beaches.has(`${adjX},${adjY}`)) {
+                        isEdge = true;
+                        break;
+                    }
+                }
+            }
+            if (isEdge) break;
+        }
+        
+        if (isEdge && Math.random() < 0.3) {
+            forests.add(pos);
+        }
+    });
+    
+    const borderIslands = new Set();
+    const borderBeaches = new Set();
+    
+    const corners = [[1, 1], [14, 1], [1, 14], [14, 14]];
+    corners.forEach(([cx, cy]) => {
+        for (let x = cx - 1; x <= cx + 1; x++) {
+            for (let y = cy - 1; y <= cy + 1; y++) {
+                if (x >= 0 && x < 16 && y >= 0 && y < 16) {
+                    const dist = Math.abs(x - cx) + Math.abs(y - cy);
+                    if (dist <= 1 && Math.random() < 0.8) {
+                        if (dist === 0) borderIslands.add(`${x},${y}`);
+                        else borderBeaches.add(`${x},${y}`);
+                    }
+                }
+            }
+        }
+    });
+    
+    return {
+        centerIsland,
+        beaches,
+        borderIslands,
+        borderBeaches,
+        forests
+    };
+}
+
+function drawActionWheel() {
+    const canvas = document.getElementById('actionWheelCanvas');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    const centerX = 100;
+    const centerY = 100;
+    const radius = 90;
+    
+    ctx.clearRect(0, 0, 200, 200);
+    
+    const sectionAngle = (Math.PI * 2) / wheelActions.length;
+    
+    wheelActions.forEach((action, index) => {
+        const startAngle = (index * sectionAngle) + wheelRotation;
+        const endAngle = ((index + 1) * sectionAngle) + wheelRotation;
+        
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+        ctx.closePath();
+        ctx.fillStyle = action.color;
+        ctx.fill();
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        const textAngle = startAngle + sectionAngle / 2;
+        const textX = centerX + Math.cos(textAngle) * (radius * 0.7);
+        const textY = centerY + Math.sin(textAngle) * (radius * 0.7);
+        
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 20px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(action.icon, textX, textY - 5);
+        
+        ctx.font = '10px Arial';
+        ctx.fillText(action.name, textX, textY + 10);
+    });
+    
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, 15, 0, Math.PI * 2);
+    ctx.fillStyle = '#333';
+    ctx.fill();
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.moveTo(centerX, centerY - radius - 10);
+    ctx.lineTo(centerX - 8, centerY - radius + 5);
+    ctx.lineTo(centerX + 8, centerY - radius + 5);
+    ctx.closePath();
+    ctx.fillStyle = '#ff0000';
+    ctx.fill();
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+}
+
+function drawDice() {
+    const canvas = document.getElementById('diceCanvas');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, 120, 60);
+    
+    drawSingleDie(ctx, 15, 15, diceRolls[0] || 1);
+    drawSingleDie(ctx, 65, 15, diceRolls[1] || 1);
+}
+
+function drawSingleDie(ctx, x, y, value) {
+    const size = 30;
+    
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(x, y, size, size);
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x, y, size, size);
+    
+    ctx.fillStyle = '#000';
+    const dotSize = 4;
+    const positions = {
+        1: [[15, 15]],
+        2: [[5, 5], [25, 25]],
+        3: [[5, 5], [15, 15], [25, 25]],
+        4: [[5, 5], [25, 5], [5, 25], [25, 25]],
+        5: [[5, 5], [25, 5], [15, 15], [5, 25], [25, 25]],
+        6: [[5, 5], [25, 5], [5, 15], [25, 15], [5, 25], [25, 25]]
+    };
+    
+    if (positions[value]) {
+        positions[value].forEach(([dx, dy]) => {
+            ctx.beginPath();
+            ctx.arc(x + dx, y + dy, dotSize, 0, Math.PI * 2);
+            ctx.fill();
+        });
+    }
+}
+
+function spinActionWheel() {
+    if (wheelSpinning || (pirateGame && pirateGame.actionTaken)) return;
+    
+    wheelSpinning = true;
+    document.getElementById('spinButton').disabled = true;
+    
+    const spinAmount = Math.PI * 2 * (3 + Math.random() * 5);
+    const spinDuration = 2000;
+    const startTime = Date.now();
+    const startRotation = wheelRotation;
+    
+    function animate() {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / spinDuration, 1);
+        
+        const easeOut = 1 - Math.pow(1 - progress, 3);
+        wheelRotation = startRotation + spinAmount * easeOut;
+        
+        drawActionWheel();
+        
+        if (progress < 1) {
+            requestAnimationFrame(animate);
+        } else {
+            wheelSpinning = false;
+            
+            const normalizedRotation = (wheelRotation % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
+            const sectionAngle = (Math.PI * 2) / wheelActions.length;
+            const adjustedRotation = (normalizedRotation + Math.PI / 2) % (Math.PI * 2);
+            const selectedIndex = Math.floor(adjustedRotation / sectionAngle) % wheelActions.length;
+            
+            selectedActionType = wheelActions[selectedIndex].name.toLowerCase();
+            document.getElementById('selectedAction').textContent = wheelActions[selectedIndex].name;
+            document.getElementById('diceButton').disabled = false;
+            
+            alert(`Wheel landed on: ${wheelActions[selectedIndex].name} ${wheelActions[selectedIndex].icon}`);
+        }
+    }
+    
+    animate();
+}
+
+function rollActionDice() {
+    if (!selectedActionType) return;
+    
+    document.getElementById('diceButton').disabled = true;
+    
+    diceRolls = [Math.floor(Math.random() * 6) + 1, Math.floor(Math.random() * 6) + 1];
+    actionPower = diceRolls[0] + diceRolls[1];
+    
+    drawDice();
+    
+    document.getElementById('diceResult').textContent = `${diceRolls[0]} + ${diceRolls[1]} = ${actionPower}`;
+    document.getElementById('executeButton').disabled = false;
+    
+    alert(`Rolled dice: ${diceRolls[0]} + ${diceRolls[1]} = ${actionPower} power!`);
+}
+
+function executeSelectedAction() {
+    if (!selectedActionType || !actionPower) return;
+    
+    pirateAction(selectedActionType);
+    
+    setTimeout(() => {
+        if (pirateGame && pirateGame.actionTaken) {
+            nextPirateTurn();
+        }
+    }, 1500);
+}
+
+function buyHotbarSlot(type) {
+    if (!pirateGame) return;
+    
+    const player = pirateGame.players[pirateGame.currentPlayer];
+    const cost = 3;
+    
+    if (player.coins < cost) {
+        alert(`Need ${cost} coins to buy an extra hotbar slot!`);
+        return;
+    }
+    
+    const hotbarId = type === 'supply' ? 'supplyHotbar' : 'cardHotbar';
+    const hotbar = document.getElementById(hotbarId);
+    const currentSlots = hotbar.children.length;
+    
+    if (currentSlots >= 6) {
+        alert('Maximum 6 slots allowed!');
+        return;
+    }
+    
+    player.coins -= cost;
+    const newSlot = document.createElement('div');
+    newSlot.className = 'hotbar-slot empty';
+    newSlot.textContent = 'Empty';
+    hotbar.appendChild(newSlot);
+    
+    updatePiratePlayerStatus();
+    alert(`Bought extra ${type} slot for ${cost} coins!`);
+}
+
+function getTileType(x, y) {
+    if (!islandLayout) return 'water';
+    
+    const pos = `${x},${y}`;
+    
+    if (islandLayout.forests && islandLayout.forests.has(pos)) {
+        return 'forest';
+    }
+    
+    if (islandLayout.centerIsland.has(pos)) {
+        return 'stone';
+    }
+    
+    if (islandLayout.beaches.has(pos) || islandLayout.borderBeaches.has(pos)) {
+        return 'beach';
+    }
+    
+    if (islandLayout.borderIslands.has(pos)) {
+        return 'jungle';
+    }
+    
+    if ((x === 5 && y === 7) || (x === 10 && y === 8)) {
+        return 'cave';
+    }
+    
+    if (x === 0 && y === 0) {
+        return 'lighthouse';
+    }
+    
+    if ((x === 0 || x === 15) && (y === 7 || y === 8)) return 'harbor';
+    if ((y === 0 || y === 15) && (x === 7 || x === 8)) return 'harbor';
+    
+    if ((x < 3 && y < 3) || (x > 12 && y < 3) || (x < 3 && y > 12) || (x > 12 && y > 12)) {
+        return 'deepwater';
+    }
+    
+    return 'water';
+}
+
+function drawTile(ctx, x, y, tileSize, tileType) {
+    const px = x * tileSize;
+    const py = y * tileSize;
+    
+    switch (tileType) {
+        case 'stone':
+            ctx.fillStyle = '#8b4513';
+            ctx.fillRect(px, py, tileSize - 2, tileSize - 2);
+            break;
+        case 'forest':
+            ctx.fillStyle = '#228b22';
+            ctx.fillRect(px, py, tileSize - 2, tileSize - 2);
+            ctx.fillStyle = '#006400';
+            ctx.font = '16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('🌲', px + tileSize/2, py + tileSize/2 + 5);
+            break;
+        case 'beach':
+            ctx.fillStyle = '#deb887';
+            ctx.fillRect(px, py, tileSize - 2, tileSize - 2);
+            break;
+        case 'jungle':
+            ctx.fillStyle = '#228b22';
+            ctx.fillRect(px, py, tileSize - 2, tileSize - 2);
+            ctx.fillStyle = '#006400';
+            ctx.font = '20px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('🌲', px + tileSize/2, py + tileSize/2 + 5);
+            break;
+        case 'cave':
+            ctx.fillStyle = '#4a4a4a';
+            ctx.fillRect(px, py, tileSize - 2, tileSize - 2);
+            ctx.fillStyle = '#000000';
+            ctx.beginPath();
+            ctx.arc(px + tileSize/2, py + tileSize/2, 12, 0, Math.PI * 2);
+            ctx.fill();
+            break;
+        case 'lighthouse':
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(px, py, tileSize - 2, tileSize - 2);
+            ctx.fillStyle = '#ff0000';
+            ctx.fillRect(px + 15, py + 5, 10, 25);
+            ctx.fillStyle = '#ffff00';
+            ctx.beginPath();
+            ctx.arc(px + 20, py + 10, 6, 0, Math.PI * 2);
+            ctx.fill();
+            break;
+        case 'harbor':
+            ctx.fillStyle = '#8b7355';
+            ctx.fillRect(px, py, tileSize - 2, tileSize - 2);
+            ctx.fillStyle = '#000000';
+            ctx.font = '16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('🏪', px + tileSize/2, py + tileSize/2);
+            break;
+        case 'deepwater':
+            ctx.fillStyle = '#003366';
+            ctx.fillRect(px, py, tileSize - 2, tileSize - 2);
+            break;
+        default:
+            ctx.fillStyle = '#1a4c87';
+            ctx.fillRect(px, py, tileSize - 2, tileSize - 2);
+            break;
+    }
+}
+
+function drawShip(ctx, x, y, tileSize, color, label) {
+    const px = x * tileSize + 8;
+    const py = y * tileSize + 8;
+    
+    ctx.fillStyle = color;
+    ctx.fillRect(px, py + 10, 24, 14);
+    ctx.fillRect(px + 10, py, 4, 20);
+    
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(px + 14, py + 2, 8, 12);
+    
+    ctx.fillStyle = '#000000';
+    ctx.font = '12px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(label, px + 12, py + 18);
+}
+
+function drawPirateBoard(ctx) {
+    ctx.fillStyle = '#1a4c87';
+    ctx.fillRect(0, 0, 640, 640);
+    
+    const tileSize = 40;
+    
+    for (let x = 0; x < 16; x++) {
+        for (let y = 0; y < 16; y++) {
+            const tileType = getTileType(x, y);
+            drawTile(ctx, x, y, tileSize, tileType);
+        }
+    }
+    
+    ctx.strokeStyle = '#0066cc';
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= 16; i++) {
+        ctx.beginPath();
+        ctx.moveTo(i * tileSize, 0);
+        ctx.lineTo(i * tileSize, 640);
+        ctx.stroke();
+        
+        ctx.beginPath();
+        ctx.moveTo(0, i * tileSize);
+        ctx.lineTo(640, i * tileSize);
+        ctx.stroke();
+    }
+    
+    if (pirateGame) {
+        ctx.fillStyle = '#ffd700';
+        pirateGame.treasures.forEach(treasure => {
+            if (!treasure.collected) {
+                const x = treasure.x * tileSize + 10;
+                const y = treasure.y * tileSize + 10;
+                ctx.fillRect(x, y, 20, 15);
+                ctx.strokeStyle = '#8b4513';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(x, y, 20, 15);
+                
+                ctx.fillStyle = '#000000';
+                ctx.font = '10px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(treasure.coins, x + 10, y + 12);
+            }
+        });
+        
+        pirateGame.players.forEach((player, playerIndex) => {
+            player.shipPositions.forEach(ship => {
+                if (ship.alive) {
+                    drawShip(ctx, ship.x, ship.y, tileSize, player.color, playerIndex + 1);
+                }
+            });
+        });
+        
+        if (pirateGame.selectedShip) {
+            const ship = pirateGame.selectedShip;
+            ctx.strokeStyle = '#ffff00';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(ship.x * tileSize + 5, ship.y * tileSize + 5, tileSize - 10, tileSize - 10);
+        }
+        
+        if (pirateGame.showMoves && pirateGame.selectedShip) {
+            ctx.fillStyle = 'rgba(0, 255, 0, 0.3)';
+            const ship = pirateGame.selectedShip;
+            const moveRange = actionPower || 1;
+            
+            for (let dx = -moveRange; dx <= moveRange; dx++) {
+                for (let dy = -moveRange; dy <= moveRange; dy++) {
+                    if (dx === 0 && dy === 0) continue;
+                    const newX = ship.x + dx;
+                    const newY = ship.y + dy;
+                    const tileType = getTileType(newX, newY);
+                    if ((tileType === 'water' || tileType === 'deepwater') && !getShipAt(newX, newY)) {
+                        ctx.fillRect(newX * tileSize, newY * tileSize, tileSize, tileSize);
+                    }
+                }
+            }
+        }
+    } else {
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '20px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('Pirate Adventure', 320, 300);
+        ctx.fillText('Click Start Adventure!', 320, 330);
+    }
+}
+
+function startPirateGame() {
+    if (!terrainSeeds) {
+        generateFixedTerrain();
+    }
+    
+    const beachTiles = [];
+    for (let x = 0; x < 16; x++) {
+        for (let y = 0; y < 16; y++) {
+            if (getTileType(x, y) === 'beach') {
+                beachTiles.push({ x, y });
+            }
+        }
+    }
+    
+    pirateGame = {
+        players: [
+            { 
+                name: 'Player 1', 
+                color: '#ff4444', 
+                ships: 3, 
+                coins: 5, 
+                cards: 0,
+                items: {},
+                shipPositions: [
+                    beachTiles[0] ? { ...beachTiles[0], alive: true } : { x: 2, y: 2, alive: true },
+                    beachTiles[1] ? { ...beachTiles[1], alive: true } : { x: 3, y: 2, alive: true },
+                    beachTiles[2] ? { ...beachTiles[2], alive: true } : { x: 2, y: 3, alive: true }
+                ]
+            },
+            { 
+                name: 'Player 2', 
+                color: '#4444ff', 
+                ships: 3, 
+                coins: 5, 
+                cards: 0,
+                items: {},
+                shipPositions: [
+                    beachTiles[3] ? { ...beachTiles[3], alive: true } : { x: 12, y: 12, alive: true },
+                    beachTiles[4] ? { ...beachTiles[4], alive: true } : { x: 13, y: 12, alive: true },
+                    beachTiles[5] ? { ...beachTiles[5], alive: true } : { x: 12, y: 13, alive: true }
+                ]
+            }
+        ],
+        treasures: treasureSpawns.map(t => ({ ...t, collected: false })),
+        currentPlayer: 0,
+        turn: 1,
+        selectedShip: null,
+        showMoves: false,
+        actionTaken: false
+    };
+    
+    const canvas = document.getElementById('pirateBoard');
+    canvas.addEventListener('click', handlePirateCanvasClick);
+    
+    document.getElementById('pirateTurn').textContent = pirateGame.turn;
+    document.getElementById('currentPiratePlayer').textContent = pirateGame.currentPlayer + 1;
+    
+    selectedActionType = null;
+    actionPower = 0;
+    diceRolls = [];
+    document.getElementById('selectedAction').textContent = 'None';
+    document.getElementById('diceResult').textContent = '-';
+    document.getElementById('spinButton').disabled = false;
+    document.getElementById('executeButton').disabled = true;
+    
+    drawPirateBoard(document.getElementById('pirateBoard').getContext('2d'));
+    updatePiratePlayerStatus();
+    
+    alert('Pirate Adventure started! Ships spawned on beaches. Spin the wheel to begin!');
+}
+
+function pirateAction(action) {
+    if (!pirateGame || pirateGame.actionTaken) {
+        alert(pirateGame?.actionTaken ? 'You already took an action!' : 'Start the game first!');
+        return;
+    }
+    
+    const player = pirateGame.players[pirateGame.currentPlayer];
+    let message = '';
+    
+    switch (action) {
+        case 'move':
+            if (!pirateGame.selectedShip) {
+                alert('Select a ship first!');
+                return;
+            }
+            pirateGame.showMoves = true;
+            message = `Move power: ${actionPower}! Click on water tiles.`;
+            drawPirateBoard(document.getElementById('pirateBoard').getContext('2d'));
+            break;
+        case 'coin':
+            const totalCoins = actionPower + Math.floor(actionPower / 2);
+            player.coins += totalCoins;
+            message = `Earned ${totalCoins} coins!`;
+            pirateGame.actionTaken = true;
+            break;
+        case 'card':
+            const cardCost = Math.max(1, 3 - Math.floor(actionPower / 3));
+            if (player.coins >= cardCost) {
+                player.coins -= cardCost;
+                player.cards++;
+                message = `Bought card for ${cardCost} coins!`;
+                pirateGame.actionTaken = true;
+            } else {
+                message = `Need ${cardCost} coins!`;
+            }
+            break;
+        case 'attack':
+            if (!pirateGame.selectedShip) {
+                alert('Select a ship first!');
+                return;
+            }
+            message = 'Attack feature coming soon!';
+            pirateGame.actionTaken = true;
+            break;
+    }
+    
+    updatePiratePlayerStatus();
+    if (message) alert(message);
+}
+
+function nextPirateTurn() {
+    if (!pirateGame) return;
+    
+    pirateGame.selectedShip = null;
+    pirateGame.showMoves = false;
+    pirateGame.actionTaken = false;
+    
+    selectedActionType = null;
+    actionPower = 0;
+    diceRolls = [];
+    document.getElementById('selectedAction').textContent = 'None';
+    document.getElementById('diceResult').textContent = '-';
+    document.getElementById('spinButton').disabled = false;
+    document.getElementById('diceButton').disabled = true;
+    document.getElementById('executeButton').disabled = true;
+    drawDice();
+    
+    pirateGame.currentPlayer = (pirateGame.currentPlayer + 1) % pirateGame.players.length;
+    if (pirateGame.currentPlayer === 0) {
+        pirateGame.turn++;
+    }
+    
+    document.getElementById('pirateTurn').textContent = pirateGame.turn;
+    document.getElementById('currentPiratePlayer').textContent = pirateGame.currentPlayer + 1;
+    
+    drawPirateBoard(document.getElementById('pirateBoard').getContext('2d'));
+}
+
+function handlePirateCanvasClick(event) {
+    if (!pirateGame || pirateGame.actionTaken) return;
+    
+    const canvas = document.getElementById('pirateBoard');
+    const rect = canvas.getBoundingClientRect();
+    const x = Math.floor((event.clientX - rect.left) / 40);
+    const y = Math.floor((event.clientY - rect.top) / 40);
+    
+    const currentPlayer = pirateGame.players[pirateGame.currentPlayer];
+    
+    if (pirateGame.showMoves && pirateGame.selectedShip) {
+        const distance = Math.abs(pirateGame.selectedShip.x - x) + Math.abs(pirateGame.selectedShip.y - y);
+        const tileType = getTileType(x, y);
+        if ((tileType === 'water' || tileType === 'deepwater') && !getShipAt(x, y) && distance <= actionPower) {
+            pirateGame.selectedShip.x = x;
+            pirateGame.selectedShip.y = y;
+            
+            const treasure = getTreasureAt(x, y);
+            if (treasure) {
+                treasure.collected = true;
+                currentPlayer.coins += treasure.coins;
+                alert(`Found treasure worth ${treasure.coins} coins!`);
+            }
+            
+            pirateGame.selectedShip = null;
+            pirateGame.showMoves = false;
+            pirateGame.actionTaken = true;
+            
+            setTimeout(() => nextPirateTurn(), 1500);
+            
+            drawPirateBoard(canvas.getContext('2d'));
+            updatePiratePlayerStatus();
+            return;
+        }
+    }
+    
+    const shipAtPos = getShipAt(x, y);
+    if (shipAtPos && shipAtPos.owner === currentPlayer) {
+        pirateGame.selectedShip = shipAtPos;
+        pirateGame.showMoves = false;
+        drawPirateBoard(canvas.getContext('2d'));
+    }
+}
+
+function resetPirateGame() {
+    pirateGame = null;
+    document.getElementById('pirateTurn').textContent = '1';
+    document.getElementById('currentPiratePlayer').textContent = '1';
+    
+    const canvas = document.getElementById('pirateBoard');
+    const newCanvas = canvas.cloneNode(true);
+    canvas.parentNode.replaceChild(newCanvas, canvas);
+    
+    const statusDiv = document.getElementById('playerStatus');
+    statusDiv.innerHTML = `
+        <p class="mb-1">Player 1: <span class="text-success">3 ships</span> | <span class="text-warning">5 coins</span></p>
+        <p class="mb-1">Player 2: <span class="text-success">3 ships</span> | <span class="text-warning">5 coins</span></p>
+    `;
+    
+    initializePirateCanvas();
+}
+
+function updatePiratePlayerStatus() {
+    if (!pirateGame) return;
+    
+    const statusDiv = document.getElementById('playerStatus');
+    let html = '';
+    
+    pirateGame.players.forEach((player, index) => {
+        const aliveShips = player.shipPositions.filter(s => s.alive).length;
+        html += `<p class="mb-1">${player.name}: <span class="text-success">${aliveShips} ships</span> | <span class="text-warning">${player.coins} coins</span> | <span class="text-info">${player.cards || 0} cards</span></p>`;
+    });
+    
+    statusDiv.innerHTML = html;
+}
+
+function getShipAt(x, y) {
+    if (!pirateGame) return null;
+    
+    for (let player of pirateGame.players) {
+        for (let ship of player.shipPositions) {
+            if (ship.alive && ship.x === x && ship.y === y) {
+                return ship;
+            }
+        }
+    }
+    
+    return null;
+}
+
+function getTreasureAt(x, y) {
+    if (!pirateGame) return null;
+    return pirateGame.treasures.find(t => !t.collected && t.x === x && t.y === y);
+}
+</script>
+{% endblock %}

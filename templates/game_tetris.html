@@ -1,0 +1,451 @@
+{% extends "base.html" %}
+
+{% block title %}Tetris - ZjadowRealm{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <div class="mb-3">
+                <a href="{{ url_for('games') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Games
+                </a>
+            </div>
+
+            <!-- Tetris Game -->
+            <div class="card shadow-lg">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-th me-2"></i>Tetris
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="text-center">
+                                <canvas id="tetrisCanvas" width="300" height="600" class="border rounded game-canvas"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="tetris-stats mb-3">
+                                <h4>Score: <span id="tetrisScore">0</span></h4>
+                                <h5>Level: <span id="tetrisLevel">1</span></h5>
+                                <h5>Lines: <span id="tetrisLines">0</span></h5>
+                            </div>
+                            
+                            <div class="next-piece mb-3">
+                                <h6>Next Piece:</h6>
+                                <canvas id="nextPieceCanvas" width="120" height="120" style="border: 1px solid #666; background: #000;"></canvas>
+                            </div>
+                            
+                            <div class="game-controls mb-3">
+                                <button id="tetrisStartButton" class="btn btn-success me-2" onclick="startTetris()">
+                                    <i class="fas fa-play"></i> Start
+                                </button>
+                                <button id="tetrisPauseButton" class="btn btn-warning me-2" onclick="pauseTetris()" disabled>
+                                    <i class="fas fa-pause"></i> Pause
+                                </button>
+                                <button class="btn btn-danger" onclick="resetTetris()">
+                                    <i class="fas fa-redo"></i> Reset
+                                </button>
+                            </div>
+                            
+                            <div class="controls-help">
+                                <h6>Controls:</h6>
+                                <small class="text-muted">
+                                    <div>← → Move left/right</div>
+                                    <div>↓ Soft drop</div>
+                                    <div>↑ / Space: Rotate</div>
+                                    <div>Shift: Hard drop</div>
+                                    <div>P: Pause</div>
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.game-canvas {
+    background-color: #000;
+    max-width: 100%;
+    height: auto;
+}
+
+@media (max-width: 768px) {
+    #tetrisCanvas {
+        width: 100%;
+        height: auto;
+    }
+}
+</style>
+
+<script>
+// Tetris game state
+let tetrisState = {
+    board: [],
+    currentPiece: null,
+    nextPiece: null,
+    score: 0,
+    level: 1,
+    lines: 0,
+    gameRunning: false,
+    paused: false,
+    dropCounter: 0,
+    dropInterval: 1000,
+    lastTime: 0
+};
+
+const TETRIS_COLORS = [
+    null,
+    '#FF0D72', // I
+    '#0DC2FF', // O  
+    '#0DFF72', // T
+    '#F538FF', // S
+    '#FF8E0D', // Z
+    '#FFE138', // J
+    '#3877FF'  // L
+];
+
+const TETRIS_PIECES = [
+    [],
+    [[1,1,1,1]], // I
+    [[2,2],[2,2]], // O
+    [[0,3,0],[3,3,3]], // T
+    [[0,4,4],[4,4,0]], // S
+    [[5,5,0],[0,5,5]], // Z
+    [[6,0,0],[6,6,6]], // J
+    [[0,0,7],[7,7,7]]  // L
+];
+
+// Load page
+document.addEventListener('DOMContentLoaded', function() {
+    initializeTetrisCanvas();
+    document.addEventListener('keydown', handleTetrisInput);
+});
+
+function initializeTetrisCanvas() {
+    const canvas = document.getElementById('tetrisCanvas');
+    if (canvas) {
+        tetrisState.board = Array(20).fill().map(() => Array(10).fill(0));
+        tetrisState.score = 0;
+        tetrisState.level = 1;
+        tetrisState.lines = 0;
+        tetrisState.gameRunning = false;
+        tetrisState.paused = false;
+        
+        updateTetrisDisplay();
+        drawTetrisBoard();
+        drawNextPiece();
+    }
+}
+
+function createPiece(type) {
+    return {
+        type: type,
+        shape: TETRIS_PIECES[type].map(row => [...row]),
+        x: Math.floor((10 - TETRIS_PIECES[type][0].length) / 2),
+        y: 0
+    };
+}
+
+function getRandomPiece() {
+    return Math.floor(Math.random() * 7) + 1;
+}
+
+function startTetris() {
+    if (tetrisState.gameRunning) return;
+    
+    tetrisState.gameRunning = true;
+    tetrisState.paused = false;
+    tetrisState.board = Array(20).fill().map(() => Array(10).fill(0));
+    tetrisState.score = 0;
+    tetrisState.level = 1;
+    tetrisState.lines = 0;
+    tetrisState.dropCounter = 0;
+    tetrisState.dropInterval = 1000;
+    
+    tetrisState.currentPiece = createPiece(getRandomPiece());
+    tetrisState.nextPiece = createPiece(getRandomPiece());
+    
+    updateTetrisDisplay();
+    drawNextPiece();
+    
+    document.getElementById('tetrisStartButton').disabled = true;
+    document.getElementById('tetrisPauseButton').disabled = false;
+    
+    tetrisGameLoop();
+}
+
+function pauseTetris() {
+    if (!tetrisState.gameRunning) return;
+    
+    tetrisState.paused = !tetrisState.paused;
+    const pauseBtn = document.getElementById('tetrisPauseButton');
+    pauseBtn.innerHTML = tetrisState.paused ? '<i class="fas fa-play"></i> Resume' : '<i class="fas fa-pause"></i> Pause';
+    
+    if (!tetrisState.paused) {
+        tetrisGameLoop();
+    }
+}
+
+function resetTetris() {
+    tetrisState.gameRunning = false;
+    tetrisState.paused = false;
+    tetrisState.score = 0;
+    tetrisState.level = 1;
+    tetrisState.lines = 0;
+    tetrisState.board = Array(20).fill().map(() => Array(10).fill(0));
+    
+    document.getElementById('tetrisStartButton').disabled = false;
+    document.getElementById('tetrisPauseButton').disabled = true;
+    document.getElementById('tetrisPauseButton').innerHTML = '<i class="fas fa-pause"></i> Pause';
+    
+    updateTetrisDisplay();
+    drawTetrisBoard();
+    drawNextPiece();
+}
+
+function tetrisGameLoop(time = 0) {
+    if (!tetrisState.gameRunning || tetrisState.paused) return;
+    
+    const deltaTime = time - tetrisState.lastTime;
+    tetrisState.lastTime = time;
+    tetrisState.dropCounter += deltaTime;
+    
+    if (tetrisState.dropCounter > tetrisState.dropInterval) {
+        dropPiece();
+    }
+    
+    drawTetrisBoard();
+    requestAnimationFrame(tetrisGameLoop);
+}
+
+function dropPiece() {
+    tetrisState.dropCounter = 0;
+    
+    if (canMovePiece(tetrisState.currentPiece, 0, 1)) {
+        tetrisState.currentPiece.y++;
+    } else {
+        lockPiece();
+        clearLines();
+        spawnNewPiece();
+        
+        if (!canMovePiece(tetrisState.currentPiece, 0, 0)) {
+            gameOver();
+        }
+    }
+}
+
+function lockPiece() {
+    const piece = tetrisState.currentPiece;
+    for (let y = 0; y < piece.shape.length; y++) {
+        for (let x = 0; x < piece.shape[y].length; x++) {
+            if (piece.shape[y][x] !== 0) {
+                const boardX = piece.x + x;
+                const boardY = piece.y + y;
+                if (boardY >= 0) {
+                    tetrisState.board[boardY][boardX] = piece.shape[y][x];
+                }
+            }
+        }
+    }
+}
+
+function clearLines() {
+    let linesCleared = 0;
+    
+    for (let y = tetrisState.board.length - 1; y >= 0; y--) {
+        if (tetrisState.board[y].every(cell => cell !== 0)) {
+            tetrisState.board.splice(y, 1);
+            tetrisState.board.unshift(Array(10).fill(0));
+            linesCleared++;
+            y++;
+        }
+    }
+    
+    if (linesCleared > 0) {
+        tetrisState.lines += linesCleared;
+        tetrisState.score += linesCleared * 100 * tetrisState.level;
+        tetrisState.level = Math.floor(tetrisState.lines / 10) + 1;
+        tetrisState.dropInterval = Math.max(50, 1000 - (tetrisState.level - 1) * 100);
+        updateTetrisDisplay();
+    }
+}
+
+function spawnNewPiece() {
+    tetrisState.currentPiece = tetrisState.nextPiece;
+    tetrisState.nextPiece = createPiece(getRandomPiece());
+    drawNextPiece();
+}
+
+function canMovePiece(piece, offsetX, offsetY) {
+    for (let y = 0; y < piece.shape.length; y++) {
+        for (let x = 0; x < piece.shape[y].length; x++) {
+            if (piece.shape[y][x] !== 0) {
+                const newX = piece.x + x + offsetX;
+                const newY = piece.y + y + offsetY;
+                
+                if (newX < 0 || newX >= 10 || newY >= 20) {
+                    return false;
+                }
+                
+                if (newY >= 0 && tetrisState.board[newY][newX] !== 0) {
+                    return false;
+                }
+            }
+        }
+    }
+    return true;
+}
+
+function rotatePiece() {
+    if (!tetrisState.currentPiece) return;
+    
+    const rotated = tetrisState.currentPiece.shape[0].map((_, i) =>
+        tetrisState.currentPiece.shape.map(row => row[i]).reverse()
+    );
+    
+    const originalShape = tetrisState.currentPiece.shape;
+    tetrisState.currentPiece.shape = rotated;
+    
+    if (!canMovePiece(tetrisState.currentPiece, 0, 0)) {
+        tetrisState.currentPiece.shape = originalShape;
+    }
+}
+
+function handleTetrisInput(event) {
+    if (!tetrisState.gameRunning || tetrisState.paused) return;
+    
+    switch(event.key) {
+        case 'ArrowLeft':
+            if (canMovePiece(tetrisState.currentPiece, -1, 0)) {
+                tetrisState.currentPiece.x--;
+            }
+            break;
+        case 'ArrowRight':
+            if (canMovePiece(tetrisState.currentPiece, 1, 0)) {
+                tetrisState.currentPiece.x++;
+            }
+            break;
+        case 'ArrowDown':
+            if (canMovePiece(tetrisState.currentPiece, 0, 1)) {
+                tetrisState.currentPiece.y++;
+                tetrisState.score += 1;
+                updateTetrisDisplay();
+            }
+            break;
+        case 'ArrowUp':
+        case ' ':
+            rotatePiece();
+            break;
+        case 'Shift':
+            while (canMovePiece(tetrisState.currentPiece, 0, 1)) {
+                tetrisState.currentPiece.y++;
+                tetrisState.score += 2;
+            }
+            updateTetrisDisplay();
+            break;
+        case 'p':
+        case 'P':
+            pauseTetris();
+            break;
+    }
+}
+
+function drawTetrisBoard() {
+    const canvas = document.getElementById('tetrisCanvas');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    const cellSize = 30;
+    
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw board
+    for (let y = 0; y < tetrisState.board.length; y++) {
+        for (let x = 0; x < tetrisState.board[y].length; x++) {
+            if (tetrisState.board[y][x] !== 0) {
+                ctx.fillStyle = TETRIS_COLORS[tetrisState.board[y][x]];
+                ctx.fillRect(x * cellSize, y * cellSize, cellSize - 1, cellSize - 1);
+            }
+        }
+    }
+    
+    // Draw current piece
+    if (tetrisState.currentPiece) {
+        ctx.fillStyle = TETRIS_COLORS[tetrisState.currentPiece.type];
+        for (let y = 0; y < tetrisState.currentPiece.shape.length; y++) {
+            for (let x = 0; x < tetrisState.currentPiece.shape[y].length; x++) {
+                if (tetrisState.currentPiece.shape[y][x] !== 0) {
+                    const drawX = (tetrisState.currentPiece.x + x) * cellSize;
+                    const drawY = (tetrisState.currentPiece.y + y) * cellSize;
+                    ctx.fillRect(drawX, drawY, cellSize - 1, cellSize - 1);
+                }
+            }
+        }
+    }
+    
+    // Draw grid
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = 1;
+    for (let x = 0; x <= 10; x++) {
+        ctx.beginPath();
+        ctx.moveTo(x * cellSize, 0);
+        ctx.lineTo(x * cellSize, 600);
+        ctx.stroke();
+    }
+    for (let y = 0; y <= 20; y++) {
+        ctx.beginPath();
+        ctx.moveTo(0, y * cellSize);
+        ctx.lineTo(300, y * cellSize);
+        ctx.stroke();
+    }
+}
+
+function drawNextPiece() {
+    const canvas = document.getElementById('nextPieceCanvas');
+    if (!canvas || !tetrisState.nextPiece) return;
+    
+    const ctx = canvas.getContext('2d');
+    const cellSize = 20;
+    
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    const piece = tetrisState.nextPiece;
+    const startX = (canvas.width - piece.shape[0].length * cellSize) / 2;
+    const startY = (canvas.height - piece.shape.length * cellSize) / 2;
+    
+    ctx.fillStyle = TETRIS_COLORS[piece.type];
+    for (let y = 0; y < piece.shape.length; y++) {
+        for (let x = 0; x < piece.shape[y].length; x++) {
+            if (piece.shape[y][x] !== 0) {
+                ctx.fillRect(
+                    startX + x * cellSize,
+                    startY + y * cellSize,
+                    cellSize - 1,
+                    cellSize - 1
+                );
+            }
+        }
+    }
+}
+
+function updateTetrisDisplay() {
+    document.getElementById('tetrisScore').textContent = tetrisState.score;
+    document.getElementById('tetrisLevel').textContent = tetrisState.level;
+    document.getElementById('tetrisLines').textContent = tetrisState.lines;
+}
+
+function gameOver() {
+    tetrisState.gameRunning = false;
+    alert(`Game Over! Final Score: ${tetrisState.score}`);
+    resetTetris();
+}
+</script>
+{% endblock %}

@@ -1,0 +1,252 @@
+{% extends "base.html" %}
+
+{% block title %}Chess - ZjadowRealm{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <div class="mb-3">
+                <a href="{{ url_for('games') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Games
+                </a>
+            </div>
+
+            <!-- Chess Game -->
+            <div class="card shadow-lg">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chess me-2"></i>Chess
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="text-center">
+                                <canvas id="chessBoard" width="480" height="480" class="border rounded game-canvas" style="background: #f0d9b5;"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="chess-info">
+                                <h6>Game Status: <span id="chessStatus">White's Turn</span></h6>
+                                <h6>Turn: <span id="chessTurn">White</span></h6>
+                                <div class="mt-3">
+                                    <button class="btn btn-success" onclick="startChess()">New Game</button>
+                                    <button class="btn btn-secondary" onclick="resetChess()">Reset</button>
+                                </div>
+                                <div class="mt-3">
+                                    <h6>Captured Pieces:</h6>
+                                    <div id="capturedWhite" class="mb-2">White: <span class="captured-pieces"></span></div>
+                                    <div id="capturedBlack">Black: <span class="captured-pieces"></span></div>
+                                </div>
+                                <div class="mt-3">
+                                    <small class="text-muted">
+                                        Click a piece to select, then click destination to move.
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.game-canvas {
+    max-width: 100%;
+    height: auto;
+    cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    #chessBoard {
+        width: 100%;
+        height: auto;
+    }
+}
+</style>
+
+<script>
+// Chess game state
+let chessState = {
+    board: [],
+    currentPlayer: 'white',
+    selectedSquare: null,
+    gameOver: false,
+    capturedPieces: { white: [], black: [] }
+};
+
+const CHESS_PIECES = {
+    'r': '♜', 'n': '♞', 'b': '♝', 'q': '♛', 'k': '♚', 'p': '♟',
+    'R': '♖', 'N': '♘', 'B': '♗', 'Q': '♕', 'K': '♔', 'P': '♙'
+};
+
+// Load page
+document.addEventListener('DOMContentLoaded', function() {
+    initializeChess();
+});
+
+function initializeChess() {
+    const canvas = document.getElementById('chessBoard');
+    if (canvas) {
+        startChess();
+        canvas.addEventListener('click', handleChessClick);
+    }
+}
+
+function startChess() {
+    chessState.board = [
+        ['r','n','b','q','k','b','n','r'],
+        ['p','p','p','p','p','p','p','p'],
+        [null,null,null,null,null,null,null,null],
+        [null,null,null,null,null,null,null,null],
+        [null,null,null,null,null,null,null,null],
+        [null,null,null,null,null,null,null,null],
+        ['P','P','P','P','P','P','P','P'],
+        ['R','N','B','Q','K','B','N','R']
+    ];
+    chessState.currentPlayer = 'white';
+    chessState.selectedSquare = null;
+    chessState.gameOver = false;
+    chessState.capturedPieces = { white: [], black: [] };
+    
+    updateChessDisplay();
+    drawChessBoard();
+}
+
+function resetChess() {
+    startChess();
+}
+
+function drawChessBoard() {
+    const canvas = document.getElementById('chessBoard');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    const squareSize = 60;
+    
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw board squares
+    for (let row = 0; row < 8; row++) {
+        for (let col = 0; col < 8; col++) {
+            const isLight = (row + col) % 2 === 0;
+            ctx.fillStyle = isLight ? '#f0d9b5' : '#b58863';
+            
+            const x = col * squareSize;
+            const y = row * squareSize;
+            ctx.fillRect(x, y, squareSize, squareSize);
+            
+            // Highlight selected square
+            if (chessState.selectedSquare && 
+                chessState.selectedSquare.row === row && 
+                chessState.selectedSquare.col === col) {
+                ctx.fillStyle = 'rgba(255, 255, 0, 0.5)';
+                ctx.fillRect(x, y, squareSize, squareSize);
+            }
+            
+            // Draw piece if present
+            const piece = chessState.board[row][col];
+            if (piece) {
+                ctx.fillStyle = 'black';
+                ctx.font = '40px serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(
+                    CHESS_PIECES[piece],
+                    x + squareSize/2,
+                    y + squareSize/2
+                );
+            }
+        }
+    }
+}
+
+function handleChessClick(event) {
+    if (chessState.gameOver) return;
+    
+    const canvas = document.getElementById('chessBoard');
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    
+    const col = Math.floor(x / 60);
+    const row = Math.floor(y / 60);
+    
+    if (row < 0 || row > 7 || col < 0 || col > 7) return;
+    
+    if (chessState.selectedSquare) {
+        // Try to move piece
+        if (isValidChessMove(chessState.selectedSquare.row, chessState.selectedSquare.col, row, col)) {
+            makeChessMove(chessState.selectedSquare.row, chessState.selectedSquare.col, row, col);
+        }
+        chessState.selectedSquare = null;
+    } else {
+        // Select piece
+        const piece = chessState.board[row][col];
+        if (piece && isPieceOwnedByCurrentPlayer(piece)) {
+            chessState.selectedSquare = { row, col };
+        }
+    }
+    
+    drawChessBoard();
+}
+
+function isPieceOwnedByCurrentPlayer(piece) {
+    const isWhitePiece = piece === piece.toUpperCase();
+    return (chessState.currentPlayer === 'white' && isWhitePiece) ||
+           (chessState.currentPlayer === 'black' && !isWhitePiece);
+}
+
+function isValidChessMove(fromRow, fromCol, toRow, toCol) {
+    const piece = chessState.board[fromRow][fromCol];
+    const targetPiece = chessState.board[toRow][toCol];
+    
+    // Can't capture own piece
+    if (targetPiece && isPieceOwnedByCurrentPlayer(targetPiece)) {
+        return false;
+    }
+    
+    // Simple movement validation (simplified chess rules for demo)
+    return true;
+}
+
+function makeChessMove(fromRow, fromCol, toRow, toCol) {
+    const piece = chessState.board[fromRow][fromCol];
+    const capturedPiece = chessState.board[toRow][toCol];
+    
+    // Capture piece if present
+    if (capturedPiece) {
+        if (capturedPiece === capturedPiece.toUpperCase()) {
+            chessState.capturedPieces.black.push(capturedPiece);
+        } else {
+            chessState.capturedPieces.white.push(capturedPiece);
+        }
+    }
+    
+    // Move piece
+    chessState.board[toRow][toCol] = piece;
+    chessState.board[fromRow][fromCol] = null;
+    
+    // Switch player
+    chessState.currentPlayer = chessState.currentPlayer === 'white' ? 'black' : 'white';
+    updateChessDisplay();
+}
+
+function updateChessDisplay() {
+    document.getElementById('chessStatus').textContent = 
+        chessState.gameOver ? 'Game Over' : `${chessState.currentPlayer}'s Turn`;
+    document.getElementById('chessTurn').textContent = 
+        chessState.currentPlayer.charAt(0).toUpperCase() + chessState.currentPlayer.slice(1);
+    
+    // Update captured pieces
+    document.querySelector('#capturedWhite .captured-pieces').textContent = 
+        chessState.capturedPieces.white.map(p => CHESS_PIECES[p]).join(' ');
+    document.querySelector('#capturedBlack .captured-pieces').textContent = 
+        chessState.capturedPieces.black.map(p => CHESS_PIECES[p]).join(' ');
+}
+</script>
+{% endblock %}

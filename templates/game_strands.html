@@ -1,0 +1,333 @@
+{% extends "base.html" %}
+
+{% block title %}Strands - ZjadowRealm{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <div class="mb-3">
+                <a href="{{ url_for('games') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Games
+                </a>
+            </div>
+
+            <!-- Strands Game -->
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-project-diagram me-2"></i>Strands
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="text-center">
+                                <div class="strands-theme mb-3">
+                                    <h5>Today's Theme: <span id="strandsTheme">Ocean Creatures</span></h5>
+                                </div>
+                                <canvas id="strandsBoard" width="400" height="400" class="border rounded game-canvas"></canvas>
+                                <div class="mt-3">
+                                    <input type="text" id="strandsInput" class="form-control mb-2" placeholder="Type your word and press Enter">
+                                    <button class="btn btn-primary" onclick="submitStrandsWord()">Submit Word</button>
+                                    <button class="btn btn-secondary" onclick="startStrands()">New Puzzle</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="strands-info">
+                                <h6>Words Found: <span id="strandsFound">0</span>/8</h6>
+                                <h6>Score: <span id="strandsScore">0</span></h6>
+                                
+                                <div class="found-words mt-3">
+                                    <h6>Found Words:</h6>
+                                    <div id="foundWordsList" class="list-group list-group-flush">
+                                        <!-- Found words will appear here -->
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-3">
+                                    <small class="text-muted">
+                                        Find words related to the theme by clicking and dragging across letters.
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.game-canvas {
+    background-color: #f8f9fa;
+    max-width: 100%;
+    height: auto;
+    cursor: crosshair;
+}
+
+@media (max-width: 768px) {
+    #strandsBoard {
+        width: 100%;
+        height: auto;
+    }
+}
+</style>
+
+<script>
+// Strands game state
+let strandsState = {
+    themes: {
+        'Ocean Creatures': ['WHALE', 'SHARK', 'DOLPHIN', 'OCTOPUS', 'STARFISH', 'JELLYFISH', 'SEAHORSE', 'CORAL'],
+        'Space Objects': ['PLANET', 'COMET', 'GALAXY', 'NEBULA', 'ASTEROID', 'METEOR', 'SATELLITE', 'BLACKHOLE'],
+        'Kitchen Items': ['SPOON', 'KNIFE', 'PLATE', 'OVEN', 'MIXER', 'BLENDER', 'SPATULA', 'REFRIGERATOR']
+    },
+    currentTheme: 'Ocean Creatures',
+    grid: [],
+    foundWords: [],
+    targetWords: [],
+    score: 0,
+    gridSize: 8,
+    selectedPath: []
+};
+
+// Load page
+document.addEventListener('DOMContentLoaded', function() {
+    initializeStrands();
+});
+
+function initializeStrands() {
+    startStrands();
+    const canvas = document.getElementById('strandsBoard');
+    if (canvas) {
+        canvas.addEventListener('mousedown', startStrandsSelection);
+        canvas.addEventListener('mousemove', continueStrandsSelection);
+        canvas.addEventListener('mouseup', endStrandsSelection);
+    }
+    
+    const input = document.getElementById('strandsInput');
+    if (input) {
+        input.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                submitStrandsWord();
+            }
+        });
+    }
+}
+
+function startStrands() {
+    const themes = Object.keys(strandsState.themes);
+    strandsState.currentTheme = themes[Math.floor(Math.random() * themes.length)];
+    strandsState.targetWords = [...strandsState.themes[strandsState.currentTheme]];
+    strandsState.foundWords = [];
+    strandsState.score = 0;
+    strandsState.selectedPath = [];
+    
+    document.getElementById('foundWordsList').innerHTML = '';
+    
+    generateStrandsGrid();
+    updateStrandsDisplay();
+    drawStrandsBoard();
+}
+
+function generateStrandsGrid() {
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    strandsState.grid = [];
+    
+    // Create random grid
+    for (let i = 0; i < strandsState.gridSize; i++) {
+        strandsState.grid[i] = [];
+        for (let j = 0; j < strandsState.gridSize; j++) {
+            strandsState.grid[i][j] = letters[Math.floor(Math.random() * letters.length)];
+        }
+    }
+    
+    // Place some target words in the grid
+    strandsState.targetWords.forEach((word, index) => {
+        if (index < 4) {
+            placeWordInGrid(word);
+        }
+    });
+}
+
+function placeWordInGrid(word) {
+    const directions = [
+        [0, 1], [1, 0], [1, 1], [-1, 1]
+    ];
+    
+    let placed = false;
+    let attempts = 0;
+    
+    while (!placed && attempts < 50) {
+        const direction = directions[Math.floor(Math.random() * directions.length)];
+        const startRow = Math.floor(Math.random() * strandsState.gridSize);
+        const startCol = Math.floor(Math.random() * strandsState.gridSize);
+        
+        let canPlace = true;
+        for (let i = 0; i < word.length; i++) {
+            const row = startRow + direction[0] * i;
+            const col = startCol + direction[1] * i;
+            
+            if (row < 0 || row >= strandsState.gridSize || 
+                col < 0 || col >= strandsState.gridSize) {
+                canPlace = false;
+                break;
+            }
+        }
+        
+        if (canPlace) {
+            for (let i = 0; i < word.length; i++) {
+                const row = startRow + direction[0] * i;
+                const col = startCol + direction[1] * i;
+                strandsState.grid[row][col] = word[i];
+            }
+            placed = true;
+        }
+        
+        attempts++;
+    }
+}
+
+function drawStrandsBoard() {
+    const canvas = document.getElementById('strandsBoard');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    const cellSize = 50;
+    
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw grid
+    for (let i = 0; i < strandsState.gridSize; i++) {
+        for (let j = 0; j < strandsState.gridSize; j++) {
+            const x = j * cellSize;
+            const y = i * cellSize;
+            
+            // Background
+            ctx.fillStyle = '#f8f9fa';
+            ctx.fillRect(x, y, cellSize, cellSize);
+            
+            // Border
+            ctx.strokeStyle = '#dee2e6';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(x, y, cellSize, cellSize);
+            
+            // Letter
+            ctx.fillStyle = '#212529';
+            ctx.font = '20px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(
+                strandsState.grid[i][j],
+                x + cellSize/2,
+                y + cellSize/2
+            );
+        }
+    }
+    
+    // Highlight selected path
+    ctx.strokeStyle = '#007bff';
+    ctx.lineWidth = 3;
+    if (strandsState.selectedPath.length > 1) {
+        ctx.beginPath();
+        for (let i = 0; i < strandsState.selectedPath.length; i++) {
+            const {row, col} = strandsState.selectedPath[i];
+            const x = col * cellSize + cellSize/2;
+            const y = row * cellSize + cellSize/2;
+            
+            if (i === 0) {
+                ctx.moveTo(x, y);
+            } else {
+                ctx.lineTo(x, y);
+            }
+        }
+        ctx.stroke();
+    }
+}
+
+function startStrandsSelection(event) {
+    strandsState.selectedPath = [];
+    const {row, col} = getStrandsGridPosition(event);
+    if (row >= 0 && col >= 0) {
+        strandsState.selectedPath.push({row, col});
+        drawStrandsBoard();
+    }
+}
+
+function continueStrandsSelection(event) {
+    if (strandsState.selectedPath.length === 0) return;
+    
+    const {row, col} = getStrandsGridPosition(event);
+    if (row >= 0 && col >= 0) {
+        const lastPos = strandsState.selectedPath[strandsState.selectedPath.length - 1];
+        if (row !== lastPos.row || col !== lastPos.col) {
+            const rowDiff = Math.abs(row - lastPos.row);
+            const colDiff = Math.abs(col - lastPos.col);
+            if (rowDiff <= 1 && colDiff <= 1) {
+                strandsState.selectedPath.push({row, col});
+                drawStrandsBoard();
+            }
+        }
+    }
+}
+
+function endStrandsSelection() {
+    if (strandsState.selectedPath.length >= 3) {
+        const word = strandsState.selectedPath
+            .map(pos => strandsState.grid[pos.row][pos.col])
+            .join('');
+        checkStrandsWord(word);
+    }
+    strandsState.selectedPath = [];
+    drawStrandsBoard();
+}
+
+function getStrandsGridPosition(event) {
+    const canvas = document.getElementById('strandsBoard');
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    
+    const col = Math.floor(x / 50);
+    const row = Math.floor(y / 50);
+    
+    return {row, col};
+}
+
+function submitStrandsWord() {
+    const input = document.getElementById('strandsInput');
+    const word = input.value.toUpperCase().trim();
+    input.value = '';
+    
+    if (word.length >= 3) {
+        checkStrandsWord(word);
+    }
+}
+
+function checkStrandsWord(word) {
+    if (strandsState.targetWords.includes(word) && !strandsState.foundWords.includes(word)) {
+        strandsState.foundWords.push(word);
+        strandsState.score += word.length * 10;
+        
+        const listItem = document.createElement('div');
+        listItem.className = 'list-group-item list-group-item-success';
+        listItem.textContent = word;
+        document.getElementById('foundWordsList').appendChild(listItem);
+        
+        if (strandsState.foundWords.length === strandsState.targetWords.length) {
+            setTimeout(() => alert('Congratulations! You found all words!'), 100);
+        }
+    }
+    
+    updateStrandsDisplay();
+}
+
+function updateStrandsDisplay() {
+    document.getElementById('strandsTheme').textContent = strandsState.currentTheme;
+    document.getElementById('strandsFound').textContent = strandsState.foundWords.length;
+    document.getElementById('strandsScore').textContent = strandsState.score;
+}
+</script>
+{% endblock %}

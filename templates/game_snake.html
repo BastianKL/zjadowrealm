@@ -1,0 +1,624 @@
+{% extends "base.html" %}
+
+{% block title %}Snake Game - ZjadowRealm{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <div class="mb-3">
+                <a href="{{ url_for('games') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Games
+                </a>
+            </div>
+
+            <!-- Snake Game -->
+            <div class="card shadow-lg">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-circle-dot me-2"></i>Snake Game
+                        <span class="float-end">Score: <span id="snakeScore">0</span> | High: <span id="snakeHighScore">0</span></span>
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    <div class="game-area mb-3">
+                        <canvas id="snakeCanvas" width="400" height="400" class="border rounded game-canvas"></canvas>
+                    </div>
+                    <div class="game-controls mb-3">
+                        <button class="btn btn-success me-2" onclick="startSnake()">
+                            <i class="fas fa-play"></i> Start
+                        </button>
+                        <button class="btn btn-warning me-2" onclick="pauseSnake()">
+                            <i class="fas fa-pause"></i> Pause
+                        </button>
+                        <button class="btn btn-danger me-2" onclick="resetSnake()">
+                            <i class="fas fa-redo"></i> Reset
+                        </button>
+                        <button class="btn btn-info me-2" onclick="toggleAdvancedMode()" id="advancedBtn">
+                            <i class="fas fa-magic"></i> Advanced!
+                        </button>
+                    </div>
+                    <div id="advancedModeInfo" style="display: none;" class="mb-3">
+                        <div class="alert alert-info">
+                            <strong>Advanced Mode Active!</strong><br>
+                            <small>
+                                🟣 Purple squares: +2 length | 🟠 Orange with yellow rim: Thick mode (broader) | 
+                                🔵🟠 Blue-Orange lines: Teleport | 🔴🟡 Red-Yellow lines: Generate obstacles | ⚫ Black pulsing: Cuts snake in half | 🟫 Obstacles: Avoid!
+                            </small>
+                        </div>
+                    </div>
+                    <p class="text-muted">Use WASD or arrow keys to move. Collect food to grow!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.game-canvas {
+    background-color: #2a2a2a;
+    max-width: 100%;
+    height: auto;
+}
+
+@media (max-width: 768px) {
+    #snakeCanvas {
+        width: 100%;
+        height: auto;
+    }
+}
+</style>
+
+<script>
+// Snake game variables
+let snake = { x: 200, y: 200 };
+let snakeBody = [{ x: 200, y: 200 }];
+let food = { x: 100, y: 100 };
+let direction = { x: 0, y: 0 };
+let snakeInterval;
+let gameRunning = false;
+let score = 0;
+let highScore = 0;
+
+// Advanced Snake features
+let advancedMode = false;
+let thickMode = false;
+let obstacles = [];
+let specialItems = [];
+let teleportLines = [];
+let obstacleLines = [];
+let pulseEffect = 0;
+
+// Load high score
+document.addEventListener('DOMContentLoaded', function() {
+    highScore = localStorage.getItem('snakeHighScore') || 0;
+    document.getElementById('snakeHighScore').textContent = highScore;
+    initializeSnakeCanvas();
+});
+
+function initializeSnakeCanvas() {
+    const canvas = document.getElementById('snakeCanvas');
+    if (canvas) {
+        const ctx = canvas.getContext('2d');
+        drawSnakeGame(ctx);
+    }
+}
+
+function startSnake() {
+    if (gameRunning) return;
+    
+    gameRunning = true;
+    score = 0;
+    
+    // Reset game state
+    snake = { x: 200, y: 200 };
+    snakeBody = [{ x: 200, y: 200 }];
+    direction = { x: 0, y: 0 };
+    thickMode = false;
+    obstacles = [];
+    specialItems = [];
+    teleportLines = [];
+    obstacleLines = [];
+    pulseEffect = 0;
+    
+    generateFood();
+    
+    // Generate obstacles and special items if in advanced mode
+    if (advancedMode) {
+        generateObstacles();
+        generateSpecialItems();
+        generateTeleportLines();
+        generateObstacleLines();
+    }
+    
+    // Update score display
+    document.getElementById('snakeScore').textContent = score;
+    
+    // Add keyboard controls
+    document.addEventListener('keydown', handleSnakeInput);
+    
+    // Start game loop
+    snakeInterval = setInterval(updateSnake, 150);
+}
+
+function toggleAdvancedMode() {
+    advancedMode = !advancedMode;
+    const btn = document.getElementById('advancedBtn');
+    const info = document.getElementById('advancedModeInfo');
+    
+    if (advancedMode) {
+        btn.innerHTML = '<i class="fas fa-magic"></i> Normal Mode';
+        btn.className = 'btn btn-warning me-2';
+        info.style.display = 'block';
+    } else {
+        btn.innerHTML = '<i class="fas fa-magic"></i> Advanced!';
+        btn.className = 'btn btn-info me-2';
+        info.style.display = 'none';
+    }
+    
+    // Reset game if running
+    if (gameRunning) {
+        resetSnake();
+    }
+}
+
+function generateObstacles() {
+    obstacles = [];
+    const numObstacles = Math.floor(Math.random() * 8) + 5;
+    
+    for (let i = 0; i < numObstacles; i++) {
+        let obstacle;
+        do {
+            obstacle = {
+                x: Math.floor(Math.random() * 20) * 20,
+                y: Math.floor(Math.random() * 20) * 20
+            };
+        } while (
+            (obstacle.x === snake.x && obstacle.y === snake.y) ||
+            (obstacle.x === food.x && obstacle.y === food.y) ||
+            obstacles.some(obs => obs.x === obstacle.x && obs.y === obstacle.y)
+        );
+        obstacles.push(obstacle);
+    }
+}
+
+function generateSpecialItems() {
+    specialItems = [];
+    const itemTypes = ['purple', 'thick', 'cut'];
+    const numItems = Math.floor(Math.random() * 2) + 2;
+    
+    for (let i = 0; i < numItems; i++) {
+        let item;
+        do {
+            item = {
+                x: Math.floor(Math.random() * 20) * 20,
+                y: Math.floor(Math.random() * 20) * 20,
+                type: itemTypes[Math.floor(Math.random() * itemTypes.length)]
+            };
+        } while (
+            (item.x === snake.x && item.y === snake.y) ||
+            (item.x === food.x && item.y === food.y) ||
+            obstacles.some(obs => obs.x === item.x && obs.y === item.y) ||
+            specialItems.some(si => si.x === item.x && si.y === item.y)
+        );
+        specialItems.push(item);
+    }
+}
+
+function generateTeleportLines() {
+    teleportLines = [];
+    const numLines = Math.floor(Math.random() * 2) + 1;
+    
+    for (let i = 0; i < numLines; i++) {
+        const isHorizontal = Math.random() < 0.5;
+        let line = [];
+        
+        if (isHorizontal) {
+            const y = Math.floor(Math.random() * 20) * 20;
+            for (let x = 0; x < 400; x += 20) {
+                line.push({ x: x, y: y });
+            }
+        } else {
+            const x = Math.floor(Math.random() * 20) * 20;
+            for (let y = 0; y < 400; y += 20) {
+                line.push({ x: x, y: y });
+            }
+        }
+        teleportLines.push(line);
+    }
+}
+
+function generateObstacleLines() {
+    obstacleLines = [];
+    const numLines = Math.floor(Math.random() * 2) + 1;
+    
+    for (let i = 0; i < numLines; i++) {
+        const isHorizontal = Math.random() < 0.5;
+        let line = [];
+        
+        if (isHorizontal) {
+            const y = Math.floor(Math.random() * 20) * 20;
+            for (let x = 0; x < 400; x += 20) {
+                line.push({ x: x, y: y });
+            }
+        } else {
+            const x = Math.floor(Math.random() * 20) * 20;
+            for (let y = 0; y < 400; y += 20) {
+                line.push({ x: x, y: y });
+            }
+        }
+        obstacleLines.push(line);
+    }
+}
+
+function handleSnakeInput(e) {
+    if (!gameRunning) return;
+    
+    const key = e.key.toLowerCase();
+    switch (key) {
+        case 'w':
+        case 'arrowup':
+            if (direction.y === 0) direction = { x: 0, y: -20 };
+            break;
+        case 's':
+        case 'arrowdown':
+            if (direction.y === 0) direction = { x: 0, y: 20 };
+            break;
+        case 'a':
+        case 'arrowleft':
+            if (direction.x === 0) direction = { x: -20, y: 0 };
+            break;
+        case 'd':
+        case 'arrowright':
+            if (direction.x === 0) direction = { x: 20, y: 0 };
+            break;
+    }
+}
+
+function updateSnake() {
+    if (!gameRunning) return;
+    if (direction.x === 0 && direction.y === 0) return;
+    
+    // Move snake
+    const newHead = { x: snake.x + direction.x, y: snake.y + direction.y };
+    
+    // Check wall collision
+    if (newHead.x < 0 || newHead.x >= 400 || newHead.y < 0 || newHead.y >= 400) {
+        gameOver();
+        return;
+    }
+    
+    // Check obstacle collision (advanced mode)
+    if (advancedMode && obstacles.some(obs => obs.x === newHead.x && obs.y === newHead.y)) {
+        gameOver();
+        return;
+    }
+    
+    // Check self collision
+    for (let segment of snakeBody) {
+        if (newHead.x === segment.x && newHead.y === segment.y) {
+            gameOver();
+            return;
+        }
+    }
+    
+    snakeBody.unshift(newHead);
+    snake.x = newHead.x;
+    snake.y = newHead.y;
+    
+    // Check food collision
+    if (snake.x === food.x && snake.y === food.y) {
+        score += 10;
+        document.getElementById('snakeScore').textContent = score;
+        generateFood();
+    } else {
+        snakeBody.pop();
+    }
+    
+    // Check special item collision (advanced mode)
+    if (advancedMode) {
+        for (let i = specialItems.length - 1; i >= 0; i--) {
+            const item = specialItems[i];
+            if (snake.x === item.x && snake.y === item.y) {
+                handleSpecialItem(item);
+                specialItems.splice(i, 1);
+                break;
+            }
+        }
+        
+        // Check teleport lines
+        for (let lineIndex = 0; lineIndex < teleportLines.length; lineIndex++) {
+            const line = teleportLines[lineIndex];
+            if (line.some(square => square.x === snake.x && square.y === snake.y)) {
+                teleportSnake();
+                teleportLines.splice(lineIndex, 1);
+                setTimeout(() => {
+                    if (gameRunning && advancedMode) {
+                        generateTeleportLines();
+                    }
+                }, 3000);
+                break;
+            }
+        }
+        
+        // Check obstacle lines
+        for (let lineIndex = 0; lineIndex < obstacleLines.length; lineIndex++) {
+            const line = obstacleLines[lineIndex];
+            if (line.some(square => square.x === snake.x && square.y === snake.y)) {
+                generateMoreObstacles();
+                obstacleLines.splice(lineIndex, 1);
+                setTimeout(() => {
+                    if (gameRunning && advancedMode) {
+                        generateObstacleLines();
+                    }
+                }, 5000);
+                break;
+            }
+        }
+        
+        pulseEffect = (pulseEffect + 0.2) % (Math.PI * 2);
+    }
+    
+    drawSnakeGame(document.getElementById('snakeCanvas').getContext('2d'));
+}
+
+function handleSpecialItem(item) {
+    switch (item.type) {
+        case 'purple':
+            snakeBody.push({ x: snakeBody[snakeBody.length - 1].x, y: snakeBody[snakeBody.length - 1].y });
+            snakeBody.push({ x: snakeBody[snakeBody.length - 1].x, y: snakeBody[snakeBody.length - 1].y });
+            score += 20;
+            document.getElementById('snakeScore').textContent = score;
+            break;
+        case 'thick':
+            thickMode = !thickMode;
+            score += 15;
+            document.getElementById('snakeScore').textContent = score;
+            break;
+        case 'cut':
+            if (snakeBody.length > 2) {
+                const halfLength = Math.floor(snakeBody.length / 2);
+                snakeBody = snakeBody.slice(0, halfLength);
+                score += 10;
+                document.getElementById('snakeScore').textContent = score;
+            }
+            break;
+    }
+}
+
+function teleportSnake() {
+    let newPos;
+    let attempts = 0;
+    do {
+        newPos = {
+            x: Math.floor(Math.random() * 20) * 20,
+            y: Math.floor(Math.random() * 20) * 20
+        };
+        attempts++;
+    } while (
+        attempts < 50 && (
+            snakeBody.some(segment => segment.x === newPos.x && segment.y === newPos.y) ||
+            obstacles.some(obs => obs.x === newPos.x && obs.y === newPos.y) ||
+            (newPos.x === food.x && newPos.y === food.y)
+        )
+    );
+    
+    if (attempts < 50) {
+        snake.x = newPos.x;
+        snake.y = newPos.y;
+        snakeBody[0] = { x: newPos.x, y: newPos.y };
+        score += 25;
+        document.getElementById('snakeScore').textContent = score;
+    }
+}
+
+function generateMoreObstacles() {
+    const numNewObstacles = Math.floor(Math.random() * 6) + 4;
+    
+    for (let i = 0; i < numNewObstacles; i++) {
+        let obstacle;
+        let attempts = 0;
+        do {
+            obstacle = {
+                x: Math.floor(Math.random() * 20) * 20,
+                y: Math.floor(Math.random() * 20) * 20
+            };
+            attempts++;
+        } while (
+            attempts < 30 && (
+                (obstacle.x === snake.x && obstacle.y === snake.y) ||
+                (obstacle.x === food.x && obstacle.y === food.y) ||
+                snakeBody.some(segment => segment.x === obstacle.x && segment.y === obstacle.y) ||
+                obstacles.some(obs => obs.x === obstacle.x && obs.y === obstacle.y) ||
+                specialItems.some(item => item.x === obstacle.x && item.y === obstacle.y)
+            )
+        );
+        if (attempts < 30) {
+            obstacles.push(obstacle);
+        }
+    }
+    
+    score += 10;
+    document.getElementById('snakeScore').textContent = score;
+}
+
+function drawSnakeGame(ctx) {
+    // Clear canvas
+    ctx.fillStyle = '#2a2a2a';
+    ctx.fillRect(0, 0, 400, 400);
+    
+    // Draw grid
+    ctx.strokeStyle = '#444';
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= 400; i += 20) {
+        ctx.beginPath();
+        ctx.moveTo(i, 0);
+        ctx.lineTo(i, 400);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(0, i);
+        ctx.lineTo(400, i);
+        ctx.stroke();
+    }
+    
+    // Draw obstacles (advanced mode)
+    if (advancedMode) {
+        ctx.fillStyle = '#8B4513';
+        obstacles.forEach(obstacle => {
+            ctx.fillRect(obstacle.x + 1, obstacle.y + 1, 18, 18);
+        });
+    }
+    
+    // Draw teleport lines (advanced mode)
+    if (advancedMode) {
+        teleportLines.forEach(line => {
+            line.forEach(square => {
+                ctx.fillStyle = '#0000FF';
+                ctx.fillRect(square.x + 1, square.y + 1, 18, 18);
+                ctx.fillStyle = '#FF8C00';
+                ctx.fillRect(square.x + 1, square.y + 4, 18, 3);
+                ctx.fillRect(square.x + 1, square.y + 10, 18, 3);
+                ctx.fillRect(square.x + 1, square.y + 16, 18, 3);
+            });
+        });
+    }
+    
+    // Draw obstacle generator lines (advanced mode)
+    if (advancedMode) {
+        obstacleLines.forEach(line => {
+            line.forEach(square => {
+                ctx.fillStyle = '#FF0000';
+                ctx.fillRect(square.x + 1, square.y + 1, 18, 18);
+                ctx.fillStyle = '#FFFF00';
+                ctx.fillRect(square.x + 1, square.y + 3, 18, 2);
+                ctx.fillRect(square.x + 1, square.y + 8, 18, 2);
+                ctx.fillRect(square.x + 1, square.y + 13, 18, 2);
+            });
+        });
+    }
+    
+    // Draw special items (advanced mode)
+    if (advancedMode) {
+        specialItems.forEach(item => {
+            switch (item.type) {
+                case 'purple':
+                    ctx.fillStyle = '#800080';
+                    ctx.fillRect(item.x + 1, item.y + 1, 18, 18);
+                    break;
+                case 'thick':
+                    ctx.fillStyle = '#FFD700';
+                    ctx.fillRect(item.x, item.y, 20, 20);
+                    ctx.fillStyle = '#FF8C00';
+                    ctx.fillRect(item.x + 3, item.y + 3, 14, 14);
+                    break;
+                case 'cut':
+                    const pulseIntensity = Math.sin(pulseEffect) * 0.3 + 0.7;
+                    const grayValue = Math.floor(pulseIntensity * 255);
+                    ctx.fillStyle = `rgb(${grayValue}, ${grayValue}, ${grayValue})`;
+                    ctx.fillRect(item.x + 1, item.y + 1, 18, 18);
+                    ctx.strokeStyle = '#FFFFFF';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(item.x + 1, item.y + 1, 18, 18);
+                    break;
+            }
+        });
+    }
+    
+    // Draw snake
+    ctx.fillStyle = '#00ff00';
+    snakeBody.forEach((segment, index) => {
+        if (index === 0) {
+            ctx.fillStyle = '#00CC00';
+        } else {
+            ctx.fillStyle = '#00ff00';
+        }
+        ctx.fillRect(segment.x, segment.y, 18, 18);
+    });
+    
+    // Draw food
+    ctx.fillStyle = '#ff0000';
+    ctx.fillRect(food.x, food.y, 18, 18);
+    
+    // Draw mode indicator
+    if (advancedMode) {
+        ctx.fillStyle = '#FFFF00';
+        ctx.font = 'bold 12px Arial';
+        ctx.textAlign = 'left';
+        ctx.fillText('ADVANCED MODE', 10, 20);
+        
+        if (thickMode) {
+            ctx.fillStyle = '#FF8C00';
+            ctx.fillText('THICK MODE ACTIVE', 10, 35);
+        }
+    }
+    
+    if (!gameRunning) {
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '16px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('Click Start to play!', 200, 200);
+        if (advancedMode) {
+            ctx.font = '12px Arial';
+            ctx.fillText('Advanced mode is ON', 200, 220);
+        }
+    }
+}
+
+function generateFood() {
+    do {
+        food.x = Math.floor(Math.random() * 20) * 20;
+        food.y = Math.floor(Math.random() * 20) * 20;
+    } while (
+        snakeBody.some(segment => segment.x === food.x && segment.y === food.y) ||
+        (advancedMode && obstacles.some(obs => obs.x === food.x && obs.y === food.y)) ||
+        (advancedMode && specialItems.some(item => item.x === food.x && item.y === food.y))
+    );
+}
+
+function pauseSnake() {
+    if (snakeInterval) {
+        clearInterval(snakeInterval);
+        snakeInterval = null;
+        gameRunning = false;
+    } else if (score >= 0) {
+        gameRunning = true;
+        snakeInterval = setInterval(updateSnake, 150);
+    }
+}
+
+function resetSnake() {
+    gameRunning = false;
+    if (snakeInterval) clearInterval(snakeInterval);
+    score = 0;
+    document.getElementById('snakeScore').textContent = '0';
+    initializeSnakeCanvas();
+}
+
+function gameOver() {
+    gameRunning = false;
+    clearInterval(snakeInterval);
+    
+    // Update high score
+    if (score > highScore) {
+        highScore = score;
+        localStorage.setItem('snakeHighScore', highScore);
+        document.getElementById('snakeHighScore').textContent = highScore;
+    }
+    
+    const canvas = document.getElementById('snakeCanvas');
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+    ctx.fillRect(0, 0, 400, 400);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 24px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('Game Over!', 200, 180);
+    ctx.font = '18px Arial';
+    ctx.fillText('Score: ' + score, 200, 210);
+    if (score === highScore && score > 0) {
+        ctx.fillStyle = '#FFD700';
+        ctx.fillText('New High Score!', 200, 240);
+    }
+}
+</script>
+{% endblock %}

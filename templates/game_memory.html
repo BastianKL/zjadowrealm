@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block title %}Memory Game - ZjadowRealm{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <div class="mb-3">
+                <a href="{{ url_for('games') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Games
+                </a>
+            </div>
+
+            <!-- Memory Game -->
+            <div class="card shadow-lg">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">
+                        <i class="fas fa-brain me-2"></i>Memory Challenge
+                        <span class="float-end">Level: <span id="memoryLevel">1</span> | Score: <span id="memoryScore">0</span></span>
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    <div class="game-area mb-3">
+                        <div id="memoryCards" class="d-flex flex-wrap justify-content-center gap-2">
+                            <p class="text-center">Click Start Memory to begin!</p>
+                        </div>
+                    </div>
+                    <div class="game-controls mb-3">
+                        <button class="btn btn-warning me-2" onclick="startMemory()">
+                            <i class="fas fa-play"></i> Start Memory
+                        </button>
+                        <button class="btn btn-danger" onclick="resetMemory()">
+                            <i class="fas fa-redo"></i> Reset
+                        </button>
+                    </div>
+                    <p class="text-muted">Find matching pairs to progress through levels!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.memory-card {
+    width: 60px;
+    height: 60px;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+@media (max-width: 768px) {
+    .memory-card {
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+    }
+}
+</style>
+
+<script>
+// Memory game variables
+let memoryCards = [];
+let flippedCards = [];
+let memoryMatched = 0;
+let gameRunning = false;
+let level = 1;
+let score = 0;
+
+// Load page
+document.addEventListener('DOMContentLoaded', function() {
+    initializeMemoryGame();
+});
+
+function initializeMemoryGame() {
+    const container = document.getElementById('memoryCards');
+    if (container) {
+        container.innerHTML = '<p class="text-center">Click Start Memory to begin!</p>';
+    }
+}
+
+function startMemory() {
+    if (gameRunning) return;
+    
+    console.log('Starting Memory game...');
+    gameRunning = true;
+    level = 1;
+    score = 0;
+    
+    generateMemoryCards();
+    updateMemoryUI();
+}
+
+function generateMemoryCards() {
+    const symbols = ['🌟', '🎵', '🎨', '🎮', '🚀', '💎', '🔥', '⚡'];
+    memoryCards = [];
+    
+    // Create pairs
+    symbols.forEach(symbol => {
+        memoryCards.push(symbol, symbol);
+    });
+    
+    // Shuffle
+    for (let i = memoryCards.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [memoryCards[i], memoryCards[j]] = [memoryCards[j], memoryCards[i]];
+    }
+    
+    renderMemoryCards();
+}
+
+function renderMemoryCards() {
+    const container = document.getElementById('memoryCards');
+    container.innerHTML = '';
+    container.className = 'd-flex flex-wrap justify-content-center gap-2';
+    
+    memoryCards.forEach((symbol, index) => {
+        const card = document.createElement('div');
+        card.className = 'memory-card btn btn-primary';
+        card.style.width = '60px';
+        card.style.height = '60px';
+        card.style.fontSize = '24px';
+        card.dataset.index = index;
+        card.textContent = '?';
+        card.onclick = () => flipMemoryCard(index);
+        container.appendChild(card);
+    });
+}
+
+function flipMemoryCard(index) {
+    if (flippedCards.length >= 2) return;
+    if (flippedCards.includes(index)) return;
+    
+    const card = document.querySelector(`[data-index="${index}"]`);
+    card.textContent = memoryCards[index];
+    card.classList.add('btn-warning');
+    flippedCards.push(index);
+    
+    if (flippedCards.length === 2) {
+        setTimeout(checkMemoryMatch, 1000);
+    }
+}
+
+function checkMemoryMatch() {
+    const [first, second] = flippedCards;
+    
+    if (memoryCards[first] === memoryCards[second]) {
+        // Match!
+        score += 10;
+        memoryMatched += 2;
+        
+        if (memoryMatched === memoryCards.length) {
+            level++;
+            setTimeout(() => {
+                alert(`Level ${level - 1} completed!`);
+                generateMemoryCards();
+                memoryMatched = 0;
+            }, 500);
+        }
+    } else {
+        // No match - flip back
+        const card1 = document.querySelector(`[data-index="${first}"]`);
+        const card2 = document.querySelector(`[data-index="${second}"]`);
+        card1.textContent = '?';
+        card2.textContent = '?';
+        card1.classList.remove('btn-warning');
+        card2.classList.remove('btn-warning');
+    }
+    
+    flippedCards = [];
+    updateMemoryUI();
+}
+
+function updateMemoryUI() {
+    document.getElementById('memoryLevel').textContent = level;
+    document.getElementById('memoryScore').textContent = score;
+}
+
+function resetMemory() {
+    gameRunning = false;
+    level = 1;
+    score = 0;
+    memoryMatched = 0;
+    flippedCards = [];
+    updateMemoryUI();
+    initializeMemoryGame();
+}
+</script>
+{% endblock %}

@@ -1,0 +1,1056 @@
+{% extends "base.html" %}
+
+{% block title %}Pong - ZjadowRealm{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <div class="mb-3">
+                <a href="{{ url_for('games') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Games
+                </a>
+            </div>
+
+            <!-- Pong Game -->
+            <div class="card shadow-lg">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-table-tennis me-2"></i>Pong
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    <div class="game-stats mb-3">
+                        <div class="row text-center">
+                            <div class="col-3">
+                                <span class="text-info">Player: </span>
+                                <span id="pongPlayerScore" class="text-light fw-bold">0</span>
+                            </div>
+                            <div class="col-3">
+                                <span class="text-warning">AI: </span>
+                                <span id="pongAIScore" class="text-light fw-bold">0</span>
+                            </div>
+                            <div class="col-6">
+                                <div class="text-success">Next Goal Worth: 
+                                    <span id="potentialScore" class="fw-bold">1</span> pts
+                                    <span id="obstacleBonus" class="text-warning"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="game-area mb-3">
+                        <canvas id="pongCanvas" width="600" height="300" class="border rounded game-canvas"></canvas>
+                        
+                        <!-- Upgrade Choice Modal -->
+                        <div id="upgradeChoice" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.9); padding: 20px; border-radius: 10px; z-index: 1000; width: 350px;">
+                            <h5 class="text-warning text-center mb-3">AI Scored! Choose Your Upgrade:</h5>
+                            <div class="text-center" id="upgradeButtons">
+                                <!-- Two random upgrade buttons will be dynamically inserted here -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="game-controls mb-3">
+                        <button class="btn btn-info me-2" onclick="startPong()">
+                            <i class="fas fa-play"></i> Start
+                        </button>
+                        <button class="btn btn-warning me-2" onclick="pausePong()">
+                            <i class="fas fa-pause"></i> Pause
+                        </button>
+                        <button class="btn btn-danger" onclick="resetPong()">
+                            <i class="fas fa-redo"></i> Reset
+                        </button>
+                    </div>
+                    <div class="mb-2">
+                        <small class="text-info">
+                            <strong>Dash Status:</strong> 
+                            Player: <span id="playerDashStatus" class="badge bg-success">Ready</span> | 
+                            AI: <span id="aiDashStatus" class="badge bg-success">Ready</span>
+                        </small>
+                    </div>
+                    <div class="mb-2">
+                        <small class="text-success">
+                            <strong>Player Upgrades:</strong> 
+                            Paddle Size: <span id="paddleSize">Normal</span> | 
+                            Speed: <span id="paddleSpeed">Normal</span> |
+                            Freeze Curse: <span id="freezeLevel">None</span>
+                        </small>
+                    </div>
+                    <div class="mb-2" id="freezeStatus" style="display: none;">
+                        <small class="text-success">
+                            <strong>❄️ AI FROZEN!</strong> Enemy can't move for <span id="freezeTimer">0</span>s
+                        </small>
+                    </div>
+                    <p class="text-muted">Use W/S keys to move your paddle. Press <strong>D key</strong> to dash! Each goal adds walls or portals. First to 10 points wins!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.game-canvas {
+    background-color: #2a2a2a;
+    max-width: 100%;
+    height: auto;
+}
+
+@media (max-width: 768px) {
+    #pongCanvas {
+        width: 100%;
+        height: auto;
+    }
+}
+</style>
+
+<script>
+// Pong game variables
+let pongBall = { x: 300, y: 150, vx: 3, vy: 2 };
+let playerPaddle = { x: 10, y: 120, width: 10, height: 60 };
+let aiPaddle = { x: 580, y: 120, width: 10, height: 60 };
+let pongInterval;
+let gameRunning = false;
+let playerScore = 0;
+let aiScore = 0;
+
+// Dash abilities
+let playerDashCooldown = 0;
+let aiDashCooldown = 0;
+let playerDashActive = false;
+let aiDashActive = false;
+const DASH_COOLDOWN = 360; // 6 seconds at 60fps
+const DASH_DURATION = 20; // frames
+const DASH_SPEED_MULTIPLIER = 2.0;
+
+// Dynamic obstacles
+let pongWalls = [];
+let pongPortals = [];
+let blockades = [];
+let extraBalls = [];
+let dashArrows = [];
+let middlePaddle = null;
+
+// Upgrade system variables
+let dashBoostLevel = 0;
+let aiPaddleSpeed = 5;
+let aiPaddleHeight = 60;
+let playerDashCooldownReduction = 0;
+let obstacleHitCount = 0;
+let lastBallDirection = 0;
+let playerPaddleSpeed = 15;
+let playerPaddleHeight = 60;
+
+// Freeze upgrade system
+let aiFreezeActive = false;
+let aiFreezeTime = 0;
+let freezeUpgradeLevel = 0;
+let lastFreezeActivation = 0;
+
+// Load page
+document.addEventListener('DOMContentLoaded', function() {
+    initializePongCanvas();
+});
+
+function initializePongCanvas() {
+    const canvas = document.getElementById('pongCanvas');
+    if (canvas) {
+        const ctx = canvas.getContext('2d');
+        drawPongGame(ctx);
+    }
+}
+
+function startPong() {
+    if (gameRunning) return;
+    
+    console.log('Starting Pong game...');
+    gameRunning = true;
+    playerScore = 0;
+    aiScore = 0;
+    
+    // Reset positions and dash states
+    pongBall = { x: 300, y: 150, vx: 3, vy: 2, justTeleported: false };
+    playerPaddle = { x: 10, y: 120, width: 10, height: 60 };
+    aiPaddle = { x: 580, y: 120, width: 10, height: 60 };
+    playerDashCooldown = 0;
+    aiDashCooldown = 0;
+    playerDashActive = false;
+    aiDashActive = false;
+    
+    // Reset all game objects
+    pongWalls = [];
+    pongPortals = [];
+    blockades = [];
+    extraBalls = [];
+    dashArrows = [];
+    middlePaddle = null;
+    
+    // Reset all upgrade variables
+    playerPaddleSpeed = 15;
+    playerPaddleHeight = 60;
+    aiPaddleSpeed = 5;
+    aiPaddleHeight = 60;
+    dashBoostLevel = 0;
+    playerDashCooldownReduction = 0;
+    freezeUpgradeLevel = 0;
+    
+    // Reset freeze state
+    aiFreezeActive = false;
+    aiFreezeTime = 0;
+    lastFreezeActivation = 0;
+    
+    // Reset obstacle tracking
+    obstacleHitCount = 0;
+    lastBallDirection = 0;
+    
+    updatePotentialScore();
+    
+    // Update score display
+    document.getElementById('pongPlayerScore').textContent = '0';
+    document.getElementById('pongAIScore').textContent = '0';
+    
+    // Reset UI displays to default
+    document.getElementById('paddleSize').textContent = 'Normal';
+    document.getElementById('paddleSpeed').textContent = 'Normal';
+    document.getElementById('freezeLevel').textContent = 'None';
+    document.getElementById('freezeStatus').style.display = 'none';
+    
+    updateDashStatus();
+    
+    document.addEventListener('keydown', handlePongInput);
+    pongInterval = setInterval(updatePong, 16);
+}
+
+function handlePongInput(e) {
+    if (!gameRunning) return;
+    
+    const key = e.key.toLowerCase();
+    let moveSpeed = playerDashActive ? playerPaddleSpeed * 1.5 : playerPaddleSpeed;
+    
+    if (key === 'w' && playerPaddle.y > 0) {
+        playerPaddle.y -= moveSpeed;
+    } else if (key === 's' && playerPaddle.y < 300 - playerPaddle.height) {
+        playerPaddle.y += moveSpeed;
+    } else if (key === 'd') {
+        if (playerDashCooldown === 0) {
+            playerDash();
+        }
+        e.preventDefault();
+    }
+}
+
+function updatePong() {
+    if (!gameRunning) return;
+    
+    // Update freeze mechanics
+    if (freezeUpgradeLevel > 0) {
+        const currentTime = Date.now();
+        
+        if (aiFreezeActive) {
+            aiFreezeTime--;
+            
+            const freezeStatus = document.getElementById('freezeStatus');
+            const freezeTimer = document.getElementById('freezeTimer');
+            freezeStatus.style.display = 'block';
+            freezeTimer.textContent = Math.ceil(aiFreezeTime / 60);
+            
+            if (aiFreezeTime <= 0) {
+                aiFreezeActive = false;
+                freezeStatus.style.display = 'none';
+            }
+        } else {
+            document.getElementById('freezeStatus').style.display = 'none';
+            
+            const freezeChance = freezeUpgradeLevel * 0.001;
+            const timeSinceLastFreeze = currentTime - lastFreezeActivation;
+            
+            if (Math.random() < freezeChance && timeSinceLastFreeze > 4000) {
+                aiFreezeActive = true;
+                aiFreezeTime = 90 + (freezeUpgradeLevel * 30);
+                lastFreezeActivation = currentTime;
+            }
+        }
+    }
+    
+    // Update dash cooldowns
+    if (playerDashCooldown > 0) {
+        playerDashCooldown--;
+        if (playerDashCooldown === 0) updateDashStatus();
+    }
+    
+    if (aiDashCooldown > 0) {
+        aiDashCooldown--;
+        if (aiDashCooldown === 0) updateDashStatus();
+    }
+    
+    // Update dash arrows
+    dashArrows = dashArrows.filter(arrow => {
+        arrow.x += arrow.vx;
+        arrow.y += arrow.vy;
+        arrow.life--;
+        return arrow.life > 0 && arrow.x > -20 && arrow.x < 620;
+    });
+    
+    // Update dash durations
+    if (playerDashActive) {
+        playerDashCooldown--;
+        if (playerDashCooldown <= DASH_COOLDOWN - DASH_DURATION) {
+            playerDashActive = false;
+        }
+    }
+    
+    if (aiDashActive) {
+        aiDashCooldown--;
+        if (aiDashCooldown <= DASH_COOLDOWN - DASH_DURATION) {
+            aiDashActive = false;
+        }
+    }
+    
+    // Move balls
+    let allBalls = [pongBall, ...extraBalls];
+    
+    allBalls.forEach(ball => {
+        ball.x += ball.vx;
+        ball.y += ball.vy;
+        
+        // Ball collision with top/bottom
+        if (ball.y <= 5 || ball.y >= 295) {
+            ball.vy = -ball.vy;
+            
+            const pushStrength = 0.3 + Math.random() * 0.4;
+            if (Math.abs(ball.vx) < 1.5) {
+                ball.vx += Math.random() > 0.5 ? pushStrength : -pushStrength;
+            }
+            
+            if (Math.abs(ball.vx) < 0.8) {
+                ball.vx = ball.vx >= 0 ? 0.8 : -0.8;
+            }
+        }
+        
+        // Ball collision with blockades
+        for (let i = 0; i < blockades.length; i++) {
+            const blockade = blockades[i];
+            const ballRadius = 5;
+            const ballLeft = ball.x - ballRadius;
+            const ballRight = ball.x + ballRadius;
+            const ballTop = ball.y - ballRadius;
+            const ballBottom = ball.y + ballRadius;
+            
+            if (ballRight > blockade.x && ballLeft < blockade.x + blockade.width &&
+                ballBottom > blockade.y && ballTop < blockade.y + blockade.height) {
+                
+                const ballMovingRight = ball.vx > 0;
+                const ballMovingLeft = ball.vx < 0;
+                
+                if ((ballMovingRight && lastBallDirection >= 0) || (ballMovingLeft && lastBallDirection <= 0)) {
+                    if (!blockade.hitThisRound) {
+                        obstacleHitCount++;
+                        blockade.hitThisRound = true;
+                        blockade.flashTime = 30;
+                        updatePotentialScore();
+                    }
+                }
+                
+                const overlapLeft = ballRight - blockade.x;
+                const overlapRight = (blockade.x + blockade.width) - ballLeft;
+                const overlapTop = ballBottom - blockade.y;
+                const overlapBottom = (blockade.y + blockade.height) - ballTop;
+                
+                const minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
+                
+                if (minOverlap === overlapLeft || minOverlap === overlapRight) {
+                    ball.vx = -ball.vx;
+                    if (minOverlap === overlapLeft) {
+                        ball.x = blockade.x - ballRadius - 1;
+                    } else {
+                        ball.x = blockade.x + blockade.width + ballRadius + 1;
+                    }
+                } else {
+                    ball.vy = -ball.vy;
+                    if (minOverlap === overlapTop) {
+                        ball.y = blockade.y - ballRadius - 1;
+                    } else {
+                        ball.y = blockade.y + blockade.height + ballRadius + 1;
+                    }
+                }
+                break;
+            }
+            
+            if (blockade.flashTime > 0) blockade.flashTime--;
+        }
+        
+        // Ball collision with walls
+        for (let i = 0; i < pongWalls.length; i++) {
+            const wall = pongWalls[i];
+            const ballRadius = 5;
+            const ballLeft = ball.x - ballRadius;
+            const ballRight = ball.x + ballRadius;
+            const ballTop = ball.y - ballRadius;
+            const ballBottom = ball.y + ballRadius;
+            
+            if (ballRight > wall.x && ballLeft < wall.x + wall.width &&
+                ballBottom > wall.y && ballTop < wall.y + wall.height) {
+                
+                const ballMovingRight = ball.vx > 0;
+                const ballMovingLeft = ball.vx < 0;
+                
+                if ((ballMovingRight && lastBallDirection >= 0) || (ballMovingLeft && lastBallDirection <= 0)) {
+                    if (!wall.hitThisRound) {
+                        obstacleHitCount++;
+                        wall.hitThisRound = true;
+                        wall.flashTime = 30;
+                        updatePotentialScore();
+                    }
+                }
+                
+                const overlapLeft = ballRight - wall.x;
+                const overlapRight = (wall.x + wall.width) - ballLeft;
+                const overlapTop = ballBottom - wall.y;
+                const overlapBottom = (wall.y + wall.height) - ballTop;
+                
+                const minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
+                
+                if (minOverlap === overlapLeft || minOverlap === overlapRight) {
+                    ball.vx = -ball.vx;
+                    if (minOverlap === overlapLeft) {
+                        ball.x = wall.x - ballRadius - 1;
+                    } else {
+                        ball.x = wall.x + wall.width + ballRadius + 1;
+                    }
+                } else {
+                    ball.vy = -ball.vy;
+                    if (minOverlap === overlapTop) {
+                        ball.y = wall.y - ballRadius - 1;
+                    } else {
+                        ball.y = wall.y + wall.height + ballRadius + 1;
+                    }
+                }
+                break;
+            }
+            
+            if (wall.flashTime > 0) wall.flashTime--;
+        }
+        
+        // Ball collision with portals
+        for (let portal of pongPortals) {
+            const ballRadius = 5;
+            const portalRadius = 15;
+            
+            const distToOrange = Math.sqrt(
+                Math.pow(ball.x - portal.orange.x, 2) + 
+                Math.pow(ball.y - portal.orange.y, 2)
+            );
+            
+            if (distToOrange <= ballRadius + portalRadius && !ball.justTeleported) {
+                if (!portal.hitThisRound) {
+                    obstacleHitCount++;
+                    portal.hitThisRound = true;
+                    portal.flashTime = 30;
+                    updatePotentialScore();
+                }
+                
+                if (ball.vx > 0) {
+                    ball.x = portal.blue.x + portalRadius + ballRadius + 2;
+                } else {
+                    ball.x = portal.blue.x - portalRadius - ballRadius - 2;
+                }
+                
+                if (ball.vy > 0) {
+                    ball.y = portal.blue.y + portalRadius + ballRadius + 2;
+                } else if (ball.vy < 0) {
+                    ball.y = portal.blue.y - portalRadius - ballRadius - 2;
+                } else {
+                    ball.y = portal.blue.y;
+                }
+                
+                ball.justTeleported = true;
+                setTimeout(() => { ball.justTeleported = false; }, 100);
+                break;
+            }
+            
+            const distToBlue = Math.sqrt(
+                Math.pow(ball.x - portal.blue.x, 2) + 
+                Math.pow(ball.y - portal.blue.y, 2)
+            );
+            
+            if (distToBlue <= ballRadius + portalRadius && !ball.justTeleported) {
+                if (!portal.hitThisRound) {
+                    obstacleHitCount++;
+                    portal.hitThisRound = true;
+                    portal.flashTime = 30;
+                    updatePotentialScore();
+                }
+                
+                if (ball.vx > 0) {
+                    ball.x = portal.orange.x + portalRadius + ballRadius + 2;
+                } else {
+                    ball.x = portal.orange.x - portalRadius - ballRadius - 2;
+                }
+                
+                if (ball.vy > 0) {
+                    ball.y = portal.orange.y + portalRadius + ballRadius + 2;
+                } else if (ball.vy < 0) {
+                    ball.y = portal.orange.y - portalRadius - ballRadius - 2;
+                } else {
+                    ball.y = portal.orange.y;
+                }
+                
+                ball.justTeleported = true;
+                setTimeout(() => { ball.justTeleported = false; }, 100);
+                break;
+            }
+        }
+    });
+    
+    // AI paddle movement
+    const aiCenter = aiPaddle.y + aiPaddle.height / 2;
+    let aiMoveSpeed = aiDashActive ? aiPaddleSpeed * 1.5 : aiPaddleSpeed;
+    
+    let closestBall = allBalls.reduce((closest, ball) => {
+        const distanceToClosest = Math.abs(closest.x - aiPaddle.x);
+        const distanceToBall = Math.abs(ball.x - aiPaddle.x);
+        return distanceToBall < distanceToClosest ? ball : closest;
+    });
+    
+    if (!aiFreezeActive) {
+        const deadzone = 15;
+        
+        if (aiCenter < closestBall.y - deadzone) {
+            aiPaddle.y += aiMoveSpeed;
+        } else if (aiCenter > closestBall.y + deadzone) {
+            aiPaddle.y -= aiMoveSpeed;
+        }
+    }
+    
+    aiPaddle.y = Math.max(0, Math.min(300 - aiPaddle.height, aiPaddle.y));
+    
+    // AI dash logic
+    if (aiDashCooldown === 0 && closestBall.vx > 0 && closestBall.x > 350 && 
+        Math.abs(closestBall.y - aiCenter) > 15 && Math.abs(closestBall.y - aiCenter) < 50) {
+        aiDash();
+    }
+    
+    // Paddle collisions
+    allBalls.forEach(ball => {
+        // Player paddle collision
+        if (ball.x <= playerPaddle.x + playerPaddle.width &&
+            ball.y >= playerPaddle.y && ball.y <= playerPaddle.y + playerPaddle.height) {
+            
+            if (lastBallDirection === -1) {
+                resetObstacleHits();
+                obstacleHitCount = 0;
+                updatePotentialScore();
+            }
+            lastBallDirection = 1;
+            
+            let speedMultiplier = playerDashActive ? DASH_SPEED_MULTIPLIER * (1 + dashBoostLevel * 0.3) : 1;
+            ball.vx = Math.abs(ball.vx) * speedMultiplier;
+            
+            const hitPos = (ball.y - playerPaddle.y) / playerPaddle.height;
+            ball.vy = (hitPos - 0.5) * 4 * speedMultiplier;
+            
+            if (playerDashActive && dashBoostLevel > 0) {
+                createDashArrows();
+            }
+            
+            if (playerDashActive) {
+                playerDashActive = false;
+                updateDashStatus();
+            }
+        }
+        
+        // AI paddle collision
+        if (ball.x >= aiPaddle.x &&
+            ball.y >= aiPaddle.y && ball.y <= aiPaddle.y + aiPaddle.height) {
+            
+            if (lastBallDirection === 1) {
+                resetObstacleHits();
+                obstacleHitCount = 0;
+                updatePotentialScore();
+            }
+            lastBallDirection = -1;
+            
+            let speedMultiplier = aiDashActive ? DASH_SPEED_MULTIPLIER : 1;
+            ball.vx = -Math.abs(ball.vx) * speedMultiplier;
+            
+            const hitPos = (ball.y - aiPaddle.y) / aiPaddle.height;
+            ball.vy = (hitPos - 0.5) * 4 * speedMultiplier;
+            
+            if (aiDashActive) {
+                aiDashActive = false;
+                updateDashStatus();
+            }
+        }
+        
+        // Middle paddle collision
+        if (middlePaddle && ball.x >= middlePaddle.x && ball.x <= middlePaddle.x + middlePaddle.width &&
+            ball.y >= middlePaddle.y && ball.y <= middlePaddle.y + middlePaddle.height) {
+            
+            if (!middlePaddle.hitThisRound) {
+                obstacleHitCount++;
+                middlePaddle.hitThisRound = true;
+                middlePaddle.flashTime = 30;
+                updatePotentialScore();
+            }
+            
+            const ballCenterX = ball.x;
+            const paddleCenterX = middlePaddle.x + middlePaddle.width / 2;
+            
+            if (ballCenterX < paddleCenterX) {
+                ball.vx = -Math.abs(ball.vx);
+                ball.x = middlePaddle.x - 6;
+            } else {
+                ball.vx = Math.abs(ball.vx);
+                ball.x = middlePaddle.x + middlePaddle.width + 6;
+            }
+            
+            const hitPos = (ball.y - middlePaddle.y) / middlePaddle.height;
+            ball.vy += (hitPos - 0.5) * 2;
+        }
+        
+        // Limit ball speed
+        const maxSpeed = 12;
+        if (Math.abs(ball.vx) > maxSpeed) {
+            ball.vx = ball.vx > 0 ? maxSpeed : -maxSpeed;
+        }
+        if (Math.abs(ball.vy) > maxSpeed) {
+            ball.vy = ball.vy > 0 ? maxSpeed : -maxSpeed;
+        }
+    });
+    
+    // Update middle paddle
+    if (middlePaddle) {
+        middlePaddle.y += middlePaddle.vy;
+        
+        if (middlePaddle.y <= 0 || middlePaddle.y >= 300 - middlePaddle.height) {
+            middlePaddle.vy = -middlePaddle.vy;
+            middlePaddle.y = Math.max(0, Math.min(300 - middlePaddle.height, middlePaddle.y));
+        }
+        
+        if (middlePaddle.flashTime > 0) middlePaddle.flashTime--;
+    }
+    
+    // Score checking
+    let scoredBalls = [];
+    allBalls.forEach((ball, index) => {
+        if (ball.x < 0) {
+            const finalScore = 1 + obstacleHitCount;
+            aiScore += finalScore;
+            document.getElementById('pongAIScore').textContent = aiScore;
+            
+            addPongObstacle();
+            showPlayerUpgradeChoice();
+            scoredBalls.push(index);
+        } else if (ball.x > 600) {
+            const finalScore = 1 + obstacleHitCount;
+            playerScore += finalScore;
+            document.getElementById('pongPlayerScore').textContent = playerScore;
+            
+            addPongObstacle();
+            setTimeout(() => aiChooseRandomUpgrade(), 500);
+            scoredBalls.push(index);
+        }
+    });
+    
+    // Remove scored balls or reset main ball
+    scoredBalls.reverse().forEach(index => {
+        if (index === 0) {
+            resetPongBall();
+            resetObstacleHits();
+            obstacleHitCount = 0;
+            updatePotentialScore();
+        } else {
+            extraBalls.splice(index - 1, 1);
+        }
+    });
+    
+    // Check for game end
+    if (playerScore >= 10 || aiScore >= 10) {
+        gameOver();
+        return;
+    }
+    
+    drawPongGame(document.getElementById('pongCanvas').getContext('2d'));
+}
+
+function resetObstacleHits() {
+    blockades.forEach(blockade => {
+        blockade.hitThisRound = false;
+        blockade.flashTime = 0;
+    });
+    pongWalls.forEach(wall => {
+        wall.hitThisRound = false;
+        wall.flashTime = 0;
+    });
+    pongPortals.forEach(portal => {
+        portal.hitThisRound = false;
+        portal.flashTime = 0;
+    });
+    if (middlePaddle) {
+        middlePaddle.hitThisRound = false;
+        middlePaddle.flashTime = 0;
+    }
+}
+
+function updatePotentialScore() {
+    const potentialPoints = 1 + obstacleHitCount;
+    document.getElementById('potentialScore').textContent = potentialPoints;
+    
+    if (obstacleHitCount > 0) {
+        document.getElementById('obstacleBonus').textContent = `(1 + ${obstacleHitCount} bonus)`;
+    } else {
+        document.getElementById('obstacleBonus').textContent = '';
+    }
+}
+
+function playerDash() {
+    playerDashActive = true;
+    const adjustedCooldown = Math.max(DASH_COOLDOWN - (playerDashCooldownReduction || 0), 60);
+    playerDashCooldown = adjustedCooldown;
+    updateDashStatus();
+}
+
+function aiDash() {
+    aiDashActive = true;
+    aiDashCooldown = DASH_COOLDOWN;
+    updateDashStatus();
+}
+
+function updateDashStatus() {
+    const playerStatus = document.getElementById('playerDashStatus');
+    const aiStatus = document.getElementById('aiDashStatus');
+    
+    if (playerDashCooldown === 0) {
+        playerStatus.textContent = 'Ready';
+        playerStatus.className = 'badge bg-success';
+    } else {
+        playerStatus.textContent = `${Math.ceil(playerDashCooldown / 60)}s`;
+        playerStatus.className = 'badge bg-warning';
+    }
+    
+    if (aiDashCooldown === 0) {
+        aiStatus.textContent = 'Ready';
+        aiStatus.className = 'badge bg-success';
+    } else {
+        aiStatus.textContent = `${Math.ceil(aiDashCooldown / 60)}s`;
+        aiStatus.className = 'badge bg-warning';
+    }
+}
+
+function addPongObstacle() {
+    if (Math.random() < 0.7) {
+        const wall = {
+            x: Math.random() * (600 - 40) + 20,
+            y: Math.random() * (300 - 40) + 20,
+            width: 15,
+            height: 40,
+            hitThisRound: false,
+            flashTime: 0
+        };
+        
+        if (wall.x > 100 && wall.x < 500) {
+            pongWalls.push(wall);
+        }
+    } else {
+        const portal = {
+            orange: {
+                x: 150 + Math.random() * 100,
+                y: 50 + Math.random() * 200
+            },
+            blue: {
+                x: 350 + Math.random() * 100,
+                y: 50 + Math.random() * 200
+            },
+            hitThisRound: false,
+            flashTime: 0
+        };
+        pongPortals.push(portal);
+        
+        middlePaddle = {
+            x: 290,
+            y: 100 + Math.random() * 100,
+            width: 20,
+            height: 40,
+            vy: (Math.random() > 0.5 ? 1 : -1) * (1 + Math.random()),
+            hitThisRound: false,
+            flashTime: 0
+        };
+    }
+}
+
+function showPlayerUpgradeChoice() {
+    gameRunning = false;
+    if (pongInterval) {
+        clearInterval(pongInterval);
+        pongInterval = null;
+    }
+    
+    const allUpgrades = [
+        { type: 'bigger', name: 'Bigger Paddle', icon: 'fas fa-expand-alt', class: 'btn-primary' },
+        { type: 'faster', name: 'Faster Movement', icon: 'fas fa-tachometer-alt', class: 'btn-success' },
+        { type: 'blockade', name: 'Place Blockade', icon: 'fas fa-cube', class: 'btn-warning' },
+        { type: 'shrink', name: 'Shrink AI Paddle', icon: 'fas fa-compress-alt', class: 'btn-danger' },
+        { type: 'slow', name: 'Slow AI', icon: 'fas fa-clock', class: 'btn-secondary' },
+        { type: 'extraball', name: 'Extra Ball', icon: 'fas fa-circle', class: 'btn-info' },
+        { type: 'dashboost', name: 'Boost Dash', icon: 'fas fa-bolt', class: 'btn-light' },
+        { type: 'cooldown', name: 'Faster Cooldown', icon: 'fas fa-stopwatch', class: 'btn-dark' },
+        { type: 'freeze', name: 'Freeze AI', icon: 'fas fa-snowflake', class: 'btn-info' }
+    ];
+    
+    const shuffled = allUpgrades.sort(() => 0.5 - Math.random());
+    const selectedUpgrades = shuffled.slice(0, 2);
+    
+    const buttonsHTML = selectedUpgrades.map(upgrade => 
+        `<button class="btn ${upgrade.class} me-2 mb-2" onclick="chooseUpgrade('${upgrade.type}')" style="min-width: 140px;">
+            <i class="${upgrade.icon}"></i> ${upgrade.name}
+        </button>`
+    ).join('');
+    
+    document.getElementById('upgradeButtons').innerHTML = buttonsHTML;
+    document.getElementById('upgradeChoice').style.display = 'block';
+}
+
+function chooseUpgrade(type) {
+    if (type === 'bigger') {
+        playerPaddleHeight = Math.min(playerPaddleHeight + 15, 120);
+        playerPaddle.height = playerPaddleHeight;
+        
+        if (playerPaddle.y + playerPaddle.height > 300) {
+            playerPaddle.y = 300 - playerPaddle.height;
+        }
+        
+        document.getElementById('paddleSize').textContent = playerPaddleHeight === 120 ? 'MAX' : 'Large';
+    } else if (type === 'faster') {
+        playerPaddleSpeed = Math.min(playerPaddleSpeed + 5, 30);
+        document.getElementById('paddleSpeed').textContent = playerPaddleSpeed === 30 ? 'MAX' : 'Fast';
+    } else if (type === 'blockade') {
+        const blockade = {
+            x: 200 + Math.random() * 200,
+            y: 50 + Math.random() * 200,
+            width: 20,
+            height: 50,
+            hitThisRound: false,
+            flashTime: 0
+        };
+        blockades.push(blockade);
+    } else if (type === 'shrink') {
+        aiPaddleHeight = Math.max(aiPaddleHeight - 10, 30);
+        aiPaddle.height = aiPaddleHeight;
+    } else if (type === 'slow') {
+        aiPaddleSpeed = Math.max(aiPaddleSpeed - 1, 2);
+    } else if (type === 'extraball') {
+        const newBall = {
+            x: 300,
+            y: 150,
+            vx: (Math.random() > 0.5 ? 1 : -1) * (2 + Math.random() * 2),
+            vy: (Math.random() - 0.5) * 4,
+            justTeleported: false
+        };
+        extraBalls.push(newBall);
+    } else if (type === 'dashboost') {
+        dashBoostLevel = Math.min(dashBoostLevel + 1, 5);
+    } else if (type === 'cooldown') {
+        playerDashCooldownReduction = Math.min(playerDashCooldownReduction + 60, 240);
+    } else if (type === 'freeze') {
+        freezeUpgradeLevel = Math.min(freezeUpgradeLevel + 1, 5);
+        document.getElementById('freezeLevel').textContent = `Level ${freezeUpgradeLevel}`;
+    }
+    
+    document.getElementById('upgradeChoice').style.display = 'none';
+    gameRunning = true;
+    pongInterval = setInterval(updatePong, 16);
+}
+
+function aiChooseRandomUpgrade() {
+    const upgrades = ['bigger', 'faster', 'shrink'];
+    const choice = upgrades[Math.floor(Math.random() * upgrades.length)];
+    
+    if (choice === 'bigger') {
+        aiPaddleHeight = Math.min(aiPaddleHeight + 10, 100);
+        aiPaddle.height = aiPaddleHeight;
+    } else if (choice === 'faster') {
+        aiPaddleSpeed = Math.min(aiPaddleSpeed + 2, 15);
+    } else if (choice === 'shrink') {
+        playerPaddleHeight = Math.max(playerPaddleHeight - 8, 40);
+        playerPaddle.height = playerPaddleHeight;
+    }
+}
+
+function createDashArrows() {
+    for (let i = 0; i < 3; i++) {
+        dashArrows.push({
+            x: playerPaddle.x + playerPaddle.width,
+            y: playerPaddle.y + (playerPaddle.height / 2) + (Math.random() - 0.5) * 20,
+            vx: 8 + Math.random() * 4,
+            vy: (Math.random() - 0.5) * 2,
+            life: 20
+        });
+    }
+}
+
+function drawPongGame(ctx) {
+    ctx.fillStyle = '#2a2a2a';
+    ctx.fillRect(0, 0, 600, 300);
+    
+    // Draw center line
+    ctx.strokeStyle = '#444';
+    ctx.setLineDash([5, 5]);
+    ctx.beginPath();
+    ctx.moveTo(300, 0);
+    ctx.lineTo(300, 300);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    
+    // Draw walls
+    ctx.fillStyle = '#666';
+    pongWalls.forEach(wall => {
+        if (wall.flashTime > 0 && wall.flashTime % 10 < 5) {
+            ctx.fillStyle = '#ffff00';
+        } else {
+            ctx.fillStyle = '#666';
+        }
+        ctx.fillRect(wall.x, wall.y, wall.width, wall.height);
+    });
+    
+    // Draw blockades
+    ctx.fillStyle = '#8b4513';
+    blockades.forEach(blockade => {
+        if (blockade.flashTime > 0 && blockade.flashTime % 10 < 5) {
+            ctx.fillStyle = '#ffff00';
+        } else {
+            ctx.fillStyle = '#8b4513';
+        }
+        ctx.fillRect(blockade.x, blockade.y, blockade.width, blockade.height);
+    });
+    
+    // Draw portals
+    pongPortals.forEach(portal => {
+        const flashOrange = portal.flashTime > 0 && portal.flashTime % 10 < 5;
+        
+        ctx.fillStyle = flashOrange ? '#ffff00' : '#ff8c00';
+        ctx.beginPath();
+        ctx.arc(portal.orange.x, portal.orange.y, 15, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#ff4500';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        ctx.fillStyle = flashOrange ? '#ffff00' : '#0066ff';
+        ctx.beginPath();
+        ctx.arc(portal.blue.x, portal.blue.y, 15, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#0044cc';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+    });
+    
+    // Draw middle paddle
+    if (middlePaddle) {
+        if (middlePaddle.flashTime > 0 && middlePaddle.flashTime % 10 < 5) {
+            ctx.fillStyle = '#ffff00';
+        } else {
+            ctx.fillStyle = '#999';
+        }
+        ctx.fillRect(middlePaddle.x, middlePaddle.y, middlePaddle.width, middlePaddle.height);
+    }
+    
+    // Draw dash arrows
+    ctx.fillStyle = '#ffaa00';
+    dashArrows.forEach(arrow => {
+        ctx.save();
+        ctx.translate(arrow.x, arrow.y);
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(-10, -5);
+        ctx.lineTo(-10, 5);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+    });
+    
+    // Draw paddles
+    ctx.fillStyle = playerDashActive ? '#00ffff' : '#0066ff';
+    ctx.fillRect(playerPaddle.x, playerPaddle.y, playerPaddle.width, playerPaddle.height);
+    
+    ctx.fillStyle = aiDashActive ? '#ff00ff' : (aiFreezeActive ? '#aaaaff' : '#ff0000');
+    ctx.fillRect(aiPaddle.x, aiPaddle.y, aiPaddle.width, aiPaddle.height);
+    
+    // Draw balls
+    ctx.fillStyle = '#ffffff';
+    let allBalls = [pongBall, ...extraBalls];
+    allBalls.forEach(ball => {
+        ctx.beginPath();
+        ctx.arc(ball.x, ball.y, 5, 0, Math.PI * 2);
+        ctx.fill();
+    });
+    
+    if (!gameRunning) {
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '20px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('Click Start to play!', 300, 150);
+    }
+}
+
+function resetPongBall() {
+    pongBall = {
+        x: 300,
+        y: 150,
+        vx: (Math.random() > 0.5 ? 1 : -1) * 3,
+        vy: (Math.random() - 0.5) * 4,
+        justTeleported: false
+    };
+}
+
+function pausePong() {
+    if (pongInterval) {
+        clearInterval(pongInterval);
+        pongInterval = null;
+        gameRunning = false;
+    } else if (playerScore >= 0 || aiScore >= 0) {
+        gameRunning = true;
+        pongInterval = setInterval(updatePong, 16);
+    }
+}
+
+function resetPong() {
+    gameRunning = false;
+    if (pongInterval) clearInterval(pongInterval);
+    playerScore = 0;
+    aiScore = 0;
+    
+    playerPaddleHeight = 60;
+    aiPaddleHeight = 60;
+    playerPaddleSpeed = 15;
+    aiPaddleSpeed = 5;
+    dashBoostLevel = 0;
+    playerDashCooldownReduction = 0;
+    blockades = [];
+    extraBalls = [];
+    dashArrows = [];
+    pongWalls = [];
+    pongPortals = [];
+    middlePaddle = null;
+    obstacleHitCount = 0;
+    freezeUpgradeLevel = 0;
+    aiFreezeActive = false;
+    
+    document.getElementById('pongPlayerScore').textContent = '0';
+    document.getElementById('pongAIScore').textContent = '0';
+    document.getElementById('paddleSize').textContent = 'Normal';
+    document.getElementById('paddleSpeed').textContent = 'Normal';
+    document.getElementById('freezeLevel').textContent = 'None';
+    document.getElementById('freezeStatus').style.display = 'none';
+    
+    initializePongCanvas();
+}
+
+function gameOver() {
+    gameRunning = false;
+    if (pongInterval) clearInterval(pongInterval);
+    
+    const winner = playerScore >= 10 ? 'Player' : 'AI';
+    setTimeout(() => {
+        alert(`Game Over! ${winner} wins!\nFinal Score - Player: ${playerScore}, AI: ${aiScore}`);
+    }, 100);
+}
+</script>
+{% endblock %}
