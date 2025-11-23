@@ -114,6 +114,21 @@ body {
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
 }
 
+/* Remove default dropdown arrow and add underline instead */
+.navbar-nav .dropdown-toggle::after {
+    display: none;
+}
+
+.navbar-nav .dropdown-toggle {
+    position: relative;
+    border-bottom: 1px solid #6c757d;
+    padding-bottom: 0.25rem;
+}
+
+.navbar-nav .dropdown-toggle:hover {
+    border-bottom-color: var(--blue-glow);
+}
+
 .dropdown-item {
     color: var(--text-light) !important;
     transition: all 0.3s ease;
