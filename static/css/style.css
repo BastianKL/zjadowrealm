@@ -827,6 +827,200 @@ footer {
     }
 }
 
+/* Enhanced Mobile Responsiveness */
+@media (max-width: 991px) {
+    /* Fix navbar toggle and dropdown behavior */
+    .navbar-collapse {
+        background: var(--dark-gray);
+        padding: 1rem;
+        border-radius: 8px;
+        margin-top: 1rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+    
+    .navbar-nav {
+        width: 100%;
+    }
+    
+    .navbar-nav .nav-item {
+        width: 100%;
+        margin: 0.25rem 0;
+    }
+    
+    .navbar-nav .nav-link {
+        padding: 0.75rem 1rem;
+        width: 100%;
+        text-align: left;
+    }
+    
+    /* Fix dropdown menus on mobile */
+    .navbar-nav .dropdown-menu {
+        position: static !important;
+        transform: none !important;
+        border: none;
+        background: var(--metal-gray) !important;
+        margin: 0.5rem 0 0 1rem;
+        width: calc(100% - 1rem);
+        box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+    
+    .navbar-nav .dropdown-menu.show {
+        display: block;
+    }
+    
+    .navbar-nav .dropdown-item {
+        padding: 0.75rem 1rem;
+    }
+    
+    /* Hide separators on mobile */
+    .nav-separator {
+        display: none;
+    }
+    
+    /* Make cards stack better on mobile */
+    .card {
+        margin-bottom: 1.5rem;
+    }
+    
+    /* Adjust container padding */
+    .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
+    /* Fix hero sections */
+    .hero-section {
+        padding: 2rem 1rem;
+    }
+    
+    .display-1, .display-2, .display-3, .display-4, .display-5 {
+        font-size: calc(1.5rem + 1.5vw) !important;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Further adjustments for tablets/smaller screens */
+    .main-content {
+        padding-top: 75px;
+    }
+    
+    /* Make tables scrollable */
+    .table-responsive {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Adjust form layouts */
+    .row > [class*='col-'] {
+        margin-bottom: 1rem;
+    }
+    
+    /* Make buttons full width on mobile when appropriate */
+    .btn-lg {
+        padding: 0.75rem 1.25rem;
+        font-size: 1rem;
+    }
+    
+    /* Fix navbar brand */
+    .navbar-brand {
+        font-size: 1.25rem;
+    }
+    
+    /* Adjust card headers */
+    .card-header h1, .card-header h2, .card-header h3,
+    .card-header h4, .card-header h5 {
+        font-size: 1.25rem !important;
+    }
+}
+
+@media (max-width: 576px) {
+    /* Extra small devices */
+    .main-content {
+        padding-top: 70px;
+    }
+    
+    /* Stack all button groups vertically */
+    .btn-group, .btn-group-vertical {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .btn-group .btn, .btn-group-vertical .btn {
+        width: 100%;
+        border-radius: 6px !important;
+        margin-bottom: 0.5rem;
+    }
+    
+    .btn-group .btn:last-child {
+        margin-bottom: 0;
+    }
+    
+    /* Adjust spacing */
+    .mb-4, .my-4 {
+        margin-bottom: 1.5rem !important;
+    }
+    
+    .mt-4, .my-4 {
+        margin-top: 1.5rem !important;
+    }
+    
+    /* Make images responsive */
+    img {
+        max-width: 100%;
+        height: auto;
+    }
+    
+    /* Adjust padding for cards */
+    .card-body {
+        padding: 1rem;
+    }
+    
+    /* Fix admin dashboard stats cards */
+    .col-md-3 {
+        margin-bottom: 1rem;
+    }
+    
+    /* Make forms more mobile-friendly */
+    .form-control, .form-select {
+        font-size: 16px; /* Prevents zoom on iOS */
+    }
+    
+    /* Adjust alert spacing */
+    .alert {
+        margin-bottom: 1rem;
+        font-size: 0.9rem;
+    }
+}
+
+/* Fix for touch devices - make dropdowns easier to use */
+@media (hover: none) and (pointer: coarse) {
+    .dropdown-toggle::after {
+        margin-left: 0.5rem;
+    }
+    
+    .dropdown-menu {
+        min-width: 100%;
+    }
+    
+    .navbar-nav .dropdown-menu {
+        animation: slideDown 0.3s ease;
+    }
+    
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+}
+
 /* Dark Mode Support (Optional) */
 @media (prefers-color-scheme: dark) {
     body {
