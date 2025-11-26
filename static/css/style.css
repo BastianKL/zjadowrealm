@@ -66,13 +66,11 @@ body {
 }
 
 .navbar-nav .nav-link:hover {
-    background: var(--metal-border);
     color: var(--blue-glow) !important;
     transform: translateY(-1px);
-    box-shadow: 0 4px 15px rgba(30, 58, 138, 0.3);
 }
 
-.navbar-nav .nav-link::after {
+.navbar-nav .nav-link:not(.dropdown-toggle)::after {
     content: '';
     position: absolute;
     width: 0;
@@ -84,7 +82,7 @@ body {
     transform: translateX(-50%);
 }
 
-.navbar-nav .nav-link:hover::after {
+.navbar-nav .nav-link:not(.dropdown-toggle):hover::after {
     width: 80%;
 }
 
@@ -93,7 +91,7 @@ body {
     color: var(--blue-glow) !important;
 }
 
-.navbar-nav .nav-link.active::after {
+.navbar-nav .nav-link.active:not(.dropdown-toggle)::after {
     width: 80%;
 }
 
@@ -114,19 +112,68 @@ body {
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
 }
 
-/* Remove default dropdown arrow and add underline instead */
-.navbar-nav .dropdown-toggle::after {
-    display: none;
-}
-
+/* Remove default dropdown arrow and add custom line with V-shaped arrow on hover */
 .navbar-nav .dropdown-toggle {
     position: relative;
-    border-bottom: 1px solid #6c757d;
-    padding-bottom: 0.25rem;
+    padding-bottom: 8px;
 }
 
-.navbar-nav .dropdown-toggle:hover {
-    border-bottom-color: var(--blue-glow);
+.navbar-nav .dropdown-toggle::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 10%;
+    right: 10%;
+    height: 1px;
+    background-color: #6c757d;
+    transition: background-color 0.3s ease;
+}
+
+/* V-shaped arrow for dropdowns - larger and only on hover */
+.navbar-nav .dropdown-toggle::after {
+    content: '' !important;
+    display: block !important;
+    position: absolute;
+    bottom: -9px;
+    left: 50%;
+    width: 10px;
+    height: 10px;
+    border: none !important;
+    border-right: 2px solid #6c757d !important;
+    border-bottom: 2px solid #6c757d !important;
+    transform: translateX(-50%) rotate(45deg);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    margin-left: 0 !important;
+}
+
+.navbar-nav .dropdown-toggle:hover::before {
+    background-color: #6c757d;
+}
+
+.navbar-nav .dropdown-toggle:hover::after {
+    opacity: 1;
+}
+
+/* Center main nav items, push user dropdown to the right */
+.navbar-nav {
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.navbar-nav .nav-item {
+    flex-shrink: 0;
+}
+
+.navbar-nav > li:last-child {
+    position: absolute;
+    right: 1rem;
+}
+
+.navbar-nav > li:last-child .nav-link {
+    white-space: nowrap;
 }
 
 .dropdown-item {

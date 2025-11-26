@@ -189,66 +189,85 @@
                                             <div class="card">
                                                 <div class="card-header bg-primary text-white">
                                                     <h5 class="mb-0"><i class="fas fa-crown me-2"></i>Key Characters</h5>
-                                                </div>
-                                                <div class="card-body">
-                                                    <div class="character-entry mb-3">
-                                                        <div class="d-flex align-items-center mb-2">
-                                                            <div class="character-avatar bg-gradient-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
-                                                                <i class="fas fa-user-wizard text-white"></i>
-                                                            </div>
-                                                            <div>
-                                                                <h6 class="text-primary mb-1">Elder Zephyr</h6>
-                                                                <small class="text-muted">Ancient Guardian</small>
-                                                            </div>
-                                                        </div>
-                                                        <p class="small text-muted">The last of the original Corral Keepers, Elder Zephyr holds the knowledge of the realm's creation and the true purpose of the corrals.</p>
-                                                        <small class="text-info"><i class="fas fa-quote-left me-1"></i>"The mark chooses its bearer, but the bearer must choose their destiny."</small>
-                                                    </div>
-                                                    
-                                                    <div class="character-entry mb-3">
-                                                        <div class="d-flex align-items-center mb-2">
-                                                            <div class="character-avatar bg-gradient-danger rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
-                                                                <i class="fas fa-mask text-white"></i>
-                                                            </div>
-                                                            <div>
-                                                                <h6 class="text-danger mb-1">The Shadow Walker</h6>
-                                                                <small class="text-muted">Mysterious Antagonist</small>
-                                                            </div>
-                                                        </div>
-                                                        <p class="small text-muted">A figure from the void realms who seeks to corrupt the corrals and release the imprisoned entities within.</p>
-                                                        <small class="text-danger"><i class="fas fa-quote-left me-1"></i>"The corrals were never meant to contain us forever."</small>
-                                                    </div>
-                                                    
-                                                    <div class="character-entry">
-                                                        <div class="d-flex align-items-center mb-2">
-                                                            <div class="character-avatar bg-gradient-success rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
-                                                                <i class="fas fa-leaf text-white"></i>
-                                                            </div>
-                                                            <div>
-                                                                <h6 class="text-success mb-1">Lyra Windwhisper</h6>
-                                                                <small class="text-muted">Nature Spirit Guide</small>
-                                                            </div>
-                                                        </div>
-                                                        <p class="small text-muted">A guardian spirit who aids travelers through the corrals, offering guidance and ancient wisdom about the realm's history.</p>
-                                                        <small class="text-success"><i class="fas fa-quote-left me-1"></i>"Nature remembers what mortals choose to forget."</small>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                        <!-- World Lore -->
-                                        <div class="col-lg-6 mb-4">
-                                            <div class="card">
-                                                <div class="card-header bg-warning text-dark">
-                                                    <h5 class="mb-0"><i class="fas fa-book-open me-2"></i>Ancient Lore</h5>
-                                                </div>
-                                                <div class="card-body">
-                                                    <div class="lore-entry mb-4">
-                                                        <h6 class="text-warning"><i class="fas fa-scroll me-1"></i>The Great Sealing</h6>
-                                                        <p class="small">Eons ago, when the realms were young, powerful entities roamed freely across dimensions. The ancient Corral Keepers created the corrals as prisons to contain these beings, each realm carefully designed to hold specific types of entities.</p>
-                                                    </div>
-                                                    
-                                                    <div class="lore-entry mb-4">
+                                                document.getElementById('areaTitleText').textContent = selectedArea;
+                                                document.getElementById('areaDetails').classList.remove('d-none');
+
+                                                const data = areaContentData[selectedArea] || {
+                                                    lore: "Details coming soon.",
+                                                    materials: [],
+                                                    mobs: { races: [], enemies: [], animals: [], bosses: [] },
+                                                    structures: [],
+                                                    characters: []
+                                                };
+
+                                                // Lore
+                                                document.getElementById('areaLore').textContent = data.lore || '';
+
+                                                // Materials
+                                                const materialsList = document.getElementById('materialsList');
+                                                materialsList.innerHTML = '';
+                                                if (data.materials?.length) {
+                                                    data.materials.forEach(m => {
+                                                        const div = document.createElement('div');
+                                                        div.className = 'mb-2';
+                                                        div.innerHTML = `<strong>${m.name}</strong><br><span class="text-muted small">${m.lore}</span><br><em class="small">Uses: ${m.uses}</em>`;
+                                                        materialsList.appendChild(div);
+                                                    });
+                                                } else {
+                                                    materialsList.innerHTML = '<span class="text-muted">No materials listed.</span>';
+                                                }
+
+                                                // Mobs
+                                                const racesList = document.getElementById('mobsRacesList');
+                                                const enemiesList = document.getElementById('mobsEnemiesList');
+                                                const animalsList = document.getElementById('mobsAnimalsList');
+                                                const bossesList = document.getElementById('mobsBossesList');
+
+                                                const populateMobCategory = (arr, container) => {
+                                                    container.innerHTML = '';
+                                                    if (arr?.length) {
+                                                        arr.forEach(x => {
+                                                            const div = document.createElement('div');
+                                                            div.className = 'mb-2';
+                                                            div.innerHTML = `<strong>${x.name}</strong><br><span class="text-muted small">${x.lore}</span><br><em class="small">Drops: ${x.drops || '—'}</em>`;
+                                                            container.appendChild(div);
+                                                        });
+                                                    } else {
+                                                        container.innerHTML = '<span class="text-muted">None listed.</span>';
+                                                    }
+                                                };
+                                                populateMobCategory(data.mobs?.races, racesList);
+                                                populateMobCategory(data.mobs?.enemies, enemiesList);
+                                                populateMobCategory(data.mobs?.animals, animalsList);
+                                                populateMobCategory(data.mobs?.bosses, bossesList);
+
+                                                // Structures
+                                                const structuresList = document.getElementById('structuresList');
+                                                structuresList.innerHTML = '';
+                                                if (data.structures?.length) {
+                                                    data.structures.forEach(s => {
+                                                        const div = document.createElement('div');
+                                                        div.className = 'mb-2';
+                                                        div.innerHTML = `<strong>${s.name}</strong><br><span class="text-muted small">${s.lore}</span><br><em class="small">Loot: ${s.loot || '—'}</em>`;
+                                                        structuresList.appendChild(div);
+                                                    });
+                                                } else {
+                                                    structuresList.innerHTML = '<span class="text-muted">No structures listed.</span>';
+                                                }
+
+                                                // Characters
+                                                const charactersList = document.getElementById('charactersList');
+                                                charactersList.innerHTML = '';
+                                                if (data.characters?.length) {
+                                                    data.characters.forEach(c => {
+                                                        const div = document.createElement('div');
+                                                        div.className = 'mb-2';
+                                                        div.innerHTML = `<strong>${c.name}</strong><br><span class="text-muted small">${c.lore}</span><br><em class="small">Profession: ${c.profession || '—'}</em>`;
+                                                        charactersList.appendChild(div);
+                                                    });
+                                                } else {
+                                                    charactersList.innerHTML = '<span class="text-muted">No characters listed.</span>';
+                                                }
                                                         <h6 class="text-info"><i class="fas fa-gem me-1"></i>The Mark of Binding</h6>
                                                         <p class="small">The glowing mark that appears on chosen individuals is more than a blessing - it's a key. Each mark is unique and can unlock specific corrals, but using this power comes with great responsibility and unknown consequences.</p>
                                                     </div>
@@ -322,69 +341,217 @@
                                     <i class="fas fa-globe me-2"></i>World Structure
                                 </h3>
                                 
+                                <!-- World Lore Section -->
+                                <div class="card mb-4 border-success">
+                                    <div class="card-header bg-gradient text-white" style="background: linear-gradient(135deg, #2d5016 0%, #1a3a0f 100%);">
+                                        <h4 class="mb-0">
+                                            <i class="fas fa-tree me-2"></i>The Bracken: The World Tree
+                                        </h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="lore-text">
+                                                    <p class="lead text-success mb-3">
+                                                        <strong>The Bracken</strong> is an immense feature in the universe, an enigma that defies simple description.
+                                                    </p>
+                                                    
+                                                    <p class="mb-3">
+                                                        Long ago, the <strong>Aldrasil</strong> was but a seed—the first thing ever created by the <strong>Asdreth of Nature</strong>. From this primordial seed, the Bracken sprouted, growing to become the foundation of all existence.
+                                                    </p>
+                                                    
+                                                    <p>
+                                                        The Bracken resembles a fern with leaves and roots at what is considered the bottom. It holds up the entire world, consisting of <strong>72 Realms</strong>. In itself, the Bracken does not consist of anything at all, yet it is simultaneously made of <em>everything</em>—for it holds all the Realms, and therefore must be made of everything. <strong>Spriggans</strong> have the unique ability to traverse its essence, which is why Spriggans are found in most Realms throughout the world.
+                                                    </p>
+                                                    
+                                                    <p>
+                                                        Though considered a tree—<em>The World Tree</em>—the Bracken possesses an unusual shape. While Spriggans dwell upon the "leaf-part" of the Bracken where the Realms flourish, a different type of creature inhabits its roots. These beings are called <strong>Nyvhroths</strong>, and they slowly consume the Bracken's roots, gnawing away at the foundation of all existence.
+                                                    </p>
+                                                    
+                                                    <hr class="my-4">
+                                                    
+                                                    <div class="row mt-4">
+                                                        <div class="col-md-6">
+                                                            <div class="realm-info realm-fyrrel p-3 rounded bg-dark" style="min-height: 240px;">
+                                                                <h5 class="text-success mb-3">
+                                                                    <i class="fas fa-leaf me-2"></i>Fyrrel
+                                                                </h5>
+                                                                <p class="mb-2"><strong>Location:</strong> The Branches of the Bracken</p>
+                                                                <p class="text-muted small mb-0">
+                                                                    Fyrrel is a realm located among the branches of the tree, where light and life flourish. This is the homeland of the <strong>Spriggans</strong>, the mystical beings who can walk upon the wood of the Bracken itself, serving as guardians and travelers between the Realms.
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="realm-info realm-domrar p-3 rounded bg-dark" style="min-height: 240px;">
+                                                                <h5 class="mb-3" style="color: #40E0D0;">
+                                                                    <i class="fas fa-skull-crossbones me-2"></i>Domrar
+                                                                </h5>
+                                                                <p class="mb-2"><strong>Location:</strong> The Roots of the Bracken</p>
+                                                                <p class="text-muted small">
+                                                                    Domrar is a realm located at the roots of the tree, where free souls descend and the Nyvhroths are found. This is the realm of the dead, where souls must prove their worth.
+                                                                </p>
+                                                                <p class="small mb-0" style="color: #40E0D0;">
+                                                                    <i class="fas fa-info-circle me-1"></i>
+                                                                    If a soul manages to traverse the entire tree and make it back to the branches where the realms are closer to the leaves, they can begin their afterlife <strong>soulstriding</strong> in all the realms by choice. If not, they remain trapped at the roots.
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                
+                                                <!-- Exploration Guidance -->
+                                                <div class="mt-4 p-3 border rounded bg-dark">
+                                                    <p class="mb-2">
+                                                        The Bracken holds many Realms — <strong>72</strong> is the most common depiction. Below you can explore every detail in the <strong>World Book</strong>.
+                                                    </p>
+                                                    <ul class="mb-3">
+                                                        <li>Select a <strong>Corral</strong> to explore</li>
+                                                        <li>Select a <strong>Realm</strong> within that Corral</li>
+                                                        <li>Select a <strong>Region</strong></li>
+                                                        <li>Select an <strong>Area</strong></li>
+                                                        <li>Start reading about everything that Area offers</li>
+                                                    </ul>
+                                                    <p class="mb-0 small text-muted">
+                                                        Knowledge includes <strong>Materials</strong>, <strong>Mobs</strong> (Races, Enemies, Animals, Bosses), <strong>Structures</strong>, <strong>Characters</strong>, and the <strong>Lore</strong> of the Realm — what the Realm is the Realm of, reasons to explore it, goals, and rewards.
+                                                    </p>
+                                                </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
                                 <div class="card mb-4">
                                     <div class="card-header bg-success text-white">
-                                        <h5 class="mb-0">Select a Corral to Explore</h5>
+                                        <h5 class="mb-0">Explore the World Book</h5>
                                     </div>
                                     <div class="card-body">
                                         <div class="row">
                                             <div class="col-md-6">
                                                 <select class="form-select form-select-lg" id="corralSelect" onchange="loadCorralRealms()">
-                                                    <option value="">Choose a Corral...</option>
-                                                    <option value="first">First Corral (8 Realms + 3 Dwarf-Realms)</option>
-                                                    <option value="shadow">Shadow Corral (4 Realms)</option>
-                                                    <option value="celestial">Celestial Corral (6 Realms)</option>
-                                                    <option value="temporal">Temporal Corral (3 Realms)</option>
-                                                    <option value="astral">Astral Corral (5 Realms)</option>
+                                                    <option value="">Select a Corral...</option>
+                                                    <option value="rabbit">Corral 1: The Rabbit (8 Realms and 3 Dwarf-Realms)</option>
+                                                    <option value="butterfly">Corral 2: The Butterfly (13 Realms and 4 Dwarf-Realms)</option>
+                                                    <option value="bear">Corral 3: The Bear (11 Realms and 2 Dwarf-Realms)</option>
+                                                    <option value="dove">Corral 4: The Dove (5 Realms and 1 Dwarf-Realms)</option>
+                                                    <option value="crow">Corral 5: The Crow (1 Realm)</option>
+                                                    <option value="hidden1">Hidden Corral 1: The Owl (6 Hidden Realms)</option>
+                                                    <option value="hidden2">Hidden Corral 2: The Wolf (4 Hidden Realms)</option>
+                                                    <option value="hidden3">Hidden Corral 3: The Salmon (9 Hidden Realms)</option>
+                                                    <option value="hidden4">Hidden Corral 4: The Fox (3 Hidden Realms)</option>
+                                                    <option value="hidden5">Hidden Corral 5: The Snake (2 Hidden Realms)</option>
                                                 </select>
                                             </div>
                                             <div class="col-md-6">
-                                                <select class="form-select form-select-lg" id="realmSelect" onchange="loadRealmZones()" disabled>
-                                                    <option value="">First select a Corral...</option>
+                                                <select class="form-select form-select-lg" id="realmSelect" onchange="loadRealmRegions()" disabled>
+                                                    <option value="">Select a Corral first...</option>
                                                 </select>
                                             </div>
                                         </div>
                                         <div class="row mt-3">
                                             <div class="col-md-6">
-                                                <select class="form-select form-select-lg" id="zoneSelect" onchange="loadZoneAreas()" disabled>
+                                                <select class="form-select form-select-lg" id="regionSelect" onchange="loadRegionAreas()" disabled>
                                                     <option value="">Select Corral and Realm first...</option>
                                                 </select>
                                             </div>
                                             <div class="col-md-6">
                                                 <select class="form-select form-select-lg" id="areaSelect" onchange="loadAreaDetails()" disabled>
-                                                    <option value="">Select Zone first...</option>
+                                                    <option value="">Select Region first...</option>
                                                 </select>
                                             </div>
 
                                     </div>
                                 </div>
 
-                                <!-- Zone Details -->
-                                <div id="zoneDetails" class="d-none">
+                                <!-- Area Details -->
+                                <div id="areaDetails" class="d-none">
                                     <div class="row">
                                         <div class="col-lg-8">
                                             <div class="card">
                                                 <div class="card-header bg-info text-white">
-                                                    <h5 class="mb-0" id="zoneTitle">Zone Information</h5>
+                                                    <h5 class="mb-0" id="areaTitle">Area: <span id="areaTitleText"></span></h5>
                                                 </div>
                                                 <div class="card-body">
-                                                    <div class="row">
-                                                        <div class="col-md-6">
-                                                            <h6 class="text-primary">Materials</h6>
-                                                            <div id="materialsList" class="mb-3"></div>
-                                                            
-                                                            <h6 class="text-danger">Enemies</h6>
-                                                            <div id="enemiesList" class="mb-3"></div>
+                                                    <div class="mb-3">
+                                                        <h6 class="text-secondary">Lore</h6>
+                                                        <p id="areaLore" class="text-muted mb-0"></p>
+                                                    </div>
+
+                                                    <div class="accordion" id="areaAccordion">
+                                                        <div class="accordion-item">
+                                                            <h2 class="accordion-header" id="materialsHeading">
+                                                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#materialsCollapse">
+                                                                    Materials
+                                                                </button>
+                                                            </h2>
+                                                            <div id="materialsCollapse" class="accordion-collapse collapse" data-bs-parent="#areaAccordion">
+                                                                <div class="accordion-body" id="materialsList"></div>
+                                                            </div>
                                                         </div>
-                                                        <div class="col-md-6">
-                                                            <h6 class="text-warning">Bosses</h6>
-                                                            <div id="bossesList" class="mb-3"></div>
-                                                            
-                                                            <h6 class="text-success">Gear</h6>
-                                                            <div id="gearList" class="mb-3"></div>
-                                                            
-                                                            <h6 class="text-info">Skill Unlocks</h6>
-                                                            <div id="skillsList"></div>
+                                                        <div class="accordion-item">
+                                                            <h2 class="accordion-header" id="mobsHeading">
+                                                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#mobsCollapse">
+                                                                    Mobs (Races, Enemies, Animals, Bosses)
+                                                                </button>
+                                                            </h2>
+                                                            <div id="mobsCollapse" class="accordion-collapse collapse" data-bs-parent="#areaAccordion">
+                                                                <div class="accordion-body">
+                                                                    <div class="accordion" id="mobsNestedAccordion">
+                                                                        <div class="accordion-item">
+                                                                            <h2 class="accordion-header" id="mobsRacesHeading">
+                                                                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#mobsRacesCollapse">Races</button>
+                                                                            </h2>
+                                                                            <div id="mobsRacesCollapse" class="accordion-collapse collapse" data-bs-parent="#mobsNestedAccordion">
+                                                                                <div class="accordion-body" id="mobsRacesList"></div>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="accordion-item">
+                                                                            <h2 class="accordion-header" id="mobsEnemiesHeading">
+                                                                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#mobsEnemiesCollapse">Enemies</button>
+                                                                            </h2>
+                                                                            <div id="mobsEnemiesCollapse" class="accordion-collapse collapse" data-bs-parent="#mobsNestedAccordion">
+                                                                                <div class="accordion-body" id="mobsEnemiesList"></div>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="accordion-item">
+                                                                            <h2 class="accordion-header" id="mobsAnimalsHeading">
+                                                                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#mobsAnimalsCollapse">Animals</button>
+                                                                            </h2>
+                                                                            <div id="mobsAnimalsCollapse" class="accordion-collapse collapse" data-bs-parent="#mobsNestedAccordion">
+                                                                                <div class="accordion-body" id="mobsAnimalsList"></div>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="accordion-item">
+                                                                            <h2 class="accordion-header" id="mobsBossesHeading">
+                                                                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#mobsBossesCollapse">Bosses</button>
+                                                                            </h2>
+                                                                            <div id="mobsBossesCollapse" class="accordion-collapse collapse" data-bs-parent="#mobsNestedAccordion">
+                                                                                <div class="accordion-body" id="mobsBossesList"></div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="accordion-item">
+                                                            <h2 class="accordion-header" id="structuresHeading">
+                                                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#structuresCollapse">
+                                                                    Structures
+                                                                </button>
+                                                            </h2>
+                                                            <div id="structuresCollapse" class="accordion-collapse collapse" data-bs-parent="#areaAccordion">
+                                                                <div class="accordion-body" id="structuresList"></div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="accordion-item">
+                                                            <h2 class="accordion-header" id="charactersHeading">
+                                                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#charactersCollapse">
+                                                                    Characters
+                                                                </button>
+                                                            </h2>
+                                                            <div id="charactersCollapse" class="accordion-collapse collapse" data-bs-parent="#areaAccordion">
+                                                                <div class="accordion-body" id="charactersList"></div>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -393,18 +560,18 @@
                                         <div class="col-lg-4">
                                             <div class="card">
                                                 <div class="card-header bg-dark text-white">
-                                                    <h6 class="mb-0">Zone Map</h6>
+                                                    <h6 class="mb-0">Area Map</h6>
                                                 </div>
                                                 <div class="card-body">
                                                     <div class="text-center p-4 border rounded">
                                                         <i class="fas fa-map fa-3x text-muted mb-2"></i>
-                                                        <p class="text-muted">Zone map visualization</p>
+                                                        <p class="text-muted">Area map visualization</p>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
+                                 </div
                             </div>
                         </div>
 
@@ -412,77 +579,9 @@
                         <div class="tab-pane fade" id="mechanics" role="tabpanel">
                             <div class="p-4">
                                 <h3 class="text-warning mb-4">
-                                    <i class="fas fa-cogs me-2"></i>Game Mechanics
+                                    <i class="fas fa-cog me-2"></i>Game Mechanics
                                 </h3>
-                                
-                                <div class="row">
-                                    <div class="col-md-4 mb-4">
-                                        <div class="card h-100">
-                                            <div class="card-header bg-danger text-white">
-                                                <h5 class="mb-0"><i class="fas fa-magic me-2"></i>Magic System</h5>
-                                            </div>
-                                            <div class="card-body">
-                                                <h6>Elemental Magic</h6>
-                                                <ul class="small">
-                                                    <li><strong>Fire:</strong> High damage, burn effects</li>
-                                                    <li><strong>Water:</strong> Healing, crowd control</li>
-                                                    <li><strong>Earth:</strong> Defense, area denial</li>
-                                                    <li><strong>Air:</strong> Speed, mobility</li>
-                                                </ul>
-                                                <h6>Dark Magic</h6>
-                                                <ul class="small">
-                                                    <li><strong>Shadow:</strong> Stealth, debuffs</li>
-                                                    <li><strong>Necromancy:</strong> Life drain, minions</li>
-                                                    <li><strong>Void:</strong> Reality manipulation</li>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-4 mb-4">
-                                        <div class="card h-100">
-                                            <div class="card-header bg-primary text-white">
-                                                <h5 class="mb-0"><i class="fas fa-sword me-2"></i>Weapons</h5>
-                                            </div>
-                                            <div class="card-body">
-                                                <h6>Melee Weapons</h6>
-                                                <ul class="small">
-                                                    <li><strong>Swords:</strong> Balanced damage and speed</li>
-                                                    <li><strong>Axes:</strong> High damage, slow speed</li>
-                                                    <li><strong>Daggers:</strong> Fast, low damage</li>
-                                                    <li><strong>Maces:</strong> Armor piercing</li>
-                                                </ul>
-                                                <h6>Ranged Weapons</h6>
-                                                <ul class="small">
-                                                    <li><strong>Bows:</strong> Silent, precise</li>
-                                                    <li><strong>Crossbows:</strong> High damage, slow reload</li>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-4 mb-4">
-                                        <div class="card h-100">
-                                            <div class="card-header bg-success text-white">
-                                                <h5 class="mb-0"><i class="fas fa-seedling me-2"></i>Farming</h5>
-                                            </div>
-                                            <div class="card-body">
-                                                <h6>Crop Types</h6>
-                                                <ul class="small">
-                                                    <li><strong>Grain:</strong> Basic food production</li>
-                                                    <li><strong>Vegetables:</strong> Health restoration</li>
-                                                    <li><strong>Fruits:</strong> Stamina regeneration</li>
-                                                    <li><strong>Herbs:</strong> Alchemy ingredients</li>
-                                                </ul>
-                                                <h6>Growing Mechanics</h6>
-                                                <ul class="small">
-                                                    <li><strong>Soil Quality:</strong> Affects yield</li>
-                                                    <li><strong>Weather:</strong> Growth modifiers</li>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                <p class="text-muted">Mechanics content coming soon...</p>
                             </div>
                         </div>
 
@@ -492,83 +591,7 @@
                                 <h3 class="text-info mb-4">
                                     <i class="fas fa-book-open me-2"></i>Game Guide & Wiki
                                 </h3>
-                                
-                                <div class="row">
-                                    <div class="col-md-4 mb-4">
-                                        <div class="card h-100">
-                                            <div class="card-header bg-primary text-white">
-                                                <h5 class="mb-0"><i class="fas fa-play me-2"></i>Getting Started</h5>
-                                            </div>
-                                            <div class="card-body">
-                                                <h6>Character Creation</h6>
-                                                <ol class="small">
-                                                    <li>Choose your starting realm</li>
-                                                    <li>Select initial magic affinity</li>
-                                                    <li>Distribute attribute points</li>
-                                                    <li>Pick starting equipment</li>
-                                                </ol>
-                                                <h6>First Steps</h6>
-                                                <ol class="small">
-                                                    <li>Complete tutorial quests</li>
-                                                    <li>Learn basic combat</li>
-                                                    <li>Gather initial resources</li>
-                                                    <li>Build your first shelter</li>
-                                                </ol>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-4 mb-4">
-                                        <div class="card h-100">
-                                            <div class="card-header bg-danger text-white">
-                                                <h5 class="mb-0"><i class="fas fa-dragon me-2"></i>Boss Guides</h5>
-                                            </div>
-                                            <div class="card-body">
-                                                <div class="accordion" id="bossAccordion">
-                                                    <div class="accordion-item">
-                                                        <h2 class="accordion-header">
-                                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#shadowWolf">
-                                                                Shadow Wolf (Lvl 5)
-                                                            </button>
-                                                        </h2>
-                                                        <div id="shadowWolf" class="accordion-collapse collapse" data-bs-parent="#bossAccordion">
-                                                            <div class="accordion-body small">
-                                                                <strong>Weaknesses:</strong> Light magic, fire damage<br>
-                                                                <strong>Strategy:</strong> Keep your distance, dodge shadow pounce<br>
-                                                                <strong>Drops:</strong> Shadow Essence, Wolf Pelt
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-4 mb-4">
-                                        <div class="card h-100">
-                                            <div class="card-header bg-success text-white">
-                                                <h5 class="mb-0"><i class="fas fa-route me-2"></i>Progression Guide</h5>
-                                            </div>
-                                            <div class="card-body">
-                                                <h6>Realm Progression Order</h6>
-                                                <ol class="small">
-                                                    <li><strong>Tutorial Plains</strong> (Lvl 1-5)</li>
-                                                    <li><strong>Forest Realms</strong> (Lvl 5-15)</li>
-                                                    <li><strong>Mountain Peaks</strong> (Lvl 15-25)</li>
-                                                    <li><strong>Desert Wastes</strong> (Lvl 25-35)</li>
-                                                    <li><strong>Shadow Realms</strong> (Lvl 35-45)</li>
-                                                </ol>
-                                                <h6>Requirements for Next Realm</h6>
-                                                <ul class="small">
-                                                    <li>Defeat previous realm boss</li>
-                                                    <li>Collect realm key fragments</li>
-                                                    <li>Minimum level requirement</li>
-                                                    <li>Complete story objectives</li>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                <p class="text-muted">Wiki content coming soon...</p>
                             </div>
                         </div>
                     </div>
@@ -580,8 +603,8 @@
 
 <script>
 const worldData = {
-    first: {
-        name: "First Corral",
+    rabbit: {
+        name: "Corral 1: The Rabbit",
         realms: {
             barikir: "Barikir",
             nibur: "Nibur",
@@ -597,126 +620,281 @@ const worldData = {
             hogway: "Hogway",
             tawing: "Tawing"
         },
-        zones: {
-            barikir: ["Rural Barikir (center zone)", "Northern Barikir (The Highlands)", "Southern Barikir (White Desert)", "Western Barikir (The Badlands)", "Eastern Barikir (Jungle)"],
-            nibur: ["Nibur Valley", "Nibur Peaks", "Nibur Caverns", "Nibur Shores"],
-            dulrog: ["Dulrog Marshes", "Dulrog Forest", "Dulrog Mountains", "Dulrog Desert"],
-            macuetz: ["Macuetz Fields", "Macuetz Ruins", "Macuetz Citadel", "Macuetz Outlands"],
-            snuhk: ["Snuhk Tundra", "Snuhk Glaciers", "Snuhk Valleys", "Snuhk Peaks"],
-            sephe: ["Sephe Gardens", "Sephe Rivers", "Sephe Hills", "Sephe Sanctum"],
-            steplar: ["Steplar Steppes", "Steplar Cliffs", "Steplar Canyons", "Steplar Mesa"],
-            igneous: ["Igneous Core", "Igneous Flows", "Igneous Chambers", "Igneous Spires"],
-            noom: ["Noom Halls", "Noom Forges", "Noom Mines", "Noom Tunnels"],
-            hogway: ["Hogway Bridges", "Hogway Gates", "Hogway Towers", "Hogway Vaults"],
-            tawing: ["Tawing Workshops", "Tawing Markets", "Tawing Quarters", "Tawing Arsenal"]
+        regions: {
+            barikir: ["center", "north", "south", "west", "east", "underground", "sky", "far_north", "far_south", "far_west", "far_east", "border"],
+            nibur: ["center", "north", "south", "west", "east", "underground", "far_north", "far_south", "far_west", "far_east", "border"],
+            dulrog: ["center", "underground", "border"],
+            macuetz: ["center", "north", "south", "west", "east", "underground", "far_north", "far_south", "far_west", "far_east", "border"],
+            snuhk: ["center", "north", "south", "west", "east", "underground", "far_north", "far_west", "border"],
+            sephe: ["center", "north", "south", "west", "east", "underground", "far_north", "far_south", "far_west", "far_east", "border"],
+            steplar: ["center", "north", "south", "west", "east", "underground", "far_north", "far_west", "far_east", "border"],
+            igneous: ["center", "north", "south", "west", "east", "underground", "sky", "far_north", "far_south", "far_west", "far_east", "border"],
+            noom: ["center", "underground", "border"],
+            hogway: ["center", "underground", "border"],
+            tawing: ["center", "north", "south", "west", "east", "underground", "sky", "border"]
         }
     },
-    shadow: {
-        name: "Shadow Corral",
+    butterfly: {
+        name: "Corral 2: The Butterfly",
         realms: {
-            nightmare: "Nightmare Realm",
-            void: "Void Spaces",
-            umbral: "Umbral Sanctum",
-            whisper: "Whispering Halls"
+            brusiv: "Brusiv",
+            kroom: "Kroom",
+            dusfer: "Dusfer",
+            iclas: "Iclas",
+            abzithal: "Abzithal",
+            rabuhist: "Rabuhist",
+            jhekal: "Jhekal",
+            enoki: "Enoki",
+            tokist: "Tokist",
+            vermu: "Vermu",
+            stolid: "Stolid",
+            aksber: "Aksber",
+            raxarall: "Raxa Rall"
         },
-        zones: {
-            nightmare: ["Fear Plains", "Terror Woods", "Anxiety Peaks", "Dread Swamps"],
-            void: ["Null Zones", "Empty Chambers", "Blank Fields", "Nothing Spaces"],
-            umbral: ["Dark Temples", "Shadow Pools", "Gloom Valleys", "Twilight Shores"],
-            whisper: ["Echo Chambers", "Murmur Corridors", "Silent Libraries", "Gossip Gardens"]
+        dwarfRealms: {
+            niim: "Niim",
+            hazen: "Hazen",
+            yplov: "Yplov",
+            grevca: "Grevca"
+        },
+        regions: {
+            brusiv: ["center", "north", "south", "west", "east", "underground", "border"],
+            kroom: ["center", "north", "west", "border"],
+            dusfer: ["center", "west", "south", "border"],
+            iclas: ["center", "north", "south", "west", "east", "underground", "border"],
+            abzithal: ["center", "border"],
+            rabuhist: ["center", "north", "south", "west", "east", "border"],
+            jhekal: ["center", "north", "south", "west", "east", "underground", "sky", "far_north", "far_south", "far_east", "border"],
+            enoki: ["center", "underground", "border"],
+            tokist: ["center", "border"],
+            vermu: ["center", "north", "underground", "border"],
+            stolid: ["center", "north", "south", "underground", "border"],
+            aksber: ["center", "north", "south", "west", "east", "underground", "border"],
+            raxarall: ["center", "north", "south", "west", "east", "border"],
+            niim: ["center", "border"],
+            hazen: ["center", "east", "border"],
+            yplov: ["center", "border"],
+            grevca: ["center", "west", "east", "underground", "sky", "border"]
         }
     },
-    celestial: {
-        name: "Celestial Corral", 
+    bear: {
+        name: "Corral 3: The Bear",
         realms: {
-            heaven: "Heavenly Realms",
-            star: "Stellar Fields",
-            divine: "Divine Sanctum",
-            light: "Light Domains",
-            cosmic: "Cosmic Expanse",
-            aurora: "Aurora Fields"
+            calwren: "Calwren",
+            aldrasilt: "Aldrasilt",
+            kyrun: "Kyrun",
+            rikis: "Rikis",
+            lavier: "Lavier",
+            erode: "Erode",
+            siltred: "Siltred",
+            brawn: "Brawn",
+            kempel: "Kempel",
+            limpid: "Limpid",
+            qhorthest: "Qhorthest"
         },
-        zones: {
-            heaven: ["Angel Courts", "Cloud Palaces", "Golden Fields", "Harmony Gardens"],
-            star: ["Star Nurseries", "Constellation Maps", "Nebula Clouds", "Comet Trails"],
-            divine: ["Holy Altars", "Sacred Pools", "Divine Libraries", "Prayer Halls"],
-            light: ["Radiant Plains", "Prism Towers", "Luminous Caverns", "Dawn Peaks"],
-            cosmic: ["Galactic Centers", "Dark Matter Fields", "Quantum Zones", "Reality Rifts"],
-            aurora: ["Color Fields", "Dancing Lights", "Spectrum Valleys", "Rainbow Bridges"]
+        dwarfRealms: {
+            goral: "Goral",
+            dukun: "Dukun"
+        },
+        regions: {
+            calwren: ["center", "north", "south", "west", "east", "underground", "far_north", "far_south", "far_west", "far_east", "border"],
+            aldrasilt: ["center", "north", "south", "west", "east", "underground", "far_north", "far_south", "far_west", "far_east", "border"],
+            kyrun: ["center", "border"],
+            rikis: ["center", "north", "south", "west", "east", "sky", "far_south", "far_west", "border"],
+            lavier: ["center", "north", "south", "west", "east", "sky", "far_north", "far_south", "far_west", "far_east", "border"],
+            erode: ["center", "north", "south", "west", "east", "underground", "far_north", "far_east", "border"],
+            siltred: ["center", "border"],
+            brawn: ["center", "underground", "border"],
+            kempel: ["center", "north", "south", "west", "east", "far_south", "far_west", "far_east", "border"],
+            limpid: ["center", "south", "east", "border"],
+            qhorthest: ["center", "underground", "border"],
+            goral: ["center", "north", "south", "west", "east", "underground", "border"],
+            dukun: ["center", "border"]
         }
     },
-    temporal: {
-        name: "Temporal Corral",
+    dove: {
+        name: "Corral 4: The Dove",
         realms: {
-            past: "Past Echoes",
-            future: "Future Visions", 
-            paradox: "Paradox Zones"
+            vogatir: "Vogatir",
+            egraen: "Egraen",
+            envin: "Envin",
+            ztonphior: "Ztonphior",
+            vacant: "Vacant"
         },
-        zones: {
-            past: ["Ancient Ruins", "Fossil Fields", "Memory Pools", "Historic Sites"],
-            future: ["Tech Cities", "Quantum Labs", "Time Streams", "Possibility Fields"],
-            paradox: ["Logic Breaks", "Causality Loops", "Timeline Splits", "Temporal Storms"]
+        dwarfRealms: {
+            peril: "Peril"
+        },
+        regions: {
+            vogatir: ["center", "sky", "border"],
+            egraen: ["center", "north", "south", "west", "east", "underground", "border"],
+            envin: ["center", "north", "south", "west", "east", "underground", "border"],
+            ztonphior: ["center", "border"],
+            vacant: ["center", "sky", "border"],
+            peril: ["center", "border"]
         }
     },
-    astral: {
-        name: "Astral Corral",
+    crow: {
+        name: "Corral 5: The Crow",
         realms: {
-            mind: "Mind Realms",
-            dream: "Dream Worlds",
-            psychic: "Psychic Planes",
-            thought: "Thought Spheres",
-            consciousness: "Consciousness Fields"
+            axrak: "Axrak"
         },
-        zones: {
-            mind: ["Memory Banks", "Thought Highways", "Logic Centers", "Emotion Pools"],
-            dream: ["Lucid Fields", "Nightmare Zones", "Dream Logic Areas", "Sleep Chambers"],
-            psychic: ["Telepathy Networks", "Telekinesis Fields", "Precog Zones", "Mind Links"],
-            thought: ["Idea Gardens", "Concept Halls", "Theory Labs", "Philosophy Towers"],
-            consciousness: ["Awareness Fields", "Perception Zones", "Reality Checks", "Self Spaces"]
+        regions: {
+            axrak: ["center", "border"]
+        }
+    },
+    hidden1: {
+        name: "Hidden Corral 1: The Owl",
+        realms: {
+            kuhre: "Kuhre",
+            eldtic: "Eldtic",
+            vapid: "Vapid",
+            algetarne: "Algetarné",
+            tawals: "Tawals",
+            highriff: "Highriff"
+        },
+        regions: {
+            kuhre: ["center", "underground", "border"],
+            eldtic: ["center", "border"],
+            vapid: ["center", "border"],
+            algetarne: ["center", "border"],
+            tawals: ["center", "border"],
+            highriff: ["center", "north", "south", "west", "east", "underground", "far_north", "far_south", "far_west", "far_east", "border"]
+        }
+    },
+    hidden2: {
+        name: "Hidden Corral 2: The Wolf",
+        realms: {
+            blukk: "Blukk",
+            muppyst: "Muppyst",
+            placid: "Placid",
+            ferrun: "Ferrun"
+        },
+        regions: {
+            blukk: ["center", "border"],
+            muppyst: ["center", "border"],
+            placid: ["center", "border"],
+            ferrun: ["center", "border"]
+        }
+    },
+    hidden3: {
+        name: "Hidden Corral 3: The Salmon",
+        realms: {
+            nimbel: "Nimbel",
+            ridoxet: "Ridoxet",
+            apnirt: "Apnirt",
+            yreg: "Yreg",
+            rhoulder: "Rhoulder",
+            uriendel: "Uriendel Dreirn",
+            tsiqaki: "Tsiqaki",
+            auverith: "Auverith",
+            enduriken: "Enduriken"
+        },
+        regions: {
+            nimbel: ["center", "border"],
+            ridoxet: ["north", "south", "east", "west", "underground", "border"],
+            apnirt: ["center", "border"],
+            yreg: ["center", "west", "south", "north", "underground", "border"],
+            rhoulder: ["center", "border"],
+            uriendel: ["center", "border"],
+            tsiqaki: ["center", "border"],
+            auverith: ["center", "underground", "border"],
+            enduriken: ["center", "north", "south", "border"]
+        }
+    },
+    hidden4: {
+        name: "Hidden Corral 4: The Fox",
+        realms: {
+            syluvar: "Syluvar",
+            odrengea: "Odrengea",
+            tenuous: "Tenuous"
+        },
+        regions: {
+            syluvar: ["center", "border"],
+            odrengea: ["center", "border"],
+            tenuous: ["center", "border"]
+        }
+    },
+    hidden5: {
+        name: "Hidden Corral 5: The Snake",
+        realms: {
+            johre: "Johre",
+            wryndor: "Wryndor"
+        },
+        regions: {
+            johre: ["center", "north", "east", "west", "border"],
+            wryndor: ["center", "border"]
         }
     }
 };
 
-// Area data for each zone
+// Area data for each region (Region → Areas)
 const areaData = {
-    "Rural Barikir (center zone)": ["Barikir Village", "Central Plains", "Trade Routes", "Market District", "Temple Grounds"],
-    "Northern Barikir (The Highlands)": ["Highland Peaks", "Mountain Passes", "Ancient Ruins", "Stone Circles", "Highland Meadows"],
-    "Southern Barikir (White Desert)": ["Salt Flats", "Desert Oasis", "Bone Valley", "Crystal Caves", "Mirage Plains"],
-    "Western Barikir (The Badlands)": ["Wasteland Canyons", "Rust Fields", "Abandoned Outposts", "Scrapyard Maze", "Toxic Pools"],
-    "Eastern Barikir (Jungle)": ["Dense Canopy", "River Tributaries", "Tribal Settlements", "Overgrown Temples", "Swamp Borders"]
+    // New scoped keys: <realm>:<region>
+    "barikir:center": [
+        "Elwood",
+        "Haerlake",
+        "Hilk",
+        "Gihl",
+        "Roofed Forest",
+        "Niivla Woods",
+        "Rofgard",
+        "Gavel",
+        "Wheat Fields",
+        "Grenaa",
+        "Agerbo",
+        "Aphlas",
+        "Djemun",
+        "Garzen",
+        "Mursgrun",
+        "Harakk",
+        "Anker",
+        "Esten",
+        "Heurldron",
+        "Merl",
+        "Skell"
+    ]
 };
 
-const zoneData = {
-    "Volcanic Peaks": {
-        materials: ["Fire Crystal", "Obsidian", "Molten Metal", "Phoenix Feather"],
-        enemies: ["Fire Elemental", "Lava Golem", "Flame Sprite", "Magma Worm"],
-        bosses: ["Inferno Dragon", "Volcano Titan"],
-        gear: ["Flamestrike Sword", "Molten Armor", "Fire Resistance Cloak"],
-        skills: ["Fire Mastery", "Heat Resistance", "Flame Burst"]
-    },
-    "Coral Reefs": {
-        materials: ["Sea Crystal", "Coral", "Pearls", "Seaweed"],
-        enemies: ["Water Elemental", "Shark", "Jellyfish", "Sea Serpent"],
-        bosses: ["Kraken", "Sea King"],
-        gear: ["Trident", "Scale Armor", "Breathing Apparatus"],
-        skills: ["Water Control", "Swimming Speed", "Underwater Vision"]
+// Content data for each area (Materials, Mobs, Structures, Characters, Lore)
+const areaContentData = {
+    // Example content schema for Barikir Center areas
+    "Elwood": {
+        lore: "A quiet woodland settlement where travelers rest and exchange stories.",
+        materials: [
+            { name: "Oak Wood", lore: "Sturdy timber from ancient trees.", uses: "Building, weapon hafts" },
+            { name: "Herb Sprig", lore: "Common medicinal plant.", uses: "Potions, salves" }
+        ],
+        mobs: {
+            races: [ { name: "Spriggan Wanderer", lore: "A friendly guardian of the woods.", drops: "Spriggan Leaf" } ],
+            enemies: [ { name: "Bog Thief", lore: "Petty bandit hiding near marshes.", drops: "Tattered Cloth" } ],
+            animals: [ { name: "Stag", lore: "Majestic deer roaming the groves.", drops: "Antler Shard" } ],
+            bosses: [ { name: "Grove Warden", lore: "Protector spirit of Elwood.", drops: "Warden Bark" } ]
+        },
+        structures: [
+            { name: "Waystone", lore: "Guides travelers through the forest.", loot: "Waystone Dust" },
+            { name: "Hunter Cabin", lore: "Shelter used by local hunters.", loot: "Camping Gear" }
+        ],
+        characters: [
+            { name: "Merra the Herbalist", lore: "Knows every plant in Elwood.", profession: "Alchemy vendor" },
+            { name: "Joran the Tracker", lore: "Finds lost paths for a fee.", profession: "Guide" }
+        ]
     }
 };
 
 function loadCorralRealms() {
     const corralSelect = document.getElementById('corralSelect');
     const realmSelect = document.getElementById('realmSelect');
-    const zoneSelect = document.getElementById('zoneSelect');
+    const regionSelect = document.getElementById('regionSelect');
     const areaSelect = document.getElementById('areaSelect');
     
     const selectedCorral = corralSelect.value;
     
     realmSelect.innerHTML = '<option value="">Choose a Realm...</option>';
-    zoneSelect.innerHTML = '<option value="">Select Corral and Realm first...</option>';
-    areaSelect.innerHTML = '<option value="">Select Zone first...</option>';
-    zoneSelect.disabled = true;
+    regionSelect.innerHTML = '<option value="">Select Corral and Realm first...</option>';
+    areaSelect.innerHTML = '<option value="">Select Region first...</option>';
+    regionSelect.disabled = true;
     areaSelect.disabled = true;
-    document.getElementById('zoneDetails').classList.add('d-none');
+    document.getElementById('areaDetails').classList.add('d-none');
     
     if (selectedCorral && worldData[selectedCorral]) {
         realmSelect.disabled = false;
@@ -742,7 +920,7 @@ function loadCorralRealms() {
             for (const [key, name] of Object.entries(dwarfRealms)) {
                 const option = document.createElement('option');
                 option.value = key;
-                option.textContent = name + ' (Dwarf-Realm)';
+                option.textContent = name;
                 realmSelect.appendChild(option);
             }
         }
@@ -751,47 +929,78 @@ function loadCorralRealms() {
     }
 }
 
-function loadRealmZones() {
+function loadRealmRegions() {
     const corralSelect = document.getElementById('corralSelect');
     const realmSelect = document.getElementById('realmSelect');
-    const zoneSelect = document.getElementById('zoneSelect');
+    const regionSelect = document.getElementById('regionSelect');
     const areaSelect = document.getElementById('areaSelect');
     
     const selectedCorral = corralSelect.value;
     const selectedRealm = realmSelect.value;
     
-    zoneSelect.innerHTML = '<option value="">Choose a Zone...</option>';
-    areaSelect.innerHTML = '<option value="">Select Zone first...</option>';
+    regionSelect.innerHTML = '<option value="">Choose a Region...</option>';
+    areaSelect.innerHTML = '<option value="">Select Region first...</option>';
     areaSelect.disabled = true;
-    document.getElementById('zoneDetails').classList.add('d-none');
+    document.getElementById('areaDetails').classList.add('d-none');
     
-    if (selectedCorral && selectedRealm && worldData[selectedCorral]?.zones[selectedRealm]) {
-        zoneSelect.disabled = false;
-        const zones = worldData[selectedCorral].zones[selectedRealm];
+    if (selectedCorral && selectedRealm) {
+        regionSelect.disabled = false;
         
-        zones.forEach(zone => {
+        // Get available regions for this realm
+        const availableRegions = worldData[selectedCorral]?.regions[selectedRealm] || [];
+        
+        // All possible regions in display order
+        const allRegions = [
+            { key: 'center', label: 'Center' },
+            { key: 'north', label: 'North' },
+            { key: 'south', label: 'South' },
+            { key: 'west', label: 'West' },
+            { key: 'east', label: 'East' },
+            { key: 'underground', label: 'Underground' },
+            { key: 'sky', label: 'Sky' },
+            { key: 'far_north', label: 'Far North' },
+            { key: 'far_south', label: 'Far South' },
+            { key: 'far_west', label: 'Far West' },
+            { key: 'far_east', label: 'Far East' },
+            { key: 'border', label: 'Realm Border' }
+        ];
+        
+        // Add all regions, but disable those not available
+        allRegions.forEach(region => {
             const option = document.createElement('option');
-            option.value = zone;
-            option.textContent = zone;
-            zoneSelect.appendChild(option);
+            option.value = region.key;
+            option.textContent = region.label;
+            
+            if (!availableRegions.includes(region.key)) {
+                option.disabled = true;
+                option.style.color = '#6c757d';
+                option.textContent += ' (Not existent)';
+            }
+            
+            regionSelect.appendChild(option);
         });
     } else {
-        zoneSelect.disabled = true;
+        regionSelect.disabled = true;
     }
 }
 
-function loadZoneAreas() {
-    const zoneSelect = document.getElementById('zoneSelect');
+function loadRegionAreas() {
+    const regionSelect = document.getElementById('regionSelect');
+    const realmSelect = document.getElementById('realmSelect');
     const areaSelect = document.getElementById('areaSelect');
-    const selectedZone = zoneSelect.value;
-    
+    const selectedRegion = regionSelect.value;
+    const selectedRealm = realmSelect.value;
+
     areaSelect.innerHTML = '<option value="">Choose an Area...</option>';
-    document.getElementById('zoneDetails').classList.add('d-none');
-    
-    if (selectedZone && areaData[selectedZone]) {
+    document.getElementById('areaDetails').classList.add('d-none');
+
+    // Use composite key realm:region to support identical region names across realms
+    const key = selectedRealm && selectedRegion ? `${selectedRealm}:${selectedRegion}` : '';
+
+    if (key && areaData[key]) {
         areaSelect.disabled = false;
-        const areas = areaData[selectedZone];
-        
+        const areas = areaData[key];
+
         areas.forEach(area => {
             const option = document.createElement('option');
             option.value = area;
@@ -808,10 +1017,10 @@ function loadAreaDetails() {
     const selectedArea = areaSelect.value;
     
     if (selectedArea) {
-        document.getElementById('zoneTitle').textContent = selectedArea;
-        document.getElementById('zoneDetails').classList.remove('d-none');
+        document.getElementById('areaTitle').textContent = selectedArea;
+        document.getElementById('areaDetails').classList.remove('d-none');
         
-        const data = zoneData[selectedArea] || {
+        const data = areaContentData[selectedArea] || {
             materials: ["Common Ore", "Basic Herbs", "Wood", "Stone"],
             enemies: ["Goblin", "Wolf", "Spider", "Orc"],
             bosses: ["Area Guardian"],
@@ -868,6 +1077,165 @@ function populateList(elementId, items, badgeColor) {
 
 .badge {
     font-size: 0.75em;
+}
+
+/* Animated realm borders */
+.realm-domrar {
+    border: 3px solid #5a4a3a;
+    position: relative;
+    overflow: visible;
+}
+
+.realm-domrar::before,
+.realm-domrar::after {
+    content: '';
+    position: absolute;
+    width: 50px;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #40E0D0, #40E0D0, transparent);
+    box-shadow: 0 0 10px #40E0D0;
+    animation: travelBorderDomrar 6s linear infinite;
+    z-index: 10;
+}
+
+.realm-domrar::after {
+    animation-delay: 3s;
+}
+
+.realm-fyrrel {
+    border: 3px solid #28a745;
+    position: relative;
+    overflow: visible;
+}
+
+.realm-fyrrel::before,
+.realm-fyrrel::after {
+    content: '';
+    position: absolute;
+    width: 50px;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #40E0D0, #40E0D0, transparent);
+    box-shadow: 0 0 10px #40E0D0;
+    animation: travelBorderFyrrel 6s linear infinite;
+    z-index: 10;
+}
+
+.realm-fyrrel::after {
+    animation-delay: 3s;
+}
+
+@keyframes travelBorderDomrar {
+    0% {
+        top: -3px;
+        left: 0;
+        width: 50px;
+        height: 3px;
+    }
+    23% {
+        top: -3px;
+        left: calc(100% - 50px);
+        width: 50px;
+        height: 3px;
+    }
+    25% {
+        top: 0;
+        left: 100%;
+        width: 3px;
+        height: 50px;
+    }
+    48% {
+        top: calc(100% - 50px);
+        left: 100%;
+        width: 3px;
+        height: 50px;
+    }
+    50% {
+        top: 100%;
+        left: calc(100% - 50px);
+        width: 50px;
+        height: 3px;
+    }
+    73% {
+        top: 100%;
+        left: 0;
+        width: 50px;
+        height: 3px;
+    }
+    75% {
+        top: calc(100% - 50px);
+        left: -3px;
+        width: 3px;
+        height: 50px;
+    }
+    98% {
+        top: 0;
+        left: -3px;
+        width: 3px;
+        height: 50px;
+    }
+    100% {
+        top: -3px;
+        left: 0;
+        width: 50px;
+        height: 3px;
+    }
+}
+
+@keyframes travelBorderFyrrel {
+    0% {
+        top: -3px;
+        left: 0;
+        width: 50px;
+        height: 3px;
+    }
+    23% {
+        top: -3px;
+        left: calc(100% - 50px);
+        width: 50px;
+        height: 3px;
+    }
+    25% {
+        top: 0;
+        left: 100%;
+        width: 3px;
+        height: 50px;
+    }
+    48% {
+        top: calc(100% - 50px);
+        left: 100%;
+        width: 3px;
+        height: 50px;
+    }
+    50% {
+        top: 100%;
+        left: calc(100% - 50px);
+        width: 50px;
+        height: 3px;
+    }
+    73% {
+        top: 100%;
+        left: 0;
+        width: 50px;
+        height: 3px;
+    }
+    75% {
+        top: calc(100% - 50px);
+        left: -3px;
+        width: 3px;
+        height: 50px;
+    }
+    98% {
+        top: 0;
+        left: -3px;
+        width: 3px;
+        height: 50px;
+    }
+    100% {
+        top: -3px;
+        left: 0;
+        width: 50px;
+        height: 3px;
+    }
 }
 </style>
 {% endblock %}

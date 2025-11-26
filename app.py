@@ -165,6 +165,9 @@ def admin_dashboard():
     # Get pending users
     pending_users = User.query.filter_by(is_approved=False, is_admin=False).all()
     
+    # Get approved users (excluding admin)
+    approved_users = User.query.filter_by(is_approved=True, is_admin=False).all()
+    
     # Get all content counts
     recipes_count = Recipe.query.count()
     game_reviews_count = GameReview.query.count()
@@ -173,6 +176,7 @@ def admin_dashboard():
     
     return render_template('admin_dashboard.html', 
                          pending_users=pending_users,
+                         approved_users=approved_users,
                          recipes_count=recipes_count,
                          game_reviews_count=game_reviews_count,
                          movie_reviews_count=movie_reviews_count,
@@ -207,6 +211,28 @@ def reject_user(user_id):
     db.session.commit()
     
     flash(f'User {username} has been rejected and removed.', 'info')
+    return redirect(url_for('admin_dashboard'))
+
+@app.route('/admin/delete-user/<int:user_id>')
+@login_required
+def delete_user(user_id):
+    """Delete an approved user"""
+    if not current_user.is_admin:
+        flash('Access denied. Admin privileges required.', 'danger')
+        return redirect(url_for('home'))
+    
+    user = User.query.get_or_404(user_id)
+    
+    # Prevent deleting admin users
+    if user.is_admin:
+        flash('Cannot delete admin users.', 'danger')
+        return redirect(url_for('admin_dashboard'))
+    
+    username = user.username
+    db.session.delete(user)
+    db.session.commit()
+    
+    flash(f'User {username} has been deleted.', 'success')
     return redirect(url_for('admin_dashboard'))
 
 # Admin content management routes

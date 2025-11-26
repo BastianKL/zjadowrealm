@@ -146,6 +146,64 @@
         </div>
     </div>
     
+    <!-- Approved Users -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-user-check me-2"></i>Approved Users
+                        <span class="badge bg-dark float-end">{{ approved_users|length }}</span>
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% if approved_users %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Username</th>
+                                        <th>Email</th>
+                                        <th>Registered</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for user in approved_users %}
+                                        <tr>
+                                            <td>
+                                                <i class="fas fa-user me-2"></i>{{ user.username }}
+                                            </td>
+                                            <td>
+                                                <i class="fas fa-envelope me-2"></i>{{ user.email }}
+                                            </td>
+                                            <td>
+                                                <i class="fas fa-calendar me-2"></i>{{ user.created_at.strftime('%Y-%m-%d %H:%M') }}
+                                            </td>
+                                            <td>
+                                                <a href="{{ url_for('delete_user', user_id=user.id) }}" 
+                                                   class="btn btn-sm btn-danger"
+                                                   onclick="return confirm('Are you sure you want to delete user {{ user.username }}? This action cannot be undone.')">
+                                                    <i class="fas fa-trash me-1"></i>Delete
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-users-slash fa-3x text-muted mb-3"></i>
+                            <p class="lead">No approved users</p>
+                            <p class="text-muted">Approved users will appear here</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <!-- Content Management -->
     <div class="row mb-4">
         <div class="col">
