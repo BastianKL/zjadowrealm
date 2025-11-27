@@ -627,8 +627,15 @@ def game_memory():
 @app.route('/games/tetris')
 @login_required
 def game_tetris():
-    """Tetris game"""
+    """Zjadow Block Drop game"""
     return render_template('game_tetris.html')
+@app.route('/games/blockdrop')
+
+@app.route('/games/platformer')
+@login_required
+def game_platformer():
+    """Infinite Rhythm Platformer"""
+    return render_template('game_platformer.html')
 
 @app.route('/games/pirates')
 @login_required

@@ -1,0 +1,401 @@
+{% extends "base.html" %}
+
+{% block title %}Zjadow Rhythm Jumper - ZjadowRealm{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <div class="mb-3">
+    <a href="{{ url_for('games') }}" class="btn btn-secondary">
+      <i class="fas fa-arrow-left"></i> Back to Games
+    </a>
+  </div>
+
+  <div class="card shadow-lg">
+    <div class="card-header bg-primary text-white">
+      <h5 class="mb-0"><i class="fas fa-music me-2"></i>Zjadow Rhythm Jumper</h5>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-8">
+          <div class="position-relative">
+            <canvas id="platformerCanvas" width="800" height="400" class="border rounded" style="background:#0a0a0a"></canvas>
+            <div id="beatBar" style="position:absolute;left:0;bottom:0;height:6px;width:0;background:#ff4081;box-shadow:0 0 12px #ff4081"></div>
+            <div id="pfDeath" class="d-none" style="position:absolute;inset:0;background:rgba(0,0,0,0.75);display:flex;align-items:center;justify-content:center;flex-direction:column;color:#fff">
+              <h3>Game Over</h3>
+              <p>Score: <span id="pfFinalScore">0</span></p>
+              <button class="btn btn-light" onclick="startPlatformer()"><i class="fas fa-redo"></i> Retry</button>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="mb-3">
+            <button class="btn btn-success me-2" onclick="startPlatformer()"><i class="fas fa-play"></i> Start</button>
+            <button class="btn btn-warning me-2" onclick="pausePlatformer()" id="pfPause" disabled><i class="fas fa-pause"></i> Pause</button>
+            <button class="btn btn-danger" onclick="resetPlatformer()"><i class="fas fa-redo"></i> Reset</button>
+          </div>
+          <div>
+            <h5>Score: <span id="pfScore">0</span></h5>
+            <h6>Speed: <span id="pfSpeed">1.0x</span></h6>
+            <h6>Distance: <span id="pfDistance">0</span> m</h6>
+            <small class="text-muted">Difficulty increases over time; syncs with rhythm feel.</small>
+          </div>
+          <div class="mt-3">
+            <h6>Audio</h6>
+            <audio id="pfMusic" src="{{ url_for('static', filename='audio/music_for_zjadowrhythmjumper.mp3') }}" preload="auto" loop></audio>
+            <audio id="pfJumpSound" preload="auto" src="{{ url_for('static', filename='audio/rotate_piece_sound.mp3') }}"></audio>
+            <audio id="pfDashSound" preload="auto" src="{{ url_for('static', filename='audio/curse_piece_landing_sound.mp3') }}"></audio>
+            <div class="form-check form-switch mt-2">
+              <input class="form-check-input" type="checkbox" id="pfMusicToggle" checked onchange="togglePfMusic(this.checked)">
+              <label class="form-check-label" for="pfMusicToggle">Music</label>
+            </div>
+          </div>
+          <div class="mt-3">
+            <h6>Controls</h6>
+            <small class="text-muted">
+              <div>W: Jump</div>
+              <div>S: Fast-fall</div>
+              <div>D: Mid-air dash forward</div>
+              <div>E: Shoot target to open doors</div>
+            </small>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .hit { box-shadow: 0 0 12px #ff4444 inset; }
+</style>
+
+<script>
+const pfState = {
+  running: false,
+  paused: false,
+  score: 0,
+  speed: 200, // pixels/sec base
+  speedFactor: 1.0,
+  distance: 0,
+  lastTime: 0,
+  player: { x: 120, y: 300, w: 24, h: 24, vy: 0, onGround: true, canDash: true },
+  gravity: 1400,
+  level: [], // segments/obstacles
+  bullets: [],
+  beatMs: 600, // default 100 BPM
+  lastBeatTime: 0,
+  density: 1.0,
+  rampRate: 0.02,
+  particles: [],
+  dashCooldownMs: 0,
+  safeStartMs: 1500,
+  stage: 1 // 1: gray, 2: blue, 3: green, 4: red
+};
+
+function startPlatformer(){
+  if (pfState.running) return;
+  pfState.running = true; pfState.paused = false;
+  pfState.score = 0; pfState.distance = 0; pfState.speedFactor = 1.0;
+  pfState.level = []; pfState.bullets = [];
+  pfState.player = { x: 120, y: 300, w: 24, h: 24, vy: 0, onGround: true, canDash: true };
+  document.getElementById('pfPause').disabled = false;
+  pfState.lastTime = performance.now();
+  startPfMusic();
+  hideDeath();
+  initStartingGround();
+  pfLoop(pfState.lastTime);
+}
+function pausePlatformer(){
+  if (!pfState.running) return;
+  pfState.paused = !pfState.paused;
+  document.getElementById('pfPause').innerHTML = pfState.paused ? '<i class="fas fa-play"></i> Resume' : '<i class="fas fa-pause"></i> Pause';
+  if (!pfState.paused) pfLoop(performance.now());
+}
+function resetPlatformer(){
+  pfState.running = false; pfState.paused = false;
+  pfState.score = 0; pfState.distance = 0; pfState.level = []; pfState.bullets = []; pfState.stage = 1; pfState.safeStartMs = 1500;
+  document.getElementById('pfPause').disabled = true;
+  stopPfMusic();
+  drawPf();
+}
+
+document.addEventListener('keydown', (e)=>{
+  if (!pfState.running || pfState.paused) return;
+  switch(e.key){
+    case 'w': case 'W':
+      if (pfState.player.onGround){ pfState.player.vy = -620; pfState.player.onGround = false; playAudio('pfJumpSound'); }
+      spawnJumpParticles();
+      break;
+    case 's': case 'S':
+      if (!pfState.player.onGround){ pfState.player.vy += 950; }
+      break;
+    case 'd': case 'D':
+      if (!pfState.player.onGround && pfState.player.canDash){
+        // Dash as forward surge: move the world left so the player stays visible
+        const surge = 170;
+        pfState.level.forEach(o=> o.x -= surge);
+        pfState.distance += surge/100;
+        if (pfState.player.vy > 60){ pfState.player.vy = -380; }
+        pfState.player.canDash = false; pfState.dashCooldownMs = 1200; spawnDashParticles(); playAudio('pfDashSound');
+      }
+      break;
+    case 'e': case 'E':
+      shootBullet();
+      break;
+  }
+});
+
+function pfLoop(now){
+  if (!pfState.running || pfState.paused) return;
+  // Decrement startup grace period
+  if (pfState.safeStartMs > 0 && pfState.lastTime){ pfState.safeStartMs = Math.max(0, pfState.safeStartMs - (now - pfState.lastTime)); }
+  const dt = (now - pfState.lastTime) / 1000;
+  pfState.lastTime = now;
+
+  // Difficulty ramp
+  pfState.speedFactor = Math.min(3.0, pfState.speedFactor + dt * pfState.rampRate);
+  const scroll = pfState.speed * pfState.speedFactor * dt;
+  updateBeatBar(now);
+  triggerBeatSpawns(now);
+
+  // Generate level pieces ahead
+  generateLevel(scroll);
+
+  // Physics
+  pfState.player.vy += pfState.gravity * dt;
+  pfState.player.y += pfState.player.vy * dt;
+  const topY = groundTopAt(pfState.player.x);
+  if (pfState.player.y + pfState.player.h >= topY){ pfState.player.y = topY - pfState.player.h; pfState.player.vy = 0; pfState.player.onGround = true; pfState.player.canDash = true; }
+
+  // Scroll level left
+  pfState.level.forEach(o => o.x -= scroll);
+  pfState.bullets.forEach(b => { b.x += b.vx * dt; b.y += b.vy * dt; });
+  pfState.particles.forEach(p => { p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt; });
+  pfState.particles = pfState.particles.filter(p=>p.life>0);
+  if (pfState.dashCooldownMs > 0){ pfState.dashCooldownMs = Math.max(0, pfState.dashCooldownMs - dt*1000); }
+
+  // Collisions
+  handleCollisions();
+
+  // Score & distance
+  pfState.distance += scroll / 100; // meters approx
+  pfState.score = Math.floor(pfState.distance * 10);
+
+  drawPf();
+  requestAnimationFrame(pfLoop);
+}
+
+function generateLevel(scroll){
+  // Continuous gray ground with random elevation; spikes sit on top; walls and long spike rows; caves vs deadly holes
+  const canvas = document.getElementById('platformerCanvas'); if (!canvas) return;
+  const cw = canvas.width;
+  // Compute the furthest right edge among ground segments only
+  const groundSegments = pfState.level.filter(o=>o.type==='ground');
+  const rightEdge = groundSegments.length ? Math.max(...groundSegments.map(o=>o.x+o.w)) : 0;
+  // Determine current ground top at the right edge
+  const currentTop = groundTopAt(rightEdge);
+  if (rightEdge < cw + 800){
+    // Random elevation delta
+    const delta = (Math.random()<0.33? -60 : Math.random()<0.66? 60 : (Math.random()<0.5? -20: 20));
+    const newTop = Math.max(220, Math.min(360, currentTop + delta));
+    const groundHeight = 60;
+    // Add ground segment; 'y' is top, theme by stage
+    pfState.level.push({ type:'ground', x:rightEdge, y:newTop, w:800, h:groundHeight, stage: pfState.stage });
+    // Place spikes on top surface at rhythmic spacing
+    const spacing = 140;
+    for (let sx = rightEdge + 200; sx < rightEdge + 780; sx += spacing){
+      // Determine the ground segment covering sx
+      const groundAtX = pfState.level.find(o=>o.type==='ground' && sx >= o.x && sx <= o.x+o.w);
+      if (!groundAtX) continue;
+      const topAt = groundAtX.y;
+      // Skip if overlapping a cave/hole opening at this x
+      const overlappingOpening = pfState.level.some(o => (o.type==='cave' || o.type==='hole') && sx >= o.x && sx <= o.x + o.w);
+      if (!overlappingOpening && Math.random() < 0.8){ pfState.level.push({ type:'spike', x:sx, y:topAt-20, w:20, h:20 }); }
+    }
+    // Stage-specific features
+    const inStage = pfState.stage;
+    // Walls: stage 2 and 5
+    if ((inStage===2 || inStage===5) && Math.random() < 0.35){ pfState.level.push({ type:'wall', x:rightEdge + 520, y:newTop-60, w:24, h:60 }); }
+    // Long spike rows: clamp each spike to ground top at its x
+    if (Math.random() < 0.2){
+      const rowLen = 6 + Math.floor(Math.random()*4);
+      for (let i=0;i<rowLen;i++){
+        const sx = rightEdge + 300 + i*22;
+        const groundAtX = pfState.level.find(o=>o.type==='ground' && sx >= o.x && sx <= o.x+o.w);
+        if (!groundAtX) continue;
+        const topAt = groundAtX.y;
+        pfState.level.push({ type:'spike', x:sx, y:topAt-20, w:20, h:20 });
+      }
+    }
+    // Doors & targets: stage 3 and 5
+    if ((inStage===3 || inStage===5) && Math.random() < 0.3){ pfState.level.push({ type:'door', x:rightEdge + 420, y:newTop-40, w:30, h:40, open:false }); pfState.level.push({ type:'target', x:rightEdge + 460, y:newTop-80, w:16, h:16, hit:false }); }
+    // Holes: stage 4 only; Caves: stage 5 only
+    if (inStage===4 && Math.random() < 0.20){ const gx = rightEdge + 360; const gw = 140; pfState.level.push({ type:'hole', x:gx, y:newTop+10, w:gw, h:80 }); }
+    if (inStage===5 && Math.random() < 0.25){ const gx = rightEdge + 360; const gw = 140; pfState.level.push({ type:'cave', x:gx, y:newTop+10, w:gw, h:80 }); const uY = newTop + 110; pfState.level.push({ type:'underground', x:gx+20, y:uY, w:gw+220, h:40 }); pfState.level.push({ type:'door', x:gx+gw+170, y:uY-40, w:30, h:40, open:false }); pfState.level.push({ type:'target', x:gx+60, y:uY-60, w:16, h:16, hit:false }); }
+    // Occasionally add a portal to next stage
+    if (Math.random() < 0.08){ pfState.level.push({ type:'portal', x:rightEdge + 600, y:newTop-40, w:24, h:40 }); }
+    // Stage 2+: add doors/targets and extra walls
+    if (pfState.stage>=2){
+      if (Math.random() < 0.25){
+        pfState.level.push({ type:'door', x:rightEdge + 420, y:newTop-40, w:30, h:40, open:false });
+        pfState.level.push({ type:'target', x:rightEdge + 460, y:newTop-80, w:16, h:16, hit:false });
+      }
+      if (Math.random() < 0.25){
+        pfState.level.push({ type:'wall', x:rightEdge + 520, y:newTop-60, w:24, h:60 });
+      }
+    }
+  }
+}
+
+function groundTopAt(x){
+  // Return ground top Y from nearest ground segment else default
+  const ground = pfState.level.find(o=>o.type==='ground' && x>=o.x && x<=o.x+o.w);
+  return ground ? ground.y : 340;
+}
+
+function handleCollisions(){
+  const p = pfState.player;
+  for (const o of pfState.level){
+    if (o.type==='spike' && rectsOverlap(p,o)) return gameOver();
+    if (o.type==='wall'){
+      // Only die if moving into the wall front head-on; allow standing on top
+      const enteringFront = (p.x + p.w > o.x) && (p.x < o.x) && (p.y + p.h > o.y+4);
+      if (enteringFront && rectsOverlap(p,o)) return gameOver();
+      // Standable top: treat as ground if player is on top
+      const topY = o.y;
+      if (p.y + p.h >= topY && p.x + p.w > o.x && p.x < o.x + o.w){ p.y = topY - p.h; p.vy = 0; p.onGround = true; }
+    }
+    if (o.type==='hole'){
+      // Deadly hole: if player bottom goes below hole top within bounds
+      const insideX = p.x + p.w > o.x && p.x < o.x + o.w;
+      const belowTop = p.y + p.h > o.y;
+      if (insideX && belowTop) return gameOver();
+    }
+    if (o.type==='cave'){
+      // Cave: allow going down without death
+      // no-op for now; underground elements handle interaction
+    }
+    if (o.type==='door'){
+      if (!o.open && rectsOverlap(p,o)) return gameOver();
+    }
+    if (o.type==='portal' && rectsOverlap(p,o)){
+      advanceStage();
+      return; // skip other collisions this frame
+    }
+    if (o.type==='target' && !o.hit){
+      for (const b of pfState.bullets){
+        if (rectsOverlap(b,o)){ o.hit = true; b.dead = true; const door = pfState.level.find(d=>d.type==='door' && Math.abs(d.x - (o.x+120))<180); if (door) door.open = true; }
+      }
+    }
+  }
+  pfState.bullets = pfState.bullets.filter(b=>!b.dead && b.x<1000);
+}
+
+function rectsOverlap(a,b){
+  return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+}
+
+function shootBullet(){
+  const p = pfState.player;
+  pfState.bullets.push({ x:p.x+p.w, y:p.y+p.h/2-3, w:6, h:6, vx:360, vy:0 });
+}
+
+function drawPf(){
+  const canvas = document.getElementById('platformerCanvas'); if (!canvas) return; const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  // Background bands for rhythm feel
+  // Stage-based background tint
+  let bg1 = '#111', bg2 = '#0b0b23';
+  if (pfState.stage===2){ bg1='#0a1028'; bg2='#0c2450'; }
+  if (pfState.stage===3){ bg1='#0a170a'; bg2='#133a1a'; }
+  if (pfState.stage===4){ bg1='#1a0a0a'; bg2='#3a1313'; }
+  ctx.fillStyle = bg1; ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle = bg2; ctx.fillRect(0,300,canvas.width,100);
+
+  // Draw ground segments with stage theme
+  pfState.level.forEach(o=>{ if (o.type==='ground'){ let col = '#777'; if (o.stage===2) col = '#1e3a8a'; if (o.stage===3) col = '#2e7d32'; if (o.stage===4) col = '#8b1d1d'; if (o.stage===5) col = '#6a1b9a'; ctx.fillStyle = col; ctx.fillRect(o.x,o.y,o.w,o.h); } });
+  // Draw non-spike obstacles first
+  for (const o of pfState.level){
+    if (o.type==='hole'){ ctx.fillStyle = '#000'; ctx.fillRect(o.x,o.y,o.w,o.h); }
+    if (o.type==='cave'){ ctx.fillStyle = '#0b1a3a'; ctx.fillRect(o.x,o.y,o.w,o.h); }
+    if (o.type==='wall'){ ctx.fillStyle = '#999'; ctx.fillRect(o.x,o.y,o.w,o.h); }
+    if (o.type==='door'){ ctx.fillStyle = o.open ? '#3fa34d' : '#666'; ctx.fillRect(o.x,o.y,o.w,o.h); }
+    if (o.type==='portal'){ ctx.fillStyle = '#9c27b0'; ctx.fillRect(o.x,o.y,o.w,o.h); }
+    if (o.type==='target'){ ctx.fillStyle = o.hit ? '#ffaa00' : '#FFD54F'; ctx.fillRect(o.x,o.y,o.w,o.h); }
+  }
+  // Draw spikes last to ensure visibility
+  for (const o of pfState.level){
+    if (o.type==='spike'){ ctx.fillStyle = '#e74c3c'; ctx.beginPath(); ctx.moveTo(o.x,o.y+o.h); ctx.lineTo(o.x+o.w/2,o.y); ctx.lineTo(o.x+o.w,o.y+o.h); ctx.closePath(); ctx.fill(); }
+  }
+
+  // Player
+  const p = pfState.player; ctx.fillStyle = '#39a0ff'; ctx.fillRect(p.x,p.y,p.w,p.h);
+  // Dash cooldown bar
+  if (!p.onGround){
+    const w = Math.max(0, Math.min(1, pfState.dashCooldownMs/1200)) * p.w;
+    ctx.fillStyle = '#ffcc00'; ctx.fillRect(p.x, p.y-6, w, 4);
+  }
+
+  // Bullets
+  ctx.fillStyle = '#fff'; pfState.bullets.forEach(b=>{ ctx.fillRect(b.x,b.y,b.w,b.h); });
+  // Particles
+  pfState.particles.forEach(pt=>{ ctx.fillStyle = pt.color; ctx.fillRect(pt.x, pt.y, pt.size, pt.size); });
+
+  // HUD
+  document.getElementById('pfScore').textContent = pfState.score;
+  document.getElementById('pfSpeed').textContent = pfState.speedFactor.toFixed(2)+'x';
+  document.getElementById('pfDistance').textContent = Math.floor(pfState.distance);
+}
+
+function advanceStage(){
+  pfState.stage = Math.min(5, pfState.stage + 1);
+  // Clear current level and re-init ground at current top to avoid jarring jumps
+  const canvas = document.getElementById('platformerCanvas'); const cw = canvas ? canvas.width : 800;
+  const currentTop = groundTopAt(pfState.player.x);
+  pfState.level = [];
+  pfState.level.push({ type:'ground', x:0, y:currentTop || 320, w:cw+800, h:60, stage: pfState.stage });
+}
+
+function gameOver(){
+  // Grace period to avoid instant deaths while level stabilizes
+  if (pfState.safeStartMs > 0){ return; }
+  pfState.running = false;
+  stopPfMusic();
+  document.getElementById('pfFinalScore').textContent = pfState.score;
+  const overlay = document.getElementById('pfDeath'); if (overlay){ overlay.classList.remove('d-none'); }
+}
+function hideDeath(){ const overlay = document.getElementById('pfDeath'); if (overlay){ overlay.classList.add('d-none'); } }
+function initStartingGround(){ const canvas = document.getElementById('platformerCanvas'); const cw = canvas ? canvas.width : 800; pfState.level.push({ type:'ground', x:0, y:340, w:cw+300, h:60 }); }
+
+// Beat-based spawns
+function triggerBeatSpawns(now){
+  if (pfState.lastBeatTime === 0) pfState.lastBeatTime = now;
+  if (now - pfState.lastBeatTime >= pfState.beatMs){
+    pfState.lastBeatTime += pfState.beatMs;
+    // On beat, add an obstacle burst
+    const canvas = document.getElementById('platformerCanvas'); const cw = canvas ? canvas.width : 800;
+    const baseY = groundTopAt(cw);
+    const roll = Math.random();
+    // Beat spawns only spikes; caves reserved for Stage 5 in generator
+    if (roll < 0.8){ pfState.level.push({ type:'spike', x:cw+320, y:baseY-20, w:20, h:20 }); }
+  }
+}
+
+// UI setters
+function setPfBpm(val){ pfState.beatMs = 60000/parseInt(val,10); document.getElementById('pfBpmLabel').textContent = val; }
+function setPfDensity(val){ pfState.density = parseFloat(val); document.getElementById('pfDensityLabel').textContent = val; }
+function setPfRamp(val){ pfState.rampRate = parseFloat(val); document.getElementById('pfRampLabel').textContent = parseFloat(val).toFixed(3); }
+
+// Simple particles
+function spawnDashParticles(){ const p = pfState.player; for(let i=0;i<8;i++){ pfState.particles.push({ x:p.x+p.w/2, y:p.y+p.h/2, vx:(Math.random()*120-60), vy:(Math.random()*-60), life:0.3, size:2, color:'#ffcc00' }); } }
+function spawnJumpParticles(){ const p = pfState.player; for(let i=0;i<6;i++){ pfState.particles.push({ x:p.x+p.w/2, y:p.y+p.h, vx:(Math.random()*60-30), vy:(Math.random()*-120), life:0.25, size:2, color:'#39a0ff' }); } }
+
+// Music helpers
+function startPfMusic(){ const m = document.getElementById('pfMusic'); if (!m) return; const resume = (window.AudioContext||window.webkitAudioContext); try{ if (resume){ const c = new resume(); c.resume().catch(()=>{}); } }catch(e){} m.volume = 0.25; m.play().catch(()=>{}); }
+function stopPfMusic(){ const m = document.getElementById('pfMusic'); if (!m) return; m.pause(); m.currentTime = 0; }
+function togglePfMusic(on){ const m = document.getElementById('pfMusic'); if (!m) return; if (on) startPfMusic(); else m.pause(); }
+function updateBeatBar(now){ const bar = document.getElementById('beatBar'); if (!bar) return; const period = pfState.beatMs; const t = now % period; const pct = t / period; bar.style.width = (pct*100)+'%'; }
+function playAudio(id){ const el = document.getElementById(id); if (!el) return; el.currentTime = 0; el.play().catch(()=>{}); }
+</script>
+{% endblock %}

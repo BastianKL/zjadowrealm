@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Tetris - ZjadowRealm{% endblock %}
+{% block title %}Zjadow Block Drop - ZjadowRealm{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
@@ -12,11 +12,11 @@
                 </a>
             </div>
 
-            <!-- Tetris Game -->
+            <!-- Zjadow Block Drop Game -->
             <div class="card shadow-lg">
                 <div class="card-header bg-danger text-white">
                     <h5 class="mb-0">
-                        <i class="fas fa-th me-2"></i>Tetris
+                        <i class="fas fa-th me-2"></i>Zjadow Block Drop
                     </h5>
                 </div>
                 <div class="card-body">
@@ -28,14 +28,32 @@
                         </div>
                         <div class="col-md-6">
                             <div class="tetris-stats mb-3">
-                                <h4>Score: <span id="tetrisScore">0</span></h4>
+                                <h4>Score: <span id="tetrisScore">0</span> <span id="scoreMultiplier" class="badge bg-warning" style="display:none;"></span></h4>
                                 <h5>Level: <span id="tetrisLevel">1</span></h5>
                                 <h5>Lines: <span id="tetrisLines">0</span></h5>
+                                <h6>Survived: <span id="tetrisTimer">00:00</span></h6>
+                                <div class="small text-info">Speed ramps with level automatically.</div>
                             </div>
                             
+                            <!-- Sound Effects (referenced by your filenames via JS mapping) -->
+                            <audio id="soundClear" preload="auto"></audio>
+                            <audio id="soundRotate" preload="auto"></audio>
+                            <audio id="soundMove" preload="auto"></audio>
+                            <audio id="soundDrop" preload="auto"></audio>
+                            <audio id="soundHeavy" preload="auto"></audio>
+                            <audio id="soundBomb" preload="auto"></audio>
+                            <audio id="soundCurse" preload="auto"></audio>
+                            <!-- Background Music -->
+                            <audio id="bgMusic" preload="auto" loop></audio>
+                            
                             <div class="next-piece mb-3">
-                                <h6>Next Piece:</h6>
+                                <h6>Next Piece: <span id="nextPieceLocked" class="badge bg-warning">Locked</span></h6>
                                 <canvas id="nextPieceCanvas" width="120" height="120" style="border: 1px solid #666; background: #000;"></canvas>
+                            </div>
+                            <div class="hold-piece mb-3">
+                                <h6>Hold Piece:</h6>
+                                <canvas id="holdPieceCanvas" width="120" height="120" style="border: 1px solid #666; background: #000;"></canvas>
+                                <div class="small text-muted">Press "C" to hold/swap (disabled for curses).</div>
                             </div>
                             
                             <div class="game-controls mb-3">
@@ -53,10 +71,11 @@
                             <div class="controls-help">
                                 <h6>Controls:</h6>
                                 <small class="text-muted">
-                                    <div>← → Move left/right</div>
-                                    <div>↓ Soft drop</div>
-                                    <div>↑ / Space: Rotate</div>
+                                    <div>A / D: Move left/right</div>
+                                    <div>S: Soft drop</div>
+                                    <div>W: Rotate (disabled for curse pieces)</div>
                                     <div>Shift: Hard drop</div>
+                                    <div>C: Hold / Swap piece (cannot hold curses)</div>
                                     <div>P: Pause</div>
                                 </small>
                             </div>
@@ -73,6 +92,32 @@
     background-color: #000;
     max-width: 100%;
     height: auto;
+    position: relative;
+}
+
+@keyframes rowClearPuff {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.5);
+    }
+}
+
+.row-clear-effect {
+    position: absolute;
+    width: 100%;
+    height: 30px;
+    background: rgba(255, 255, 255, 0.8);
+    pointer-events: none;
+    animation: rowClearPuff 0.5s ease-out;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.9);
 }
 
 @media (max-width: 768px) {
@@ -89,6 +134,8 @@ let tetrisState = {
     board: [],
     currentPiece: null,
     nextPiece: null,
+    holdPiece: null,
+    hasSwappedThisDrop: false,
     score: 0,
     level: 1,
     lines: 0,
@@ -96,7 +143,11 @@ let tetrisState = {
     paused: false,
     dropCounter: 0,
     dropInterval: 1000,
-    lastTime: 0
+    lastTime: 0,
+    startTime: 0,
+    elapsedMs: 0,
+    nextPreviewUnlocked: false,
+    scoreBuff: { multiplier: 1, untilTime: 0 }
 };
 
 const TETRIS_COLORS = [
@@ -107,7 +158,15 @@ const TETRIS_COLORS = [
     '#F538FF', // S
     '#FF8E0D', // Z
     '#FFE138', // J
-    '#3877FF'  // L
+    '#3877FF', // L
+    '#FF4500', // 8: Bomb
+    '#8B4513', // 9: Heavy
+    '#708090', // 10: Stone
+    '#E0FFFF', // 11: Glass/Ice
+    '#8B008B', // 12: Curse 2x2
+    '#4B0082', // 13: Curse 4x1
+    '#FFD700',  // 14: Golden
+    '#FFFFFF'   // 15: Remover 2x1
 ];
 
 const TETRIS_PIECES = [
@@ -118,14 +177,73 @@ const TETRIS_PIECES = [
     [[0,4,4],[4,4,0]], // S
     [[5,5,0],[0,5,5]], // Z
     [[6,0,0],[6,6,6]], // J
-    [[0,0,7],[7,7,7]]  // L
+    [[0,0,7],[7,7,7]], // L
+    // Special pieces
+    [[8,8],[8,8]], // Bomb 2x2
+    [[9,9,9]], // Heavy 3x1
+    [[10,10,10],[10,10,10],[10,10,10]], // Stone 3x3
+    [[11,11,11,11,11]], // Glass/Ice 5x1 split
+    [[12,12],[12,12]], // Curse 2x2 (no rotate)
+    [[13,13,13,13]], // Curse 4x1 (no clear)
+    [[14]], // Golden 1x1 converter
+    [[15,15]] // Remover 2x1: removes connected same-color groups
 ];
+
+// Audio file mapping to your filenames in static/audio
+const AUDIO_FILES = {
+    soundClear: 'clear_row_sound.mp3',
+    soundRotate: 'rotate_piece_sound.mp3',
+    soundMove: null, // provide e.g. 'move_piece_sound.mp3' if you add one
+    soundDrop: 'piece_landing_sound.mp3',
+    soundHeavy: 'rock_piece_landing_sound.mp3',
+    soundCurse: 'curse_piece_landing_sound.mp3',
+    soundBomb: 'bomb_piece_landing_sound.mp3',
+    bgMusic: 'music_for_zjadowblockdrop.mp3'
+};
+
+function applyAudioSources() {
+    Object.entries(AUDIO_FILES).forEach(([id, file]) => {
+        const el = document.getElementById(id);
+        if (el && file) {
+            el.src = `{{ url_for('static', filename='audio/') }}` + file;
+        }
+    });
+}
+
+// Sound helpers
+function playSound(id) {
+    const audio = document.getElementById(id);
+    if (audio && audio.src) {
+        audio.currentTime = 0;
+        audio.play().catch(e => console.log('Audio play failed:', e));
+    }
+}
 
 // Load page
 document.addEventListener('DOMContentLoaded', function() {
     initializeTetrisCanvas();
     document.addEventListener('keydown', handleTetrisInput);
+    // Prepare background music at low volume (start on user interaction)
+    const bg = document.getElementById('bgMusic');
+    if (bg) {
+        bg.volume = 0.15; // default low volume
+    }
+    // Apply your audio filenames
+    applyAudioSources();
+    setupMusicAudioGraph();
 });
+
+function ensureBgMusicStarted() {
+    const bg = document.getElementById('bgMusic');
+    if (!bg) return;
+    // Resume AudioContext if needed
+    if (musicAudio.ctx && musicAudio.ctx.state === 'suspended') {
+        musicAudio.ctx.resume().catch(()=>{});
+    }
+    if (bg.paused) {
+        bg.play().catch(() => {/* some browsers require further interaction */});
+    }
+}
 
 function initializeTetrisCanvas() {
     const canvas = document.getElementById('tetrisCanvas');
@@ -153,7 +271,11 @@ function createPiece(type) {
 }
 
 function getRandomPiece() {
-    return Math.floor(Math.random() * 7) + 1;
+    // Weighted random including specials
+    const bag = [1,2,3,4,5,6,7,1,2,3,4,5,6,7,9,11,14,8,10,12,13];
+    // Rarities: bomb(8) rare, stone(10) very rare, curses(12,13) rare, golden(14) rare, heavy(9) occasional, glass(11) occasional
+    const idx = Math.floor(Math.random() * bag.length);
+    return bag[idx];
 }
 
 function startTetris() {
@@ -167,16 +289,28 @@ function startTetris() {
     tetrisState.lines = 0;
     tetrisState.dropCounter = 0;
     tetrisState.dropInterval = 1000;
+    tetrisState.startTime = performance.now();
+    tetrisState.elapsedMs = 0;
+    tetrisState.nextPreviewUnlocked = false;
+    tetrisState.holdPiece = null;
+    tetrisState.hasSwappedThisDrop = false;
+    tetrisState.scoreBuff = { multiplier: 1, untilTime: 0 };
     
     tetrisState.currentPiece = createPiece(getRandomPiece());
     tetrisState.nextPiece = createPiece(getRandomPiece());
     
     updateTetrisDisplay();
     drawNextPiece();
+    drawHoldPiece();
     
     document.getElementById('tetrisStartButton').disabled = true;
     document.getElementById('tetrisPauseButton').disabled = false;
     
+    // Start background music on Start click (user gesture)
+    ensureBgMusicStarted();
+    // Recreate audio graph if context was blocked before
+    if (!musicAudio.ctx) setupMusicAudioGraph();
+
     tetrisGameLoop();
 }
 
@@ -199,6 +333,10 @@ function resetTetris() {
     tetrisState.level = 1;
     tetrisState.lines = 0;
     tetrisState.board = Array(20).fill().map(() => Array(10).fill(0));
+    tetrisState.holdPiece = null;
+    tetrisState.hasSwappedThisDrop = false;
+    tetrisState.nextPreviewUnlocked = false;
+    tetrisState.scoreBuff = { multiplier: 1, untilTime: 0 };
     
     document.getElementById('tetrisStartButton').disabled = false;
     document.getElementById('tetrisPauseButton').disabled = true;
@@ -207,6 +345,7 @@ function resetTetris() {
     updateTetrisDisplay();
     drawTetrisBoard();
     drawNextPiece();
+    drawHoldPiece();
 }
 
 function tetrisGameLoop(time = 0) {
@@ -216,11 +355,27 @@ function tetrisGameLoop(time = 0) {
     tetrisState.lastTime = time;
     tetrisState.dropCounter += deltaTime;
     
+    // Update survival timer
+    tetrisState.elapsedMs = time - tetrisState.startTime;
+    updateTimerDisplay();
+
+    // Expire score buffs
+    if (tetrisState.scoreBuff.untilTime && performance.now() > tetrisState.scoreBuff.untilTime) {
+        tetrisState.scoreBuff.multiplier = 1;
+        tetrisState.scoreBuff.untilTime = 0;
+        updateScoreMultiplierDisplay();
+    } else if (tetrisState.scoreBuff.multiplier > 1) {
+        updateScoreMultiplierDisplay();
+    }
+
     if (tetrisState.dropCounter > tetrisState.dropInterval) {
         dropPiece();
     }
     
     drawTetrisBoard();
+
+    // Dynamic background music adjustments
+    adjustBackgroundMusic();
     requestAnimationFrame(tetrisGameLoop);
 }
 
@@ -229,6 +384,7 @@ function dropPiece() {
     
     if (canMovePiece(tetrisState.currentPiece, 0, 1)) {
         tetrisState.currentPiece.y++;
+        afterMoveDown();
     } else {
         lockPiece();
         clearLines();
@@ -242,14 +398,183 @@ function dropPiece() {
 
 function lockPiece() {
     const piece = tetrisState.currentPiece;
+    
+    // Apply pre-lock behaviors for special pieces
+    applyPreLockBehavior(piece);
+    if (piece.preventLock) {
+        // Play specialized sounds on special placements that do not lock normally
+        if (piece.type === 9) playSound('soundHeavy');
+        if (piece.type === 11) playSound('soundDrop');
+        if (piece.type === 14) playSound('soundClear');
+        return; // special behavior handled placement
+    }
+    
+    // Lock piece to board
     for (let y = 0; y < piece.shape.length; y++) {
         for (let x = 0; x < piece.shape[y].length; x++) {
             if (piece.shape[y][x] !== 0) {
                 const boardX = piece.x + x;
                 const boardY = piece.y + y;
-                if (boardY >= 0) {
+                if (boardY >= 0 && boardY < 20 && boardX >= 0 && boardX < 10) {
                     tetrisState.board[boardY][boardX] = piece.shape[y][x];
                 }
+            }
+        }
+    }
+    // Play landing sounds for certain piece types
+    if (piece.type === 10 || piece.type === 9) playSound('soundHeavy');
+    if (piece.type === 12 || piece.type === 13) playSound('soundCurse');
+}
+
+function applyPreLockBehavior(piece) {
+    const type = piece.type;
+    
+    // Bomb (8): Explode in 3x3 area on hard drop (flag needed)
+    if (type === 8 && piece.hardDropped) {
+        explodeBomb(piece);
+    }
+    
+    // Heavy (9): Crush air gaps beneath and leave trail
+    if (type === 9) {
+        crushWithHeavy(piece);
+    }
+    
+    // Glass/Ice (11): Split into 5 singles on contact
+    if (type === 11) {
+        splitGlass(piece);
+        piece.preventLock = true; // do not lock original 5x1
+    }
+    
+    // Golden (14): Convert ALL curses on board to normal blocks
+    if (type === 14) {
+        convertAllCurses();
+        piece.preventLock = true; // golden vanishes after purify
+    }
+
+    // Remover (15): Remove connected groups of same color adjacent to placement
+    if (type === 15) {
+        removeConnectedSameColorGroups(piece);
+        piece.preventLock = true; // remover acts, then vanishes
+    }
+}
+function removeConnectedSameColorGroups(piece) {
+    // For each cell of the 2x1 piece, look at adjacent board cells (up/down/left/right).
+    // If an adjacent cell has a color/type T (>0), flood-fill remove all connected cells of type T.
+    const dirs = [[1,0],[-1,0],[0,1],[0,-1]];
+    for (let y = 0; y < piece.shape.length; y++) {
+        for (let x = 0; x < piece.shape[y].length; x++) {
+            if (piece.shape[y][x] !== 0) {
+                const bx = piece.x + x;
+                const by = piece.y + y;
+                dirs.forEach(([dx,dy]) => {
+                    const nx = bx + dx;
+                    const ny = by + dy;
+                    if (ny >= 0 && ny < 20 && nx >= 0 && nx < 10) {
+                        const targetType = tetrisState.board[ny][nx];
+                        if (targetType > 0) {
+                            floodRemove(nx, ny, targetType);
+                        }
+                    }
+                });
+            }
+        }
+    }
+}
+
+function floodRemove(startX, startY, targetType) {
+    const stack = [[startX, startY]];
+    const seen = new Set();
+    const key = (x,y) => `${x},${y}`;
+    while (stack.length) {
+        const [x,y] = stack.pop();
+        if (x < 0 || x >= 10 || y < 0 || y >= 20) continue;
+        const k = key(x,y);
+        if (seen.has(k)) continue;
+        seen.add(k);
+        if (tetrisState.board[y][x] !== targetType) continue;
+        // remove
+        tetrisState.board[y][x] = 0;
+        // neighbors
+        stack.push([x+1,y]);
+        stack.push([x-1,y]);
+        stack.push([x,y+1]);
+        stack.push([x,y-1]);
+    }
+}
+
+function explodeBomb(piece) {
+    // Clear 5x5 area centered on bomb and play bomb sound
+    const cx = piece.x + 1; // approximate center of 2x2 bomb
+    const cy = piece.y + 1;
+
+    for (let dy = -2; dy <= 2; dy++) {
+        for (let dx = -2; dx <= 2; dx++) {
+            const bx = cx + dx;
+            const by = cy + dy;
+            if (by >= 0 && by < 20 && bx >= 0 && bx < 10) {
+                tetrisState.board[by][bx] = 0;
+            }
+        }
+    }
+    playSound('soundBomb');
+}
+
+function crushWithHeavy(piece) {
+    // Heavy 3x1: Crush blocks below until a full 3-wide foundation exists directly beneath.
+    const startX = piece.x;
+    const endX = piece.x + 2;
+    let row = piece.y + 1;
+    if (startX < 0 || endX >= 10) return;
+
+    // Descend, crushing until foundation (three contiguous non-zero) is found or bottom reached
+    while (row < 20) {
+        let supportCount = 0;
+        for (let x = startX; x <= endX; x++) {
+            if (tetrisState.board[row][x] !== 0) supportCount++;
+        }
+        if (supportCount === 3) {
+            // Stop above this foundation
+            row--; 
+            break;
+        }
+        // Crush any blocks in the path at this row
+        for (let x = startX; x <= endX; x++) {
+            tetrisState.board[row][x] = 0;
+        }
+        row++;
+    }
+    if (row >= 20) row = 19;
+    // Fill trail with heavy blocks from original y to final row
+    for (let y = piece.y; y <= row && y < 20; y++) {
+        for (let x = startX; x <= endX; x++) {
+            if (y >= 0) tetrisState.board[y][x] = 9;
+        }
+    }
+    piece.preventLock = true;
+}
+
+function splitGlass(piece) {
+    // Glass 5x1 splits into 5 individual 1x1 blocks
+    for (let x = 0; x < piece.shape[0].length; x++) {
+        if (piece.shape[0][x] !== 0) {
+            const boardX = piece.x + x;
+            let row = piece.y;
+            // fall each fragment independently
+            while (row + 1 < 20 && tetrisState.board[row + 1][boardX] === 0) {
+                row++;
+            }
+            if (row >= 0 && row < 20 && boardX >= 0 && boardX < 10) {
+                tetrisState.board[row][boardX] = 11;
+            }
+        }
+    }
+}
+
+function convertAllCurses() {
+    for (let y = 0; y < 20; y++) {
+        for (let x = 0; x < 10; x++) {
+            if (tetrisState.board[y][x] === 12 || tetrisState.board[y][x] === 13) {
+                tetrisState.board[y][x] = 1;
             }
         }
     }
@@ -257,32 +582,178 @@ function lockPiece() {
 
 function clearLines() {
     let linesCleared = 0;
+    const clearedRows = [];
     
-    for (let y = tetrisState.board.length - 1; y >= 0; y--) {
-        if (tetrisState.board[y].every(cell => cell !== 0)) {
-            tetrisState.board.splice(y, 1);
-            tetrisState.board.unshift(Array(10).fill(0));
-            linesCleared++;
-            y++;
+    // Check for Curse 4x1 (type 13) anywhere on board - blocks line clearing
+    let hasCurse4x1 = false;
+    for (let y = 0; y < tetrisState.board.length; y++) {
+        for (let x = 0; x < tetrisState.board[y].length; x++) {
+            if (tetrisState.board[y][x] === 13) {
+                hasCurse4x1 = true;
+                break;
+            }
+        }
+        if (hasCurse4x1) break;
+    }
+    
+    if (!hasCurse4x1) {
+        for (let y = tetrisState.board.length - 1; y >= 0; y--) {
+            if (tetrisState.board[y].every(cell => cell !== 0)) {
+                clearedRows.push(y);
+                tetrisState.board.splice(y, 1);
+                tetrisState.board.unshift(Array(10).fill(0));
+                linesCleared++;
+                y++;
+            }
         }
     }
     
     if (linesCleared > 0) {
+        // Play clear sound and show white puff effect
+        playSound('soundClear');
+        showRowClearEffect(clearedRows);
+        
         tetrisState.lines += linesCleared;
-        tetrisState.score += linesCleared * 100 * tetrisState.level;
+        // Apply score buff multiplier
+        const base = linesCleared * 100 * tetrisState.level;
+        tetrisState.score += Math.floor(base * (tetrisState.scoreBuff.multiplier || 1));
+
+        // Unlock next-piece preview on Tetris (4 lines)
+        if (linesCleared === 4) {
+            tetrisState.nextPreviewUnlocked = true;
+            const badge = document.getElementById('nextPieceLocked');
+            if (badge) badge.style.display = 'none';
+        }
+
+        // Rare chance to grant double/triple score buff on double/triple clear
+        if (linesCleared === 2 && Math.random() < 0.15) {
+            tetrisState.scoreBuff.multiplier = 2;
+            tetrisState.scoreBuff.untilTime = performance.now() + 15000; // 15s
+            updateScoreMultiplierDisplay();
+        }
+        if (linesCleared === 3 && Math.random() < 0.1) {
+            tetrisState.scoreBuff.multiplier = 3;
+            tetrisState.scoreBuff.untilTime = performance.now() + 12000; // 12s
+            updateScoreMultiplierDisplay();
+        }
         tetrisState.level = Math.floor(tetrisState.lines / 10) + 1;
         tetrisState.dropInterval = Math.max(50, 1000 - (tetrisState.level - 1) * 100);
         updateTetrisDisplay();
     }
 }
 
+function showRowClearEffect(rows) {
+    const canvas = document.getElementById('tetrisCanvas');
+    if (!canvas || rows.length === 0) return;
+    const cellSize = 30;
+    
+    rows.forEach(rowIndex => {
+        const effect = document.createElement('div');
+        effect.className = 'row-clear-effect';
+        effect.style.top = (rowIndex * cellSize) + 'px';
+        effect.style.left = '0';
+        effect.style.width = (10 * cellSize) + 'px';
+        canvas.parentElement.style.position = 'relative';
+        canvas.parentElement.appendChild(effect);
+        
+        setTimeout(() => effect.remove(), 500);
+    });
+}
+
+function updateScoreMultiplierDisplay() {
+    const el = document.getElementById('scoreMultiplier');
+    if (!el) return;
+    
+    if (tetrisState.scoreBuff.multiplier > 1 && tetrisState.scoreBuff.untilTime > performance.now()) {
+        el.textContent = `x${tetrisState.scoreBuff.multiplier}`;
+        el.style.display = 'inline';
+    } else {
+        el.style.display = 'none';
+    }
+}
+
 function spawnNewPiece() {
     tetrisState.currentPiece = tetrisState.nextPiece;
     tetrisState.nextPiece = createPiece(getRandomPiece());
+    tetrisState.hasSwappedThisDrop = false;
     drawNextPiece();
+    // Update music after spawn in case of bombs
+    adjustBackgroundMusic();
+}
+
+function bombPresentOnScreen() {
+    // Check current piece and board for Bomb (type 8)
+    if (tetrisState.currentPiece && tetrisState.currentPiece.type === 8) return true;
+    for (let y = 0; y < tetrisState.board.length; y++) {
+        for (let x = 0; x < tetrisState.board[y].length; x++) {
+            if (tetrisState.board[y][x] === 8) return true;
+        }
+    }
+    return false;
+}
+
+function adjustBackgroundMusic() {
+    const bg = document.getElementById('bgMusic');
+    if (!bg) return;
+    // Base volume low; slightly higher when bomb present
+    const baseVol = 0.15;
+    const bombBoost = bombPresentOnScreen() ? 0.08 : 0.0;
+    bg.volume = Math.min(1.0, baseVol + bombBoost);
+
+    // Speed music up as level increases: gentle ramp
+    const level = tetrisState.level || 1;
+    let rate = Math.min(1.5, 1.0 + (level - 1) * 0.03); // +3% per level, capped at 1.5x
+    // Keep playback speed modest; apply perceived pitch increase via EQ (high-shelf) with curse density
+    const curseCount = countCurseBlocks();
+    updateMusicPitchEQ(curseCount);
+    if (Math.abs(bg.playbackRate - rate) > 0.01) {
+        bg.playbackRate = rate;
+    }
+}
+
+function countCurseBlocks() {
+    let count = 0;
+    for (let y = 0; y < 20; y++) {
+        for (let x = 0; x < 10; x++) {
+            const t = tetrisState.board[y][x];
+            if (t === 12 || t === 13) count++;
+        }
+    }
+    return count;
+}
+
+// Web Audio graph for perceived pitch (brightness) without speeding up
+let musicAudio = { ctx: null, source: null, filter: null };
+
+function setupMusicAudioGraph() {
+    const bg = document.getElementById('bgMusic');
+    if (!bg) return;
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const source = ctx.createMediaElementSource(bg);
+        const filter = ctx.createBiquadFilter();
+        filter.type = 'highshelf';
+        filter.frequency.value = 1500; // boost highs above 1.5kHz
+        filter.gain.value = 0; // start neutral
+        source.connect(filter);
+        filter.connect(ctx.destination);
+        musicAudio = { ctx, source, filter };
+    } catch (e) {
+        console.log('WebAudio unavailable, skipping EQ pitch effect:', e);
+    }
+}
+
+function updateMusicPitchEQ(curseCount) {
+    if (!musicAudio.filter) return;
+    // Map curse density to brightness gain (perceived pitch)
+    const gain = Math.min(12, curseCount * 0.6); // up to +12dB
+    musicAudio.filter.gain.setTargetAtTime(gain, musicAudio.ctx.currentTime, 0.05);
 }
 
 function canMovePiece(piece, offsetX, offsetY) {
+    const isStone = (piece.type === 10);
+    const isDownwardMove = (offsetY > 0);
+    
     for (let y = 0; y < piece.shape.length; y++) {
         for (let x = 0; x < piece.shape[y].length; x++) {
             if (piece.shape[y][x] !== 0) {
@@ -294,6 +765,10 @@ function canMovePiece(piece, offsetX, offsetY) {
                 }
                 
                 if (newY >= 0 && tetrisState.board[newY][newX] !== 0) {
+                    // Stone can pass through non-heavy blocks when moving down
+                    if (isStone && isDownwardMove && tetrisState.board[newY][newX] !== 9) {
+                        continue; // Allow stone to pass through
+                    }
                     return false;
                 }
             }
@@ -302,8 +777,38 @@ function canMovePiece(piece, offsetX, offsetY) {
     return true;
 }
 
+function afterMoveDown() {
+    const piece = tetrisState.currentPiece;
+    if (!piece) return;
+    // Stone: clear any non-heavy blocks it overlaps as it passes through
+    if (piece.type === 10) {
+        clearOverlappedByStone(piece);
+    }
+    // Keep music dynamics updated while moving
+    adjustBackgroundMusic();
+}
+
+function clearOverlappedByStone(piece) {
+    for (let y = 0; y < piece.shape.length; y++) {
+        for (let x = 0; x < piece.shape[y].length; x++) {
+            if (piece.shape[y][x] !== 0) {
+                const bx = piece.x + x;
+                const by = piece.y + y;
+                if (by >= 0 && by < 20 && bx >= 0 && bx < 10) {
+                    const cell = tetrisState.board[by][bx];
+                    if (cell !== 0 && cell !== 9) {
+                        tetrisState.board[by][bx] = 0;
+                    }
+                }
+            }
+        }
+    }
+}
+
 function rotatePiece() {
     if (!tetrisState.currentPiece) return;
+    // Disable rotation if a 2x2 curse (12) is active anywhere (current or on board)
+    if (tetrisState.currentPiece.type === 12 || hasCurse2x2OnBoard()) return;
     
     const rotated = tetrisState.currentPiece.shape[0].map((_, i) =>
         tetrisState.currentPiece.shape.map(row => row[i]).reverse()
@@ -317,37 +822,81 @@ function rotatePiece() {
     }
 }
 
+function hasCurse2x2OnBoard() {
+    for (let y = 0; y < tetrisState.board.length; y++) {
+        for (let x = 0; x < tetrisState.board[y].length; x++) {
+            if (tetrisState.board[y][x] === 12) return true;
+        }
+    }
+    return false;
+}
+
 function handleTetrisInput(event) {
     if (!tetrisState.gameRunning || tetrisState.paused) return;
+    // Attempt to start music on any key interaction
+    ensureBgMusicStarted();
     
-    switch(event.key) {
-        case 'ArrowLeft':
+    switch(event.key.toLowerCase()) {
+        case 'a':
             if (canMovePiece(tetrisState.currentPiece, -1, 0)) {
                 tetrisState.currentPiece.x--;
+                playSound('soundMove');
             }
             break;
-        case 'ArrowRight':
+        case 'd':
             if (canMovePiece(tetrisState.currentPiece, 1, 0)) {
                 tetrisState.currentPiece.x++;
+                playSound('soundMove');
             }
             break;
-        case 'ArrowDown':
+        case 's':
             if (canMovePiece(tetrisState.currentPiece, 0, 1)) {
                 tetrisState.currentPiece.y++;
                 tetrisState.score += 1;
+                playSound('soundMove');
                 updateTetrisDisplay();
+                afterMoveDown();
             }
             break;
-        case 'ArrowUp':
-        case ' ':
+        case 'w':
             rotatePiece();
+            playSound('soundRotate');
             break;
-        case 'Shift':
-            while (canMovePiece(tetrisState.currentPiece, 0, 1)) {
-                tetrisState.currentPiece.y++;
-                tetrisState.score += 2;
+    }
+    
+    // Handle Shift separately since it's not a letter key
+    if (event.key === 'Shift') {
+        tetrisState.currentPiece.hardDropped = true;
+        while (canMovePiece(tetrisState.currentPiece, 0, 1)) {
+            tetrisState.currentPiece.y++;
+            tetrisState.score += 2;
+            afterMoveDown();
+        }
+        playSound('soundDrop');
+        updateTetrisDisplay();
+        return;
+    }
+    
+    switch(event.key.toLowerCase()) {
+        case 'c':
+            // Hold/swap piece: not allowed for curses (12,13) and only once per drop
+            if (tetrisState.hasSwappedThisDrop) break;
+            const t = tetrisState.currentPiece.type;
+            if (t === 12 || t === 13) break;
+            if (!tetrisState.holdPiece) {
+                tetrisState.holdPiece = createPiece(tetrisState.currentPiece.type);
+                tetrisState.currentPiece = tetrisState.nextPiece;
+                tetrisState.nextPiece = createPiece(getRandomPiece());
+            } else {
+                const swapType = tetrisState.holdPiece.type;
+                tetrisState.holdPiece = createPiece(tetrisState.currentPiece.type);
+                tetrisState.currentPiece = createPiece(swapType);
             }
-            updateTetrisDisplay();
+            tetrisState.currentPiece.x = Math.floor((10 - tetrisState.currentPiece.shape[0].length) / 2);
+            tetrisState.currentPiece.y = 0;
+            tetrisState.hasSwappedThisDrop = true;
+            drawHoldPiece();
+            drawNextPiece();
             break;
         case 'p':
         case 'P':
@@ -370,21 +919,62 @@ function drawTetrisBoard() {
     for (let y = 0; y < tetrisState.board.length; y++) {
         for (let x = 0; x < tetrisState.board[y].length; x++) {
             if (tetrisState.board[y][x] !== 0) {
-                ctx.fillStyle = TETRIS_COLORS[tetrisState.board[y][x]];
+                const cellType = tetrisState.board[y][x];
+                ctx.fillStyle = TETRIS_COLORS[cellType];
                 ctx.fillRect(x * cellSize, y * cellSize, cellSize - 1, cellSize - 1);
+                
+                // Add pulsating purple aura for curse blocks
+                if (cellType === 12 || cellType === 13) {
+                    const pulseIntensity = Math.sin(Date.now() / 200) * 0.5 + 0.5;
+                    ctx.shadowColor = `rgba(138, 43, 226, ${pulseIntensity})`;
+                    ctx.shadowBlur = 15 * pulseIntensity;
+                    ctx.strokeStyle = `rgba(138, 43, 226, ${0.8 + pulseIntensity * 0.2})`;
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(x * cellSize + 1, y * cellSize + 1, cellSize - 3, cellSize - 3);
+                    ctx.shadowBlur = 0;
+                }
             }
         }
     }
     
     // Draw current piece
     if (tetrisState.currentPiece) {
-        ctx.fillStyle = TETRIS_COLORS[tetrisState.currentPiece.type];
+        const pieceType = tetrisState.currentPiece.type;
+        ctx.fillStyle = TETRIS_COLORS[pieceType];
+        
         for (let y = 0; y < tetrisState.currentPiece.shape.length; y++) {
             for (let x = 0; x < tetrisState.currentPiece.shape[y].length; x++) {
                 if (tetrisState.currentPiece.shape[y][x] !== 0) {
-                    const drawX = (tetrisState.currentPiece.x + x) * cellSize;
-                    const drawY = (tetrisState.currentPiece.y + y) * cellSize;
+                    // Bomb shaking effect while in air (not hard dropped yet)
+                    let jitterX = 0, jitterY = 0;
+                    if (pieceType === 8 && !tetrisState.currentPiece.hardDropped && canMovePiece(tetrisState.currentPiece, 0, 1)) {
+                        jitterX = (Math.random() - 0.5) * 3;
+                        jitterY = (Math.random() - 0.5) * 3;
+                    }
+                    const drawX = (tetrisState.currentPiece.x + x) * cellSize + jitterX;
+                    const drawY = (tetrisState.currentPiece.y + y) * cellSize + jitterY;
                     ctx.fillRect(drawX, drawY, cellSize - 1, cellSize - 1);
+                    
+                    // Intense pulsating aura for curse pieces
+                    if (pieceType === 12 || pieceType === 13) {
+                        const pulseIntensity = Math.sin(Date.now() / 120) * 0.5 + 0.7; // stronger and faster
+                        ctx.shadowColor = `rgba(138, 43, 226, ${pulseIntensity})`;
+                        ctx.shadowBlur = 30 * pulseIntensity;
+                        ctx.strokeStyle = `rgba(186, 85, 211, ${0.9})`;
+                        ctx.lineWidth = 3;
+                        ctx.strokeRect(drawX + 0.5, drawY + 0.5, cellSize - 2, cellSize - 2);
+                        ctx.shadowBlur = 0;
+                    }
+                    // White pulsating aura for Golden 1x1
+                    if (pieceType === 14) {
+                        const pulseIntensityW = Math.sin(Date.now() / 140) * 0.5 + 0.6;
+                        ctx.shadowColor = `rgba(255, 255, 255, ${pulseIntensityW})`;
+                        ctx.shadowBlur = 22 * pulseIntensityW;
+                        ctx.strokeStyle = `rgba(255, 255, 255, 0.95)`;
+                        ctx.lineWidth = 2.5;
+                        ctx.strokeRect(drawX + 0.5, drawY + 0.5, cellSize - 2, cellSize - 2);
+                        ctx.shadowBlur = 0;
+                    }
                 }
             }
         }
@@ -410,6 +1000,7 @@ function drawTetrisBoard() {
 function drawNextPiece() {
     const canvas = document.getElementById('nextPieceCanvas');
     if (!canvas || !tetrisState.nextPiece) return;
+    const locked = !tetrisState.nextPreviewUnlocked;
     
     const ctx = canvas.getContext('2d');
     const cellSize = 20;
@@ -417,6 +1008,15 @@ function drawNextPiece() {
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
+    if (locked) {
+        // Show locked pattern
+        ctx.fillStyle = '#222';
+        ctx.fillRect(10, 10, canvas.width-20, canvas.height-20);
+        ctx.strokeStyle = '#555';
+        ctx.strokeRect(10, 10, canvas.width-20, canvas.height-20);
+        return;
+    }
+
     const piece = tetrisState.nextPiece;
     const startX = (canvas.width - piece.shape[0].length * cellSize) / 2;
     const startY = (canvas.height - piece.shape.length * cellSize) / 2;
@@ -436,10 +1036,40 @@ function drawNextPiece() {
     }
 }
 
+function drawHoldPiece() {
+    const canvas = document.getElementById('holdPieceCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const cellSize = 20;
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    if (!tetrisState.holdPiece) return;
+    const piece = tetrisState.holdPiece;
+    const startX = (canvas.width - piece.shape[0].length * cellSize) / 2;
+    const startY = (canvas.height - piece.shape.length * cellSize) / 2;
+    ctx.fillStyle = TETRIS_COLORS[piece.type] || '#888';
+    for (let y = 0; y < piece.shape.length; y++) {
+        for (let x = 0; x < piece.shape[y].length; x++) {
+            if (piece.shape[y][x] !== 0) {
+                ctx.fillRect(startX + x * cellSize, startY + y * cellSize, cellSize - 1, cellSize - 1);
+            }
+        }
+    }
+}
+
 function updateTetrisDisplay() {
     document.getElementById('tetrisScore').textContent = tetrisState.score;
     document.getElementById('tetrisLevel').textContent = tetrisState.level;
     document.getElementById('tetrisLines').textContent = tetrisState.lines;
+}
+
+function updateTimerDisplay() {
+    const el = document.getElementById('tetrisTimer');
+    if (!el) return;
+    const totalSec = Math.floor(tetrisState.elapsedMs / 1000);
+    const mm = String(Math.floor(totalSec / 60)).padStart(2, '0');
+    const ss = String(totalSec % 60).padStart(2, '0');
+    el.textContent = `${mm}:${ss}`;
 }
 
 function gameOver() {
