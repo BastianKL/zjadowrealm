@@ -65,20 +65,7 @@
 
         <!-- Zjadow Block Drop Game Card -->
         <div class="col-md-6 col-lg-4">
-                <div class="card h-100 shadow-lg game-card">
-                    <div class="card-header bg-warning text-dark">
-                        <h5 class="mb-0"><i class="fas fa-th me-2"></i>Zjadow Block Drop</h5>
-                    </div>
-                    <div class="card-body d-flex flex-column">
-                        <p class="card-text">Zjadow Block Drop — rotate and fit falling blocks, trigger special effects, and clear lines to score big!</p>
-                        <div class="mt-auto">
-                            <a href="{{ url_for('game_tetris') }}" class="btn btn-warning w-100">
-                                <i class="fas fa-play me-2"></i>Play Zjadow Block Drop
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <div class="card h-100 shadow-lg game-card">
                 <div class="card-header bg-warning text-dark">
                     <h5 class="mb-0"><i class="fas fa-th me-2"></i>Zjadow Block Drop</h5>
                 </div>
@@ -93,19 +80,24 @@
             </div>
         </div>
 
-        <!-- Pirate Adventure Card -->
-                    <div class="col-md-6 col-lg-4 mb-4">
-                        <!-- Infinite Rhythm Platformer Card -->
-                        <div class="card h-100 shadow-sm border-primary">
-                            <div class="card-body">
-                                <h5 class="mb-0"><i class="fas fa-running me-2"></i>Zjadow Rhythm Jumper</h5>
-                                <p class="card-text mt-2">Auto-scrolling platformer with jumps, fast-fall, dash, and doors opened by shooting targets. Difficulty ramps over time.</p>
-                                <a href="{{ url_for('game_platformer') }}" class="btn btn-primary w-100">
-                                    <i class="fas fa-play me-2"></i>Play Zjadow Rhythm Jumper
-                                </a>
-                            </div>
-                        </div>
+        <!-- Zjadow Rhythm Jumper Card -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-lg game-card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-running me-2"></i>Zjadow Rhythm Jumper</h5>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <p class="card-text">Auto-scrolling platformer with jumps, fast-fall, dash, and doors opened by shooting targets. Difficulty ramps over time.</p>
+                    <div class="mt-auto">
+                        <a href="{{ url_for('game_platformer') }}" class="btn btn-primary w-100">
+                            <i class="fas fa-play me-2"></i>Play Zjadow Rhythm Jumper
+                        </a>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pirate Adventure Card -->
         <div class="col-md-6 col-lg-4">
             <div class="card h-100 shadow-lg game-card">
                 <div class="card-header bg-danger text-white">

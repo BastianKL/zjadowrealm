@@ -1,48 +1,56 @@
 {% extends "base.html" %}
 
-{% block title %}Chess - ZjadowRealm{% endblock %}
+{% block title %}Zjadow War - ZjadowRealm{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
+<div class="container-fluid mt-4">
     <div class="row justify-content-center">
-        <div class="col-md-10 col-lg-8">
+        <div class="col-12 col-xl-10">
             <div class="mb-3">
                 <a href="{{ url_for('games') }}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left"></i> Back to Games
                 </a>
             </div>
 
-            <!-- Chess Game -->
+            <!-- Zjadow War Game -->
             <div class="card shadow-lg">
-                <div class="card-header bg-success text-white">
+                <div class="card-header bg-danger text-white">
                     <h5 class="mb-0">
-                        <i class="fas fa-chess me-2"></i>Chess
+                        <i class="fas fa-chess-knight me-2"></i>Zjadow War
                     </h5>
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-md-8">
+                        <div class="col-lg-9">
                             <div class="text-center">
-                                <canvas id="chessBoard" width="480" height="480" class="border rounded game-canvas" style="background: #f0d9b5;"></canvas>
+                                <canvas id="warBoard" width="750" height="750" class="border rounded game-canvas" style="background: #2d2d2d;"></canvas>
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="chess-info">
-                                <h6>Game Status: <span id="chessStatus">White's Turn</span></h6>
-                                <h6>Turn: <span id="chessTurn">White</span></h6>
+                        <div class="col-lg-3">
+                            <div class="war-info">
+                                <h6>Status: <span id="warStatus">Player's Turn</span></h6>
+                                <h6>Turn: <span id="warTurn" class="text-primary">Player (Blue)</span></h6>
                                 <div class="mt-3">
-                                    <button class="btn btn-success" onclick="startChess()">New Game</button>
-                                    <button class="btn btn-secondary" onclick="resetChess()">Reset</button>
+                                    <button class="btn btn-danger btn-sm w-100 mb-2" onclick="startWar()">New Game</button>
+                                    <button class="btn btn-secondary btn-sm w-100" onclick="resetWar()">Reset</button>
                                 </div>
                                 <div class="mt-3">
-                                    <h6>Captured Pieces:</h6>
-                                    <div id="capturedWhite" class="mb-2">White: <span class="captured-pieces"></span></div>
-                                    <div id="capturedBlack">Black: <span class="captured-pieces"></span></div>
+                                    <h6>Casualties:</h6>
+                                    <div id="casualtiesPlayer" class="mb-2 small">Player: <span class="casualties-list"></span></div>
+                                    <div id="casualtiesAI" class="small">AI: <span class="casualties-list"></span></div>
+                                </div>
+                                <div class="mt-3">
+                                    <h6>Selected Piece:</h6>
+                                    <div id="pieceInfo" class="small text-muted">None</div>
                                 </div>
                                 <div class="mt-3">
                                     <small class="text-muted">
-                                        Click a piece to select, then click destination to move.
+                                        Click a piece to select, then click a valid square to move or attack.
                                     </small>
+                                </div>
+                                <div class="mt-3">
+                                    <h6>Movement Preview:</h6>
+                                    <canvas id="movementPreview" width="270" height="270" class="border rounded" style="background: #2d2d2d;"></canvas>
                                 </div>
                             </div>
                         </div>
@@ -61,7 +69,7 @@
 }
 
 @media (max-width: 768px) {
-    #chessBoard {
+    #warBoard {
         width: 100%;
         height: auto;
     }
@@ -69,184 +77,1257 @@
 </style>
 
 <script>
-// Chess game state
-let chessState = {
-    board: [],
-    currentPlayer: 'white',
+// Zjadow War game state
+let warState = {
+    board: [], // 15x15 grid
+    currentPlayer: 'player', // 'player' or 'ai'
     selectedSquare: null,
     gameOver: false,
-    capturedPieces: { white: [], black: [] }
+    casualties: { player: [], ai: [] },
+    deadPieces: { player: [], ai: [] }, // For witch revival
+    validMoves: [],
+    royalChoices: {
+        player: { royal: null, towers: [null, null] }, // prince/princess, [left tower summon, right tower summon]
+        ai: { royal: null, towers: [null, null] }
+    },
+    pendingAction: null, // For wizard/archer/protector choice
+    walls: [], // Track wall positions and health [{row, col, health, owner}]
+    lastMove: null, // Track last move for visual highlight {from: {row, col}, to: {row, col}, type: 'move'/'attack'/'shoot'}
+    shootingAnimation: null // Track shooting animation {from: {row, col}, to: {row, col}, progress: 0-1}
 };
 
-const CHESS_PIECES = {
-    'r': '♜', 'n': '♞', 'b': '♝', 'q': '♛', 'k': '♚', 'p': '♟',
-    'R': '♖', 'N': '♘', 'B': '♗', 'Q': '♕', 'K': '♔', 'P': '♙'
+// Piece types with their symbols (placeholders until you add images)
+const PIECE_SYMBOLS = {
+    // Player pieces (blue)
+    'p_peasant': 'P',
+    'p_peasant_elite': 'Pₑ',
+    'p_knight': 'Kₙ',
+    'p_cavalry': 'C',
+    'p_wizard': 'W',
+    'p_archer': 'A',
+    'p_tower': 'T',
+    'p_witch': 'Wi',
+    'p_king': 'K',
+    'p_queen': 'Q',
+    'p_prince': 'Pr',
+    'p_princess': 'Ps',
+    'p_thief': 'Th',
+    'p_giant': 'G',
+    'p_protector': 'Pt',
+    // AI pieces (red)
+    'ai_peasant': 'p',
+    'ai_peasant_elite': 'pₑ',
+    'ai_knight': 'kₙ',
+    'ai_cavalry': 'c',
+    'ai_wizard': 'w',
+    'ai_archer': 'a',
+    'ai_tower': 't',
+    'ai_witch': 'wi',
+    'ai_king': 'k',
+    'ai_queen': 'q',
+    'ai_prince': 'pr',
+    'ai_princess': 'ps',
+    'ai_thief': 'th',
+    'ai_giant': 'g',
+    'ai_protector': 'pt'
 };
 
-// Load page
+// Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
-    initializeChess();
+    initializeWar();
 });
 
-function initializeChess() {
-    const canvas = document.getElementById('chessBoard');
+function initializeWar() {
+    const canvas = document.getElementById('warBoard');
     if (canvas) {
-        startChess();
-        canvas.addEventListener('click', handleChessClick);
+        // Show setup dialogs
+        setupGame();
+        canvas.addEventListener('click', handleWarClick);
     }
 }
 
-function startChess() {
-    chessState.board = [
-        ['r','n','b','q','k','b','n','r'],
-        ['p','p','p','p','p','p','p','p'],
-        [null,null,null,null,null,null,null,null],
-        [null,null,null,null,null,null,null,null],
-        [null,null,null,null,null,null,null,null],
-        [null,null,null,null,null,null,null,null],
-        ['P','P','P','P','P','P','P','P'],
-        ['R','N','B','Q','K','B','N','R']
-    ];
-    chessState.currentPlayer = 'white';
-    chessState.selectedSquare = null;
-    chessState.gameOver = false;
-    chessState.capturedPieces = { white: [], black: [] };
+function setupGame() {
+    // Show royal selection UI
+    showRoyalSelection();
+}
+
+function showRoyalSelection() {
+    const html = `
+        <div id="royalSelectionOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: flex; align-items: center; justify-content: center;">
+            <div style="background: white; padding: 30px; border-radius: 10px; text-align: center; max-width: 500px;">
+                <h3 class="mb-4">Choose Your Royal Companion</h3>
+                <div class="row mb-3">
+                    <div class="col-6">
+                        <button class="btn btn-primary btn-lg w-100" onclick="selectRoyal('prince')">
+                            <h4>🤴 Prince</h4>
+                            <p class="small mb-0">Moves 3 squares forward or to the sides</p>
+                        </button>
+                    </div>
+                    <div class="col-6">
+                        <button class="btn btn-danger btn-lg w-100" onclick="selectRoyal('princess')">
+                            <h4>👸 Princess</h4>
+                            <p class="small mb-0">Moves 2 squares in any direction (including diagonals)</p>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function selectRoyal(choice) {
+    warState.royalChoices.player.royal = choice;
+    warState.royalChoices.ai.royal = Math.random() < 0.5 ? 'prince' : 'princess';
     
-    updateChessDisplay();
-    drawChessBoard();
+    // Remove overlay
+    const overlay = document.getElementById('royalSelectionOverlay');
+    if (overlay) overlay.remove();
+    
+    startWar();
 }
 
-function resetChess() {
-    startChess();
+function startWar() {
+    // Initialize 15x15 board
+    warState.board = Array(15).fill(null).map(() => Array(15).fill(null).map(() => ({
+        piece: null,
+        owner: null,
+        health: 1,
+        killedPieces: [], // For thief ability
+        hasPlacedWall: false // For protector
+    })));
+    warState.walls = [];
+    
+    // Setup AI side (top 3 rows: 0, 1, 2) - row 0 is front line
+    setupSide('ai', 2, 1, 0);
+    
+    // Setup Player side (bottom 3 rows: 12, 13, 14) - row 14 is front line
+    setupSide('player', 12, 13, 14);
+    
+    warState.currentPlayer = 'player';
+    warState.selectedSquare = null;
+    warState.gameOver = false;
+    warState.casualties = { player: [], ai: [] };
+    warState.deadPieces = { player: [], ai: [] };
+    warState.validMoves = [];
+    warState.lastMove = null;
+    warState.shootingAnimation = null;
+    
+    updateWarDisplay();
+    drawWarBoard();
 }
 
-function drawChessBoard() {
-    const canvas = document.getElementById('chessBoard');
+function setupSide(owner, row1, row2, row3) {
+    const prefix = owner === 'player' ? 'p_' : 'ai_';
+    
+    // Row 1: Peasants with 20% chance for knight, 5% protector
+    for (let col = 0; col < 15; col++) {
+        const rand = Math.random();
+        let pieceType, health;
+        if (rand < 0.05) {
+            pieceType = prefix + 'protector';
+            health = 1;
+        } else if (rand < 0.25) {
+            pieceType = prefix + 'knight';
+            health = 2;
+        } else {
+            pieceType = prefix + 'peasant';
+            health = 1;
+        }
+        warState.board[row1][col] = {
+            piece: pieceType,
+            owner: owner,
+            health: health,
+            killedPieces: [],
+            hasPlacedWall: false
+        };
+    }
+    
+    // Row 2: Random mix with rare spawns
+    const row2Pieces = ['cavalry', 'knight', 'wizard', 'archer'];
+    for (let col = 0; col < 15; col++) {
+        let pieceType;
+        const rare = Math.random();
+        if (rare < 0.05) pieceType = 'thief';
+        else if (rare < 0.1) pieceType = 'giant';
+        else pieceType = row2Pieces[Math.floor(Math.random() * row2Pieces.length)];
+        
+        warState.board[row2][col] = {
+            piece: prefix + pieceType,
+            owner: owner,
+            health: pieceType === 'knight' ? 2 : 1,
+            killedPieces: [],
+            hasPlacedWall: false
+        };
+    }
+    
+    // Row 3: Back row with special setup
+    // Corners: Towers (ALWAYS)
+    warState.board[row3][0] = { piece: prefix + 'tower', owner: owner, health: 1, killedPieces: [], hasPlacedWall: false };
+    warState.board[row3][14] = { piece: prefix + 'tower', owner: owner, health: 1, killedPieces: [], hasPlacedWall: false };
+    
+    // Middle 3: King, Queen, Royal
+    warState.board[row3][7] = { piece: prefix + 'king', owner: owner, health: 1, killedPieces: [], hasPlacedWall: false };
+    warState.board[row3][6] = { piece: prefix + 'queen', owner: owner, health: 1, killedPieces: [], hasPlacedWall: false };
+    const royalType = warState.royalChoices[owner].royal;
+    warState.board[row3][8] = { piece: prefix + royalType, owner: owner, health: 1, killedPieces: [], hasPlacedWall: false };
+    
+    // Rest of row 3: Random mix with rare spawns (NOT corners - those are always towers!)
+    const row3Pieces = ['wizard', 'archer', 'cavalry', 'witch'];
+    for (let col = 1; col <= 13; col++) {
+        if (col === 6 || col === 7 || col === 8) continue; // Skip royals
+        
+        let pieceType;
+        const rare = Math.random();
+        if (rare < 0.05) pieceType = 'thief';
+        else if (rare < 0.1) pieceType = 'giant';
+        else pieceType = row3Pieces[Math.floor(Math.random() * row3Pieces.length)];
+        
+        warState.board[row3][col] = {
+            piece: prefix + pieceType,
+            owner: owner,
+            health: pieceType === 'knight' ? 2 : 1,
+            killedPieces: [],
+            hasPlacedWall: false
+        };
+    }
+}
+
+function resetWar() {
+    setupGame();
+}
+
+function drawWarBoard() {
+    const canvas = document.getElementById('warBoard');
     if (!canvas) return;
     
     const ctx = canvas.getContext('2d');
-    const squareSize = 60;
+    const squareSize = 50;
     
-    // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
     // Draw board squares
-    for (let row = 0; row < 8; row++) {
-        for (let col = 0; col < 8; col++) {
+    for (let row = 0; row < 15; row++) {
+        for (let col = 0; col < 15; col++) {
             const isLight = (row + col) % 2 === 0;
-            ctx.fillStyle = isLight ? '#f0d9b5' : '#b58863';
+            ctx.fillStyle = isLight ? '#4a4a4a' : '#2d2d2d';
             
             const x = col * squareSize;
             const y = row * squareSize;
             ctx.fillRect(x, y, squareSize, squareSize);
             
             // Highlight selected square
-            if (chessState.selectedSquare && 
-                chessState.selectedSquare.row === row && 
-                chessState.selectedSquare.col === col) {
-                ctx.fillStyle = 'rgba(255, 255, 0, 0.5)';
+            if (warState.selectedSquare && 
+                warState.selectedSquare.row === row && 
+                warState.selectedSquare.col === col) {
+                ctx.fillStyle = 'rgba(255, 215, 0, 0.6)';
                 ctx.fillRect(x, y, squareSize, squareSize);
             }
             
+            // Highlight valid moves
+            const validMove = warState.validMoves.find(m => m.row === row && m.col === col);
+            if (validMove) {
+                if (validMove.type === 'attack' || validMove.type === 'shoot') {
+                    ctx.fillStyle = 'rgba(255, 0, 0, 0.4)';
+                } else if (validMove.type === 'summon') {
+                    ctx.fillStyle = 'rgba(100, 200, 255, 0.4)';
+                } else if (validMove.type === 'protector_choice') {
+                    ctx.fillStyle = 'rgba(200, 150, 255, 0.4)'; // Purple for protector choice
+                } else {
+                    ctx.fillStyle = 'rgba(0, 255, 0, 0.3)';
+                }
+                ctx.fillRect(x, y, squareSize, squareSize);
+            }
+            
+            // Highlight last move
+            if (warState.lastMove) {
+                if ((warState.lastMove.from.row === row && warState.lastMove.from.col === col) ||
+                    (warState.lastMove.to.row === row && warState.lastMove.to.col === col)) {
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+                    ctx.fillRect(x, y, squareSize, squareSize);
+                }
+            }
+            
+            // Draw wall if present
+            const wall = warState.walls.find(w => w.row === row && w.col === col);
+            if (wall) {
+                ctx.fillStyle = '#8B4513';
+                ctx.fillRect(x + 5, y + 5, squareSize - 10, squareSize - 10);
+                ctx.strokeStyle = '#654321';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(x + 5, y + 5, squareSize - 10, squareSize - 10);
+                // Show wall health
+                ctx.fillStyle = '#FFFFFF';
+                ctx.font = 'bold 14px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(`🛡${wall.health}`, x + squareSize/2, y + squareSize/2);
+            }
+            
             // Draw piece if present
-            const piece = chessState.board[row][col];
-            if (piece) {
-                ctx.fillStyle = 'black';
-                ctx.font = '40px serif';
+            const cell = warState.board[row][col];
+            if (cell.piece) {
+                const isPlayer = cell.owner === 'player';
+                ctx.fillStyle = isPlayer ? '#4169E1' : '#DC143C';
+                ctx.font = 'bold 18px Arial';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText(
-                    CHESS_PIECES[piece],
+                    PIECE_SYMBOLS[cell.piece],
                     x + squareSize/2,
-                    y + squareSize/2
+                    y + squareSize/2 - 5
                 );
+                
+                // Show health if > 1
+                if (cell.health > 1) {
+                    ctx.fillStyle = '#FFD700';
+                    ctx.font = 'bold 10px Arial';
+                    ctx.fillText(`HP:${cell.health}`, x + squareSize/2, y + squareSize - 8);
+                }
             }
         }
     }
+    
+    // Draw grid lines
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= 15; i++) {
+        ctx.beginPath();
+        ctx.moveTo(i * squareSize, 0);
+        ctx.lineTo(i * squareSize, 750);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(0, i * squareSize);
+        ctx.lineTo(750, i * squareSize);
+        ctx.stroke();
+    }
 }
 
-function handleChessClick(event) {
-    if (chessState.gameOver) return;
+function handleWarClick(event) {
+    if (warState.gameOver || warState.currentPlayer !== 'player') return;
     
-    const canvas = document.getElementById('chessBoard');
+    const canvas = document.getElementById('warBoard');
     const rect = canvas.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const x = (event.clientX - rect.left) * scaleX;
+    const y = (event.clientY - rect.top) * scaleY;
     
-    const col = Math.floor(x / 60);
-    const row = Math.floor(y / 60);
+    const col = Math.floor(x / 50);
+    const row = Math.floor(y / 50);
     
-    if (row < 0 || row > 7 || col < 0 || col > 7) return;
+    if (row < 0 || row >= 15 || col < 0 || col >= 15) return;
     
-    if (chessState.selectedSquare) {
-        // Try to move piece
-        if (isValidChessMove(chessState.selectedSquare.row, chessState.selectedSquare.col, row, col)) {
-            makeChessMove(chessState.selectedSquare.row, chessState.selectedSquare.col, row, col);
+    if (warState.selectedSquare) {
+        // Try to move/attack
+        const validMove = warState.validMoves.find(m => m.row === row && m.col === col);
+        if (validMove) {
+            const selectedCell = warState.board[warState.selectedSquare.row][warState.selectedSquare.col];
+            const pieceType = selectedCell.piece.split('_')[1];
+            
+            // Check if piece needs action choice
+            if ((pieceType === 'wizard' || pieceType === 'archer') && validMove.type !== 'move') {
+                showActionChoice(pieceType, warState.selectedSquare.row, warState.selectedSquare.col, row, col, validMove.type);
+                return;
+            } else if (validMove.type === 'protector_choice') {
+                showProtectorChoice(warState.selectedSquare.row, warState.selectedSquare.col, row, col);
+                return;
+            } else if (validMove.type === 'summon') {
+                showTowerChoice(warState.selectedSquare.row, warState.selectedSquare.col, row, col);
+                return;
+            }
+            
+            makeWarMove(warState.selectedSquare.row, warState.selectedSquare.col, row, col, validMove.type);
+            warState.selectedSquare = null;
+            warState.validMoves = [];
+            updatePieceInfo(null);
+            
+            // AI turn after delay
+            if (!warState.gameOver) {
+                setTimeout(() => {
+                    if (warState.currentPlayer === 'ai') {
+                        makeAIMove();
+                    }
+                }, 500);
+            }
+        } else {
+            // Deselect or select new piece
+            const cell = warState.board[row][col];
+            if (cell.piece && cell.owner === 'player') {
+                warState.selectedSquare = { row, col };
+                warState.validMoves = getValidMoves(row, col);
+                warState.lastMove = null; // Clear previous move highlight
+                updatePieceInfo(cell);
+            } else {
+                warState.selectedSquare = null;
+                warState.validMoves = [];
+                updatePieceInfo(null);
+            }
         }
-        chessState.selectedSquare = null;
     } else {
         // Select piece
-        const piece = chessState.board[row][col];
-        if (piece && isPieceOwnedByCurrentPlayer(piece)) {
-            chessState.selectedSquare = { row, col };
+        const cell = warState.board[row][col];
+        if (cell.piece && cell.owner === 'player') {
+            warState.selectedSquare = { row, col };
+            warState.validMoves = getValidMoves(row, col);
+            warState.lastMove = null; // Clear previous move highlight
+            updatePieceInfo(cell);
         }
     }
     
-    drawChessBoard();
+    drawWarBoard();
 }
 
-function isPieceOwnedByCurrentPlayer(piece) {
-    const isWhitePiece = piece === piece.toUpperCase();
-    return (chessState.currentPlayer === 'white' && isWhitePiece) ||
-           (chessState.currentPlayer === 'black' && !isWhitePiece);
-}
-
-function isValidChessMove(fromRow, fromCol, toRow, toCol) {
-    const piece = chessState.board[fromRow][fromCol];
-    const targetPiece = chessState.board[toRow][toCol];
+function getValidMoves(row, col) {
+    const cell = warState.board[row][col];
+    if (!cell.piece) return [];
     
-    // Can't capture own piece
-    if (targetPiece && isPieceOwnedByCurrentPlayer(targetPiece)) {
-        return false;
+    const moves = [];
+    const pieceType = cell.piece.split('_')[1];
+    const owner = cell.owner;
+    const direction = owner === 'player' ? -1 : 1; // player moves up, ai moves down
+    
+    // Helper to add move if valid
+    const addMove = (r, c, type = 'move') => {
+        if (r >= 0 && r < 15 && c >= 0 && c < 15) {
+            const target = warState.board[r][c];
+            if (type === 'attack' && target.piece && target.owner !== owner) {
+                moves.push({ row: r, col: c, type: 'attack' });
+            } else if (type === 'move' && !target.piece) {
+                moves.push({ row: r, col: c, type: 'move' });
+            } else if (type === 'shoot' && target.piece && target.owner !== owner) {
+                moves.push({ row: r, col: c, type: 'shoot' });
+            }
+        }
+    };
+    
+    // Helper to check path is clear (for shooting over pieces)
+    const isPathClear = (fromR, fromC, toR, toC, allowPieces = false) => {
+        const dr = Math.sign(toR - fromR);
+        const dc = Math.sign(toC - fromC);
+        let r = fromR + dr;
+        let c = fromC + dc;
+        while (r !== toR || c !== toC) {
+            if (!allowPieces && warState.board[r][c].piece) return false;
+            r += dr;
+            c += dc;
+        }
+        return true;
+    };
+    
+    switch (pieceType) {
+        case 'peasant':
+            // Move 1-2 forward
+            addMove(row + direction, col, 'move');
+            addMove(row + direction * 2, col, 'move');
+            // Attack diagonal and forward
+            addMove(row + direction, col, 'attack');
+            addMove(row + direction, col - 1, 'attack');
+            addMove(row + direction, col + 1, 'attack');
+            break;
+            
+        case 'peasant_elite':
+            // Move 2 forward
+            addMove(row + direction, col, 'move');
+            addMove(row + direction * 2, col, 'move');
+            // Move diagonal
+            addMove(row + direction, col - 1, 'move');
+            addMove(row + direction, col + 1, 'move');
+            // Attack diagonal
+            addMove(row + direction, col - 1, 'attack');
+            addMove(row + direction, col + 1, 'attack');
+            addMove(row - direction, col - 1, 'attack');
+            addMove(row - direction, col + 1, 'attack');
+            break;
+            
+        case 'knight':
+            // Move 1 forward
+            addMove(row + direction, col, 'move');
+            addMove(row + direction, col, 'attack');
+            break;
+            
+        case 'cavalry':
+            // L-shaped moves (like chess knight)
+            const knightMoves = [
+                [2,1],[2,-1],[-2,1],[-2,-1],
+                [1,2],[1,-2],[-1,2],[-1,-2]
+            ];
+            knightMoves.forEach(([dr, dc]) => {
+                addMove(row + dr, col + dc, 'move');
+                addMove(row + dr, col + dc, 'attack');
+            });
+            break;
+            
+        case 'wizard':
+            // Move 1 forward or 1 diagonal
+            addMove(row + direction, col, 'move');
+            addMove(row + direction, col - 1, 'move');
+            addMove(row + direction, col + 1, 'move');
+            // Shoot 3 forward over pieces
+            for (let i = 1; i <= 3; i++) {
+                addMove(row + direction * i, col, 'shoot');
+            }
+            break;
+            
+        case 'archer':
+            // Move 2 forward or 1 diagonal
+            addMove(row + direction, col, 'move');
+            addMove(row + direction * 2, col, 'move');
+            addMove(row + direction, col - 1, 'move');
+            addMove(row + direction, col + 1, 'move');
+            // Shoot 2 forward or 1 diagonal
+            addMove(row + direction, col, 'shoot');
+            addMove(row + direction * 2, col, 'shoot');
+            addMove(row + direction, col - 1, 'shoot');
+            addMove(row + direction, col + 1, 'shoot');
+            break;
+            
+        case 'tower':
+            // Towers can't move but can summon adjacent units
+            // Check all adjacent squares for empty spots
+            [[1,0],[-1,0],[0,1],[0,-1]].forEach(([dr,dc]) => {
+                const nr = row + dr;
+                const nc = col + dc;
+                if (nr >= 0 && nr < 15 && nc >= 0 && nc < 15) {
+                    const target = warState.board[nr][nc];
+                    if (!target.piece && !warState.walls.some(w => w.row === nr && w.col === nc)) {
+                        moves.push({ row: nr, col: nc, type: 'summon' });
+                    }
+                }
+            });
+            break;
+            
+        case 'witch':
+            // Bishop moves - diagonal any distance (can't jump)
+            const witchDirs = [[1,1],[1,-1],[-1,1],[-1,-1]];
+            witchDirs.forEach(([dr,dc]) => {
+                for (let i = 1; i < 15; i++) {
+                    const nr = row + dr * i;
+                    const nc = col + dc * i;
+                    if (nr < 0 || nr >= 15 || nc < 0 || nc >= 15) break;
+                    
+                    const target = warState.board[nr][nc];
+                    const hasWall = warState.walls.some(w => w.row === nr && w.col === nc);
+                    
+                    if (hasWall) break; // Can't pass through walls
+                    if (!target.piece) {
+                        addMove(nr, nc, 'move');
+                    } else if (target.owner !== owner) {
+                        addMove(nr, nc, 'attack');
+                        break; // Stop after hitting enemy
+                    } else {
+                        break; // Stop at friendly piece
+                    }
+                }
+            });
+            break;
+            
+        case 'king':
+            // Move 1 in any direction
+            for (let dr = -1; dr <= 1; dr++) {
+                for (let dc = -1; dc <= 1; dc++) {
+                    if (dr === 0 && dc === 0) continue;
+                    addMove(row + dr, col + dc, 'move');
+                    addMove(row + dr, col + dc, 'attack');
+                }
+            }
+            break;
+            
+        case 'queen':
+            // Move like rook + bishop (any distance, but can't jump)
+            const queenDirs = [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]];
+            queenDirs.forEach(([dr,dc]) => {
+                for (let i = 1; i < 15; i++) {
+                    const nr = row + dr * i;
+                    const nc = col + dc * i;
+                    if (nr < 0 || nr >= 15 || nc < 0 || nc >= 15) break;
+                    
+                    const target = warState.board[nr][nc];
+                    const hasWall = warState.walls.some(w => w.row === nr && w.col === nc);
+                    
+                    if (hasWall) break; // Can't pass through walls
+                    if (!target.piece) {
+                        addMove(nr, nc, 'move');
+                    } else if (target.owner !== owner) {
+                        addMove(nr, nc, 'attack');
+                        break; // Stop after hitting enemy
+                    } else {
+                        break; // Stop at friendly piece
+                    }
+                }
+            });
+            break;
+            
+        case 'prince':
+            // Move 3 forward or 3 sides
+            for (let i = 1; i <= 3; i++) {
+                addMove(row + direction * i, col, 'move');
+                addMove(row + direction * i, col, 'attack');
+                addMove(row, col + i, 'move');
+                addMove(row, col + i, 'attack');
+                addMove(row, col - i, 'move');
+                addMove(row, col - i, 'attack');
+            }
+            break;
+            
+        case 'princess':
+            // Move 2 forward, sides, or diagonal
+            for (let i = 1; i <= 2; i++) {
+                addMove(row + direction * i, col, 'move');
+                addMove(row + direction * i, col, 'attack');
+                addMove(row, col + i, 'move');
+                addMove(row, col + i, 'attack');
+                addMove(row, col - i, 'move');
+                addMove(row, col - i, 'attack');
+                addMove(row + i, col + i, 'move');
+                addMove(row + i, col + i, 'attack');
+                addMove(row + i, col - i, 'move');
+                addMove(row + i, col - i, 'attack');
+                addMove(row - i, col + i, 'move');
+                addMove(row - i, col + i, 'attack');
+                addMove(row - i, col - i, 'move');
+                addMove(row - i, col - i, 'attack');
+            }
+            break;
+            
+        case 'giant':
+            // Move 1 forward or sides (can't be killed)
+            addMove(row + direction, col, 'move');
+            addMove(row + direction, col, 'attack');
+            addMove(row, col + 1, 'move');
+            addMove(row, col + 1, 'attack');
+            addMove(row, col - 1, 'move');
+            addMove(row, col - 1, 'attack');
+            break;
+            
+        case 'thief':
+            // Uses moveset of last killed piece
+            if (cell.killedPieces.length > 0) {
+                const lastKilled = cell.killedPieces[cell.killedPieces.length - 1];
+                // Recursively get moves (simplified - just use basic moves)
+                addMove(row + direction, col, 'move');
+                addMove(row + direction, col, 'attack');
+                addMove(row + direction, col - 1, 'attack');
+                addMove(row + direction, col + 1, 'attack');
+            } else {
+                // Default: peasant moves
+                addMove(row + direction, col, 'move');
+                addMove(row + direction, col - 1, 'attack');
+                addMove(row + direction, col + 1, 'attack');
+            }
+            break;
+            
+        case 'protector':
+            // Move 1 forward or attack
+            const protectorForward = row + direction;
+            if (protectorForward >= 0 && protectorForward < 15) {
+                const forwardTarget = warState.board[protectorForward][col];
+                const hasWallInFront = warState.walls.some(w => w.row === protectorForward && w.col === col);
+                
+                if (!hasWallInFront) {
+                    if (forwardTarget.piece && forwardTarget.owner !== owner) {
+                        // Can attack
+                        addMove(protectorForward, col, 'attack');
+                    } else if (!forwardTarget.piece) {
+                        // Can move or place wall
+                        addMove(protectorForward, col, 'protector_choice'); // Special type for protector forward action
+                    }
+                }
+            }
+            break;
     }
     
-    // Simple movement validation (simplified chess rules for demo)
-    return true;
+    return moves;
 }
 
-function makeChessMove(fromRow, fromCol, toRow, toCol) {
-    const piece = chessState.board[fromRow][fromCol];
-    const capturedPiece = chessState.board[toRow][toCol];
+function makeWarMove(fromRow, fromCol, toRow, toCol, moveType) {
+    const attacker = warState.board[fromRow][fromCol];
+    const defender = warState.board[toRow][toCol];
     
-    // Capture piece if present
-    if (capturedPiece) {
-        if (capturedPiece === capturedPiece.toUpperCase()) {
-            chessState.capturedPieces.black.push(capturedPiece);
+    if (moveType === 'attack' || moveType === 'shoot') {
+        // Check if attacking a wall
+        const wallIndex = warState.walls.findIndex(w => w.row === toRow && w.col === toCol);
+        if (wallIndex !== -1) {
+            warState.walls[wallIndex].health--;
+            if (warState.walls[wallIndex].health <= 0) {
+                warState.walls.splice(wallIndex, 1);
+            }
+            // Switch turns
+            warState.currentPlayer = warState.currentPlayer === 'player' ? 'ai' : 'player';
+            updateWarDisplay();
+            drawWarBoard();
+            return;
+        }
+        
+        // Handle combat with pieces
+        if (defender.piece) {
+            const defenderType = defender.piece.split('_')[1];
+            
+            // Giant can't be killed
+            if (defenderType === 'giant') {
+                alert('Giants cannot be killed!');
+                return;
+            }
+            
+            // Reduce health
+            defender.health--;
+            
+            // Update the cell with reduced health
+            warState.board[toRow][toCol] = defender;
+            
+            if (defender.health <= 0) {
+                // Piece killed
+                warState.casualties[defender.owner].push(defender.piece);
+                warState.deadPieces[defender.owner].push(defender.piece);
+                
+                // Thief gains ability
+                if (attacker.piece.split('_')[1] === 'thief') {
+                    attacker.killedPieces.push(defender.piece);
+                }
+                
+                // Witch can revive
+                if (attacker.piece.split('_')[1] === 'witch') {
+                    // Mark that witch can revive (simplified - auto revive last piece)
+                    if (warState.deadPieces[attacker.owner].length > 0) {
+                        // Revive logic would go here
+                    }
+                }
+                
+                // Remove defender
+                warState.board[toRow][toCol] = { piece: null, owner: null, health: 1, killedPieces: [] };
+                
+                // Check for king or queen death - game over!
+                if (defenderType === 'king' || defenderType === 'queen') {
+                    warState.gameOver = true;
+                    const winner = attacker.owner === 'player' ? 'Player' : 'AI';
+                    const royalTitle = defenderType === 'king' ? 'King' : 'Queen';
+                    alert(`${winner} wins! The ${royalTitle} has fallen!`);
+                }
+            }
+        }
+    }
+    
+    // Move piece (if not shooting)
+    if (moveType !== 'shoot') {
+        warState.board[toRow][toCol] = attacker;
+        warState.board[fromRow][fromCol] = { piece: null, owner: null, health: 1, killedPieces: [], hasPlacedWall: false };
+    }
+    
+    // Track last move for visual highlight
+    warState.lastMove = {
+        from: { row: fromRow, col: fromCol },
+        to: { row: toRow, col: toCol },
+        type: moveType
+    };
+    
+    // Switch turns
+    warState.currentPlayer = warState.currentPlayer === 'player' ? 'ai' : 'player';
+    updateWarDisplay();
+    drawWarBoard();
+}
+
+function makeAIMove() {
+    // Simple AI: find all pieces and their valid moves, pick one randomly
+    const aiPieces = [];
+    for (let row = 0; row < 15; row++) {
+        for (let col = 0; col < 15; col++) {
+            const cell = warState.board[row][col];
+            if (cell.piece && cell.owner === 'ai') {
+                const moves = getValidMoves(row, col);
+                if (moves.length > 0) {
+                    aiPieces.push({ row, col, moves });
+                }
+            }
+        }
+    }
+    
+    if (aiPieces.length === 0) {
+        warState.gameOver = true;
+        alert('AI has no moves! Player wins!');
+        return;
+    }
+    
+    // Prioritize attacks
+    const attackMoves = aiPieces.filter(p => p.moves.some(m => m.type === 'attack' || m.type === 'shoot'));
+    const selectedPiece = attackMoves.length > 0 
+        ? attackMoves[Math.floor(Math.random() * attackMoves.length)]
+        : aiPieces[Math.floor(Math.random() * aiPieces.length)];
+    
+    const attackMovesForPiece = selectedPiece.moves.filter(m => m.type === 'attack' || m.type === 'shoot');
+    const selectedMove = attackMovesForPiece.length > 0
+        ? attackMovesForPiece[Math.floor(Math.random() * attackMovesForPiece.length)]
+        : selectedPiece.moves[Math.floor(Math.random() * selectedPiece.moves.length)];
+    
+    const pieceType = warState.board[selectedPiece.row][selectedPiece.col].piece.split('_')[1];
+    
+    // Handle special AI moves (tower summon, protector wall, wizard/archer shoot)
+    if (pieceType === 'tower' && selectedMove.type === 'summon') {
+        // AI just summons cavalry
+        const owner = 'ai';
+        const prefix = 'ai_';
+        warState.board[selectedMove.row][selectedMove.col] = {
+            piece: prefix + 'cavalry',
+            owner: owner,
+            health: 1,
+            killedPieces: [],
+            hasPlacedWall: false
+        };
+        warState.lastMove = {
+            from: { row: selectedPiece.row, col: selectedPiece.col },
+            to: { row: selectedMove.row, col: selectedMove.col },
+            type: 'summon'
+        };
+        warState.currentPlayer = 'player';
+        updateWarDisplay();
+        drawWarBoard();
+    } else if (selectedMove.type === 'protector_choice') {
+        // AI 50% chance to place wall or move
+        const cell = warState.board[selectedPiece.row][selectedPiece.col];
+        if (Math.random() < 0.5 && !cell.hasPlacedWall) {
+            cell.hasPlacedWall = true;
+            warState.walls.push({ row: selectedMove.row, col: selectedMove.col, health: 3, owner: 'ai' });
+            warState.lastMove = {
+                from: { row: selectedPiece.row, col: selectedPiece.col },
+                to: { row: selectedMove.row, col: selectedMove.col },
+                type: 'wall'
+            };
+            warState.currentPlayer = 'player';
+            updateWarDisplay();
+            drawWarBoard();
         } else {
-            chessState.capturedPieces.white.push(capturedPiece);
+            makeWarMove(selectedPiece.row, selectedPiece.col, selectedMove.row, selectedMove.col, 'move');
+        }
+    } else if ((pieceType === 'wizard' || pieceType === 'archer') && selectedMove.type === 'shoot') {
+        // AI prefers shooting if available
+        makeWarMove(selectedPiece.row, selectedPiece.col, selectedMove.row, selectedMove.col, 'shoot');
+    } else {
+        makeWarMove(selectedPiece.row, selectedPiece.col, selectedMove.row, selectedMove.col, selectedMove.type);
+    }
+}
+
+function showActionChoice(pieceType, fromRow, fromCol, toRow, toCol, moveType) {
+    const actionName = pieceType === 'wizard' ? 'Cast Spell' : 'Shoot Arrow';
+    const actionDesc = pieceType === 'wizard' ? 'Attack from range with magic' : 'Attack from range with arrows';
+    
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 9999;';
+    overlay.innerHTML = `
+        <div class="card" style="max-width: 400px; width: 90%;">
+            <div class="card-body">
+                <h5 class="card-title">Choose Action</h5>
+                <p class="text-muted">Select how your ${pieceType} should act:</p>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary" onclick="selectAction('move', ${fromRow}, ${fromCol}, ${toRow}, ${toCol})">
+                        <strong>Move</strong><br>
+                        <small>Move to the target position</small>
+                    </button>
+                    <button class="btn btn-danger" onclick="selectAction('shoot', ${fromRow}, ${fromCol}, ${toRow}, ${toCol})">
+                        <strong>${actionName}</strong><br>
+                        <small>${actionDesc}</small>
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+}
+
+function selectAction(action, fromRow, fromCol, toRow, toCol) {
+    // Remove overlay
+    const overlay = document.querySelector('div[style*="position: fixed"]');
+    if (overlay) overlay.remove();
+    
+    if (action === 'shoot') {
+        // Start shooting animation
+        const pieceType = warState.board[fromRow][fromCol].piece.split('_')[1];
+        warState.shootingAnimation = {
+            from: { row: fromRow, col: fromCol },
+            to: { row: toRow, col: toCol },
+            progress: 0,
+            type: pieceType
+        };
+        
+        // Animate the projectile
+        const animateShoot = () => {
+            warState.shootingAnimation.progress += 0.05;
+            drawWarBoard();
+            
+            if (warState.shootingAnimation.progress >= 1) {
+                warState.shootingAnimation = null;
+                makeWarMove(fromRow, fromCol, toRow, toCol, 'shoot');
+                warState.selectedSquare = null;
+                warState.validMoves = [];
+                updatePieceInfo(null);
+                
+                // AI turn after delay
+                if (!warState.gameOver) {
+                    setTimeout(() => {
+                        if (warState.currentPlayer === 'ai') {
+                            makeAIMove();
+                        }
+                    }, 500);
+                }
+            } else {
+                requestAnimationFrame(animateShoot);
+            }
+        };
+        animateShoot();
+    } else {
+        makeWarMove(fromRow, fromCol, toRow, toCol, action);
+        warState.selectedSquare = null;
+        warState.validMoves = [];
+        updatePieceInfo(null);
+        
+        // AI turn after delay
+        if (!warState.gameOver) {
+            setTimeout(() => {
+                if (warState.currentPlayer === 'ai') {
+                    makeAIMove();
+                }
+            }, 500);
+        }
+    }
+}
+
+function showProtectorChoice(fromRow, fromCol, toRow, toCol) {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 9999;';
+    overlay.innerHTML = `
+        <div class="card" style="max-width: 400px; width: 90%;">
+            <div class="card-body">
+                <h5 class="card-title">Protector Action</h5>
+                <p class="text-muted">Choose what your protector should do:</p>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary" onclick="selectProtectorAction('move', ${fromRow}, ${fromCol}, ${toRow}, ${toCol})">
+                        <strong>Move Forward</strong><br>
+                        <small>Advance to the target position</small>
+                    </button>
+                    <button class="btn btn-warning" onclick="selectProtectorAction('wall', ${fromRow}, ${fromCol}, ${toRow}, ${toCol})">
+                        <strong>Place Wall</strong><br>
+                        <small>Create a barrier (3 HP, blocks movement)</small>
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+}
+
+function selectProtectorAction(action, fromRow, fromCol, toRow, toCol) {
+    // Remove overlay
+    const overlay = document.querySelector('div[style*="position: fixed"]');
+    if (overlay) overlay.remove();
+    
+    if (action === 'move') {
+        makeWarMove(fromRow, fromCol, toRow, toCol, 'move');
+    } else {
+        // Place wall
+        const cell = warState.board[fromRow][fromCol];
+        cell.hasPlacedWall = true;
+        warState.walls.push({ row: toRow, col: toCol, health: 3, owner: cell.owner });
+        
+        // Track last move for visual highlight
+        warState.lastMove = {
+            from: { row: fromRow, col: fromCol },
+            to: { row: toRow, col: toCol },
+            type: 'wall'
+        };
+        
+        // Switch turns
+        warState.currentPlayer = warState.currentPlayer === 'player' ? 'ai' : 'player';
+        updateWarDisplay();
+        drawWarBoard();
+    }
+    
+    warState.selectedSquare = null;
+    warState.validMoves = [];
+    updatePieceInfo(null);
+    
+    // AI turn after delay
+    if (!warState.gameOver) {
+        setTimeout(() => {
+            if (warState.currentPlayer === 'ai') {
+                makeAIMove();
+            }
+        }, 500);
+    }
+}
+
+function showTowerChoice(fromRow, fromCol, toRow, toCol) {
+    const cell = warState.board[fromRow][fromCol];
+    const owner = cell.owner;
+    const prefix = owner === 'player' ? 'p_' : 'ai_';
+    
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 9999;';
+    overlay.innerHTML = `
+        <div class="card" style="max-width: 400px; width: 90%;">
+            <div class="card-body">
+                <h5 class="card-title">Tower Summoning</h5>
+                <p class="text-muted">Choose what to summon:</p>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary" onclick="selectTowerSummon('cavalry', ${fromRow}, ${fromCol}, ${toRow}, ${toCol})">
+                        <strong>Cavalry</strong><br>
+                        <small>Summon 1 cavalry unit (L-shaped movement)</small>
+                    </button>
+                    <button class="btn btn-success" onclick="selectTowerSummon('elite1', ${fromRow}, ${fromCol}, ${toRow}, ${toCol})">
+                        <strong>Elite Peasant (First)</strong><br>
+                        <small>Summon first of 2 elite peasants</small>
+                    </button>
+                    <button class="btn btn-info" onclick="selectTowerSummon('elite2', ${fromRow}, ${fromCol}, ${toRow}, ${toCol})" id="elitePeasant2Btn" ${warState.royalChoices[owner].towers[0] === 'elite1' ? '' : 'disabled'}>
+                        <strong>Elite Peasant (Second)</strong><br>
+                        <small>Summon second elite peasant (unlock after first)</small>
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+}
+
+function selectTowerSummon(summonType, fromRow, fromCol, toRow, toCol) {
+    // Remove overlay
+    const overlay = document.querySelector('div[style*="position: fixed"]');
+    if (overlay) overlay.remove();
+    
+    const cell = warState.board[fromRow][fromCol];
+    const owner = cell.owner;
+    const prefix = owner === 'player' ? 'p_' : 'ai_';
+    
+    // Determine which piece to summon
+    let pieceType;
+    if (summonType === 'cavalry') {
+        pieceType = prefix + 'cavalry';
+    } else if (summonType === 'elite1') {
+        pieceType = prefix + 'peasant_elite';
+        // Track that first elite was summoned
+        if (!warState.royalChoices[owner].towers[0]) {
+            warState.royalChoices[owner].towers[0] = 'elite1';
+        }
+    } else if (summonType === 'elite2') {
+        pieceType = prefix + 'peasant_elite';
+        // Track that second elite was summoned
+        warState.royalChoices[owner].towers[1] = 'elite2';
+    }
+    
+    // Summon the unit
+    warState.board[toRow][toCol] = {
+        piece: pieceType,
+        owner: owner,
+        health: 1,
+        killedPieces: [],
+        hasPlacedWall: false
+    };
+    
+    // Track last move for visual highlight
+    warState.lastMove = {
+        from: { row: fromRow, col: fromCol },
+        to: { row: toRow, col: toCol },
+        type: 'summon'
+    };
+    
+    // Switch turns
+    warState.currentPlayer = warState.currentPlayer === 'player' ? 'ai' : 'player';
+    warState.selectedSquare = null;
+    warState.validMoves = [];
+    updatePieceInfo(null);
+    updateWarDisplay();
+    drawWarBoard();
+    
+    // AI turn after delay
+    if (!warState.gameOver) {
+        setTimeout(() => {
+            if (warState.currentPlayer === 'ai') {
+                makeAIMove();
+            }
+        }, 500);
+    }
+}
+
+function drawMovementPreview() {
+    const canvas = document.getElementById('movementPreview');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#2d2d2d';
+    ctx.fillRect(0, 0, 270, 270);
+    
+    if (!warState.selectedSquare) {
+        ctx.fillStyle = '#888';
+        ctx.font = '12px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('Select a piece', 135, 135);
+        return;
+    }
+    
+    const cellSize = 30;
+    const gridSize = 9;
+    const centerRow = 4;
+    const centerCol = 4;
+    
+    // Draw 9x9 grid
+    for (let r = 0; r < gridSize; r++) {
+        for (let c = 0; c < gridSize; c++) {
+            const x = c * cellSize;
+            const y = r * cellSize;
+            const isLight = (r + c) % 2 === 0;
+            ctx.fillStyle = isLight ? '#4a4a4a' : '#2d2d2d';
+            ctx.fillRect(x, y, cellSize, cellSize);
         }
     }
     
-    // Move piece
-    chessState.board[toRow][toCol] = piece;
-    chessState.board[fromRow][fromCol] = null;
+    // Get piece type and show movement pattern (not actual valid moves)
+    const cell = warState.board[warState.selectedSquare.row][warState.selectedSquare.col];
+    const pieceType = cell.piece.split('_')[1];
+    const owner = cell.owner;
+    const direction = owner === 'player' ? -1 : 1;
     
-    // Switch player
-    chessState.currentPlayer = chessState.currentPlayer === 'white' ? 'black' : 'white';
-    updateChessDisplay();
+    // Helper to mark squares
+    const markSquare = (r, c, color) => {
+        if (r >= 0 && r < gridSize && c >= 0 && c < gridSize) {
+            const x = c * cellSize;
+            const y = r * cellSize;
+            ctx.fillStyle = color;
+            ctx.fillRect(x, y, cellSize, cellSize);
+        }
+    };
+    
+    // Show movement rules for each piece type
+    switch (pieceType) {
+        case 'peasant':
+            markSquare(centerRow + direction, centerCol, 'rgba(0, 255, 0, 0.5)'); // forward 1 move
+            markSquare(centerRow + direction * 2, centerCol, 'rgba(0, 255, 0, 0.5)'); // forward 2 move
+            markSquare(centerRow + direction, centerCol, 'rgba(255, 0, 0, 0.3)'); // forward attack (overlay)
+            markSquare(centerRow + direction, centerCol - 1, 'rgba(255, 0, 0, 0.5)'); // attack left
+            markSquare(centerRow + direction, centerCol + 1, 'rgba(255, 0, 0, 0.5)'); // attack right
+            break;
+        case 'knight':
+            markSquare(centerRow + direction, centerCol, 'rgba(0, 255, 255, 0.5)');
+            break;
+        case 'cavalry':
+            [[2,1],[2,-1],[-2,1],[-2,-1],[1,2],[1,-2],[-1,2],[-1,-2]].forEach(([dr,dc]) => {
+                markSquare(centerRow + dr, centerCol + dc, 'rgba(0, 255, 255, 0.5)');
+            });
+            break;
+        case 'wizard':
+            markSquare(centerRow + direction, centerCol, 'rgba(0, 255, 0, 0.5)');
+            markSquare(centerRow + direction, centerCol - 1, 'rgba(0, 255, 0, 0.5)');
+            markSquare(centerRow + direction, centerCol + 1, 'rgba(0, 255, 0, 0.5)');
+            // Shoot range
+            for (let i = 1; i <= 3; i++) {
+                markSquare(centerRow + direction * i, centerCol, 'rgba(255, 165, 0, 0.5)');
+            }
+            break;
+        case 'archer':
+            markSquare(centerRow + direction, centerCol, 'rgba(0, 255, 0, 0.5)');
+            markSquare(centerRow + direction * 2, centerCol, 'rgba(0, 255, 0, 0.5)');
+            markSquare(centerRow + direction, centerCol - 1, 'rgba(0, 255, 0, 0.5)');
+            markSquare(centerRow + direction, centerCol + 1, 'rgba(0, 255, 0, 0.5)');
+            // Shoot diagonal
+            [[2,2],[2,-2]].forEach(([dr,dc]) => {
+                const r = centerRow + (direction > 0 ? dr : -dr);
+                markSquare(r, centerCol + dc, 'rgba(255, 165, 0, 0.5)');
+            });
+            break;
+        case 'tower':
+            // Show adjacent summon squares
+            [[1,0],[-1,0],[0,1],[0,-1]].forEach(([dr,dc]) => {
+                markSquare(centerRow + dr, centerCol + dc, 'rgba(100, 200, 255, 0.6)');
+            });
+            ctx.fillStyle = '#888';
+            ctx.font = '10px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Summons adjacent', 135, 260);
+            break;
+        case 'witch':
+        case 'queen':
+            // Show diagonal/multiple directions
+            for (let i = 1; i <= 2; i++) {
+                [[i,i],[i,-i],[-i,i],[-i,-i]].forEach(([dr,dc]) => {
+                    markSquare(centerRow + dr, centerCol + dc, 'rgba(0, 255, 255, 0.5)');
+                });
+            }
+            if (pieceType === 'queen') {
+                [[1,0],[-1,0],[0,1],[0,-1]].forEach(([dr,dc]) => {
+                    markSquare(centerRow + dr, centerCol + dc, 'rgba(0, 255, 255, 0.5)');
+                });
+            }
+            break;
+        case 'king':
+            [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]].forEach(([dr,dc]) => {
+                markSquare(centerRow + dr, centerCol + dc, 'rgba(0, 255, 255, 0.5)');
+            });
+            break;
+        case 'prince':
+        case 'princess':
+            [[1,0],[-1,0],[0,1],[0,-1]].forEach(([dr,dc]) => {
+                markSquare(centerRow + dr, centerCol + dc, 'rgba(0, 255, 255, 0.5)');
+            });
+            [[2,0],[-2,0],[0,2],[0,-2]].forEach(([dr,dc]) => {
+                markSquare(centerRow + dr, centerCol + dc, 'rgba(255, 0, 0, 0.5)');
+            });
+            break;
+        case 'giant':
+            [[1,0],[-1,0],[0,1],[0,-1]].forEach(([dr,dc]) => {
+                markSquare(centerRow + dr, centerCol + dc, 'rgba(0, 255, 255, 0.5)');
+            });
+            break;
+        case 'protector':
+            markSquare(centerRow + direction, centerCol, 'rgba(0, 255, 255, 0.5)');
+            markSquare(centerRow + direction, centerCol, 'rgba(139, 69, 19, 0.3)'); // wall placement
+            break;
+    }
+    
+    // Highlight center (selected piece)
+    ctx.fillStyle = 'rgba(255, 215, 0, 0.6)';
+    ctx.fillRect(centerCol * cellSize, centerRow * cellSize, cellSize, cellSize);
+    
+    // Draw grid lines
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= gridSize; i++) {
+        ctx.beginPath();
+        ctx.moveTo(i * cellSize, 0);
+        ctx.lineTo(i * cellSize, 150);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(0, i * cellSize);
+        ctx.lineTo(150, i * cellSize);
+        ctx.stroke();
+    }
 }
 
-function updateChessDisplay() {
-    document.getElementById('chessStatus').textContent = 
-        chessState.gameOver ? 'Game Over' : `${chessState.currentPlayer}'s Turn`;
-    document.getElementById('chessTurn').textContent = 
-        chessState.currentPlayer.charAt(0).toUpperCase() + chessState.currentPlayer.slice(1);
+function updatePieceInfo(cell) {
+    const info = document.getElementById('pieceInfo');
+    if (!cell || !cell.piece) {
+        info.textContent = 'None';
+        info.className = 'small text-muted';
+        drawMovementPreview();
+        return;
+    }
     
-    // Update captured pieces
-    document.querySelector('#capturedWhite .captured-pieces').textContent = 
-        chessState.capturedPieces.white.map(p => CHESS_PIECES[p]).join(' ');
-    document.querySelector('#capturedBlack .captured-pieces').textContent = 
-        chessState.capturedPieces.black.map(p => CHESS_PIECES[p]).join(' ');
+    const pieceType = cell.piece.split('_')[1];
+    const displayName = pieceType.replace('_', ' ').split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+    info.innerHTML = `<strong class="text-primary">${displayName}</strong><br>HP: ${cell.health}<br>Moves: ${warState.validMoves.length}`;
+    info.className = 'small';
+    drawMovementPreview();
+}
+
+function updateWarDisplay() {
+    const status = warState.gameOver ? 'Game Over!' : 
+                   warState.currentPlayer === 'player' ? "Player's Turn" : "AI's Turn";
+    document.getElementById('warStatus').textContent = status;
+    
+    const turnText = warState.currentPlayer === 'player' ? 'Player (Blue)' : 'AI (Red)';
+    const turnEl = document.getElementById('warTurn');
+    turnEl.textContent = turnText;
+    turnEl.className = warState.currentPlayer === 'player' ? 'text-primary' : 'text-danger';
+    
+    // Update casualties
+    document.querySelector('#casualtiesPlayer .casualties-list').textContent = 
+        warState.casualties.player.map(p => PIECE_SYMBOLS[p]).join(' ');
+    document.querySelector('#casualtiesAI .casualties-list').textContent = 
+        warState.casualties.ai.map(p => PIECE_SYMBOLS[p]).join(' ');
 }
 </script>
 {% endblock %}
