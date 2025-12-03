@@ -29,6 +29,7 @@
                         <div class="col-md-6">
                             <div class="tetris-stats mb-3">
                                 <h4>Score: <span id="tetrisScore">0</span> <span id="scoreMultiplier" class="badge bg-info"></span></h4>
+                                <h4><i class="fas fa-coins"></i> Coins: <span id="tetrisCoins">0</span></h4>
                                 <h5>Level: <span id="tetrisLevel">1</span></h5>
                                 <h5>Lines: <span id="tetrisLines">0</span></h5>
                                 <h6>Survived: <span id="tetrisTimer">00:00</span></h6>
@@ -43,6 +44,13 @@
                             <audio id="soundHeavy" preload="auto"></audio>
                             <audio id="soundBomb" preload="auto"></audio>
                             <audio id="soundCurse" preload="auto"></audio>
+                            <audio id="soundIce" preload="auto"></audio>
+                            <audio id="soundSaw" preload="auto"></audio>
+                            <audio id="soundFire" preload="auto"></audio>
+                            <audio id="soundCoin" preload="auto"></audio>
+                            <audio id="soundCoinUse" preload="auto"></audio>
+                            <audio id="soundCure" preload="auto"></audio>
+                            <audio id="soundGlass" preload="auto"></audio>
                             <!-- Background Music -->
                             <audio id="bgMusic" preload="auto" loop></audio>
                             
@@ -105,6 +113,93 @@
     </div>
 </div>
 
+<!-- Shop Modal -->
+<div class="modal fade" id="shopModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header border-warning">
+                <h5 class="modal-title"><i class="fas fa-store"></i> Zjadow Shop - Coins: <span id="shopCoins">0</span></h5>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="card bg-secondary text-white h-100" onclick="buyShopItem('revive')" style="cursor:pointer;">
+                            <div class="card-body">
+                                <h5><i class="fas fa-heart"></i> Revive (8 coins)</h5>
+                                <p class="mb-0">Clears board halfway down when you die</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card bg-secondary text-white h-100" onclick="buyShopItem('clearBad')" style="cursor:pointer;">
+                            <div class="card-body">
+                                <h5><i class="fas fa-broom"></i> Clear Bad Blocks (6 coins)</h5>
+                                <p class="mb-0">Removes all curse, ice, and dirt blocks</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card bg-secondary text-white h-100" onclick="buyShopItem('reduceCurse')" style="cursor:pointer;">
+                            <div class="card-body">
+                                <h5><i class="fas fa-skull"></i> Reduce Curses (5 coins)</h5>
+                                <p class="mb-0">Decreases spawn rate of curse pieces</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card bg-secondary text-white h-100" onclick="buyShopItem('reduceSpecial')" style="cursor:pointer;">
+                            <div class="card-body">
+                                <h5><i class="fas fa-fire"></i> Reduce Specials (4 coins)</h5>
+                                <p class="mb-0">Decreases ice, fire, water, dirt spawn</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card bg-secondary text-white h-100" onclick="buyShopItem('snakeQueue')" style="cursor:pointer;">
+                            <div class="card-body">
+                                <h5><i class="fas fa-snake"></i> 5 Snakes (2 coins)</h5>
+                                <p class="mb-0">Next 5 pieces will be snake destroyers</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card bg-secondary text-white h-100" onclick="buyShopItem('boulderQueue')" style="cursor:pointer;">
+                            <div class="card-body">
+                                <h5><i class="fas fa-mountain"></i> 3 Boulders (2 coins)</h5>
+                                <p class="mb-0">Next 3 pieces will be heavy boulders</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card bg-secondary text-white h-100" onclick="buyShopItem('slowDown')" style="cursor:pointer;">
+                            <div class="card-body">
+                                <h5><i class="fas fa-hourglass-half"></i> Slow Game (4 coins)</h5>
+                                <p class="mb-0">Permanently reduce game speed</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card bg-secondary text-white h-100" onclick="buyShopItem('doubleScore')" style="cursor:pointer;">
+                            <div class="card-body">
+                                <h5><i class="fas fa-star"></i> Double Score (3 coins)</h5>
+                                <p class="mb-0">Permanently double all score gains</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="alert alert-info mt-3 mb-0">
+                    <i class="fas fa-info-circle"></i> Click any item to purchase. Shop closes after one purchase!
+                </div>
+            </div>
+            <div class="modal-footer border-warning">
+                <button type="button" class="btn btn-warning" onclick="closeShop()">
+                    <i class="fas fa-times"></i> Close Shop (1 coin)
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <style>
 .game-canvas {
     background-color: #000;
@@ -136,6 +231,21 @@
     pointer-events: none;
     animation: rowClearPuff 0.5s ease-out;
     box-shadow: 0 0 20px rgba(255, 255, 255, 0.9);
+}
+
+@keyframes milestoneClearWave {
+    0% {
+        opacity: 0;
+        transform: translateX(-100%);
+    }
+    50% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(100%);
+    }
 }
 
 @media (max-width: 768px) {
@@ -170,7 +280,14 @@ let tetrisState = {
     hold2Unlocked: false,
     hold3Unlocked: false,
     scoreBuff: { multiplier: 1, untilTime: 0 },
-    snakeAnimation: [] // For visual snake destruction: [{x, y, frame}]
+    snakeAnimation: [], // For visual snake destruction: [{x, y, frame}]
+    coins: 0, // Shop currency
+    shopActive: false,
+    queuedPieces: [], // For snake/boulder queue purchases
+    permanentDoubleScore: false,
+    curseSpawnReduction: 0, // 0 = normal, 1 = reduced
+    specialSpawnReduction: 0, // 0 = normal, 1 = reduced
+    lastMilestone: 0 // Track last milestone reached for board clear
 };
 
 const TETRIS_COLORS = [
@@ -198,8 +315,8 @@ const TETRIS_COLORS = [
     null,       // 21: Rainbow Connector (dynamic color)
     '#FF4500',  // 22: Fire 3x3 with center hole (melts ice)
     '#00FFFF',  // 23: Score Multiplier 1x1 (cyan - 2x score per piece, stacks)
-    '#0080FF',  // 24: Score Multiplier 1x1 (blue - 4x score per piece, unlocked by 23, stacks)
-    '#4B0082',  // 25: Score Multiplier 1x1 (indigo - 8x score per piece, unlocked by 24, stacks)
+    '#0080FF',  // 24: Score Multiplier 1x1 (blue - 3x score per piece, unlocked by 23, stacks)
+    '#4B0082',  // 25: Score Multiplier 1x1 (indigo - 4x score per piece, unlocked by 24, stacks)
     '#800080',  // 26: Spreading Curse 1x1 (purple - spreads all curses)
     '#2F0F3F',  // 27: Curse Wall 6x1 (dark purple - can't rotate)
     '#C0C0C0',  // 28: Saw 2x2 (silver - cuts everything above)
@@ -208,7 +325,11 @@ const TETRIS_COLORS = [
     '#32CD32',  // 31: 2x1 block (lime green)
     '#FFD700',  // 32: 3x1 block (gold)
     '#FF69B4',  // 33: 3x2 block (hot pink)
-    '#20B2AA'   // 34: 4x2 without corners (light sea green)
+    '#20B2AA',  // 34: 4x2 without corners (light sea green)
+    '#FFD700',  // 35: Coin 1x1 (gold - gives 1 coin when cleared)
+    '#00CED1',  // 36: Shop 1x1 (dark turquoise - opens shop menu)
+    '#4B0052',  // 37: Hold Lock curse - Bowl/U shape (dark purple - prevents hold switching)
+    '#87CEEB'   // 38: Slow Time - T shape with 5 blocks (light blue - keeps game slow)
 ];
 
 const TETRIS_PIECES = [
@@ -237,8 +358,8 @@ const TETRIS_PIECES = [
     [[21,21]], // Rainbow Connector 2x1: removes all connected same-type blocks
     [[22,22,22],[22,0,22],[22,22,22]], // Fire 3x3 with center hole: melts ice pieces
     [[23]], // Score Multiplier 1x1: 2x score per piece (stacks)
-    [[24]], // Score Multiplier 1x1: 4x score per piece (unlocked by 23, stacks)
-    [[25]], // Score Multiplier 1x1: 8x score per piece (unlocked by 24, stacks)
+    [[24]], // Score Multiplier 1x1: 3x score per piece (unlocked by 23, stacks)
+    [[25]], // Score Multiplier 1x1: 4x score per piece (unlocked by 24, stacks)
     [[26]], // Spreading Curse 1x1: makes all curses spread/grow
     [[27,27,27,27,27,27]], // Curse Wall 6x1: cannot rotate
     [[28,28],[28,28]], // Saw 2x2: cuts everything above it
@@ -247,7 +368,11 @@ const TETRIS_PIECES = [
     [[31,31]], // 2x1 block
     [[32,32,32]], // 3x1 block
     [[33,33,33],[33,33,33]], // 3x2 block
-    [[0,34,34,0],[34,34,34,34],[0,34,34,0]] // 4x2 without corners (3 rows)
+    [[0,34,34,0],[34,34,34,34],[0,34,34,0]], // 4x2 without corners (3 rows)
+    [[35]], // Coin 1x1: gives 1 coin when cleared in a line
+    [[36]], // Shop 1x1: pauses game and opens shop menu
+    [[37,0,37],[37,37,37]], // Hold Lock curse - Bowl/U shape 3x2: prevents hold switching
+    [[0,38,0],[38,38,38],[0,38,0]]  // Slow Time - T shape 3x3 with 5 blocks: slows game
 ];
 
 // Audio file mapping to your filenames in static/audio
@@ -259,6 +384,13 @@ const AUDIO_FILES = {
     soundHeavy: 'rock_piece_landing_sound.mp3',
     soundCurse: 'curse_piece_landing_sound.mp3',
     soundBomb: 'bomb_piece_landing_sound.mp3',
+    soundIce: 'ice_piece_sound.mp3',
+    soundSaw: 'saw_piece_sound.mp3',
+    soundFire: 'fire_piece_sound.mp3',
+    soundCoin: 'coin_clear_sound.mp3',
+    soundCoinUse: 'coin_use_sound.mp3',
+    soundCure: 'cure_bar_sound.mp3',
+    soundGlass: 'glass_break_sound.mp3',
     bgMusic: 'music_for_zjadowblockdrop.mp3'
 };
 
@@ -272,10 +404,11 @@ function applyAudioSources() {
 }
 
 // Sound helpers
-function playSound(id) {
+function playSound(id, pitchShift = 1.0) {
     const audio = document.getElementById(id);
     if (audio && audio.src) {
         audio.currentTime = 0;
+        audio.playbackRate = pitchShift; // Adjust pitch (1.0 = normal, 1.2 = higher, 0.8 = lower)
         audio.play().catch(e => console.log('Audio play failed:', e));
     }
 }
@@ -334,6 +467,11 @@ function createPiece(type) {
 }
 
 function getRandomPiece() {
+    // Check for queued pieces first (from shop purchases)
+    if (tetrisState.queuedPieces && tetrisState.queuedPieces.length > 0) {
+        return tetrisState.queuedPieces.shift();
+    }
+    
     // Count curse magnets (19) on board - they stack!
     let curseMagnetCount = 0;
     for (let row of tetrisState.board) {
@@ -349,64 +487,111 @@ function getRandomPiece() {
     const has1xMultiplier = tetrisState.board.some(row => row.includes(23));
     const has2xMultiplier = tetrisState.board.some(row => row.includes(24));
     
-    // Weighted random - normal pieces dominate, special pieces are rare
+    // SPAWN RATES (Base bag ~85 entries):
+    // Normal types 1-7: ~33% (each ~4.7%)
+    // Normal types 29-34: ~21% (varied 2-4 each)
+    // Heavy (9): ~4.7%
+    // Stone/Boulder (10): ~3.5%
+    // Glass (11): ~2.4%
+    // Curses (12,13): ~2.4% each
+    // Water (16): ~2.4%
+    // Snow/Ice (18): ~2.4%
+    // Curse Magnet (19): ~4.7%
+    // Snake (20): ~2.4%
+    // Rainbow (21): ~2.4%
+    // Fire (22): ~1.2%
+    // Multipliers (23): ~4.7%, (24): ~2.4%, (25): ~1.2%
+    // Bomb (8): ~3.5%
+    // Spreading Curse (26): ~2.4%
+    // Curse Wall (27): ~1.2%
+    // Saw (28): ~3.5%
+    // 4x3 corners (34): Reduced to ~2.4%
+    
     let bag = [
-        // Normal pieces (types 1-7, 29-34) - very common (75% of spawns)
+        // Classic tetris shapes (types 1-7) - 28 entries = ~33%
         1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6,7,7,7,7,
-        29,29,29,30,30,30,31,31,31,32,32,32,33,33,33,34,34,34,
-        // Heavy (9) - common (helps with progression)
-        9,9,9,
-        // Glass (11) - occasional
+        // New normal shapes - varied distribution
+        29,29,29,29,  // Bowl/U: 4 entries
+        30,30,30,     // T shape: 3 entries
+        31,31,31,     // 2x1: 3 entries
+        32,32,32,     // 3x1: 3 entries
+        33,33,33,     // 3x2: 3 entries
+        34,34,        // 4x3 without corners: 2 entries (reduced)
+        // Heavy (9) - 4 entries = ~4.7%
+        9,9,9,9,
+        // Stone/Boulder (10) - 3 entries = ~3.5% (increased!)
+        10,10,10,
+        // Glass (11) - 2 entries = ~2.4%
         11,11,
-        // Water (16) - occasional
-        16,
-        // Curse Magnet (19) - occasional (improves cure spawn)
-        19,19,
-        // Snake Destroyer (20) - occasional
-        20,
-        // Rainbow Connector (21) - rare
-        21,
-        // Fire (22) - rare
-        22
+        // Curses (12, 13) - affected by shop reduction
+        12,12,
+        13,13,
+        // Water (16) - 2 entries = ~2.4%
+        16,16,
+        // Snow/Ice (18) - 2 entries = ~2.4% (much more visible now!)
+        18,18,
+        // Curse Magnet (19) - 4 entries = ~4.7% (increased!)
+        19,19,19,19,
+        // Snake Destroyer (20) - 2 entries = ~2.4%
+        20,20,
+        // Rainbow Connector (21) - 2 entries = ~2.4%
+        21,21,
+        // Fire (22) - 1 entry = ~1.2% (reduced)
+        22,
+        // Bomb (8) - 3 entries = ~3.5%
+        8,8,8,
+        // Spreading Curse (26) - 2 entries = ~2.4%
+        26,26,
+        // Curse Wall (27) - 1 entry = ~1.2%
+        27,
+        // Saw (28) - 3 entries = ~3.5%
+        28,28,28,
+        // Coin (35) - 3 entries = ~3.5%
+        35,35,35,
+        // Shop (36) - 1 entry = ~1.2%
+        36,
+        // Hold Lock curse (37) - 2 entries = ~2.4%
+        37,37,
+        // Slow Time (38) - 2 entries = ~2.4%
+        38,38
     ];
     
-    // Snow/ice (18) - very rare
-    if (Math.random() < 0.15) bag.push(18);
+    // Apply spawn reductions from shop purchases
+    if (tetrisState.curseSpawnReduction > 0) {
+        // Remove half the curse pieces
+        bag = bag.filter((v, i, arr) => {
+            if (v === 12 || v === 13 || v === 26 || v === 27) {
+                return arr.indexOf(v) === i; // Keep only first occurrence
+            }
+            return true;
+        });
+    }
     
-    // Bomb (8) - very rare but powerful
-    if (Math.random() < 0.08) bag.push(8);
+    if (tetrisState.specialSpawnReduction > 0) {
+        // Remove ice, fire, water, heavy
+        bag = bag.filter((v, i, arr) => {
+            if (v === 18 || v === 22 || v === 16 || v === 9) {
+                return arr.indexOf(v) === i; // Keep only first occurrence
+            }
+            return true;
+        });
+    }
     
-    // Stone (10) - extremely rare obstacle
-    if (Math.random() < 0.03) bag.push(10);
-    
-    // Curse pieces (12, 13) - rare threats
-    if (Math.random() < 0.12) bag.push(12);
-    if (Math.random() < 0.12) bag.push(13);
-    
-    // Score multiplier pieces - cascading unlock (more common for visibility)
-    bag.push(23, 23, 23); // 1x1 cyan multiplier (2x) always available
-    if (has1xMultiplier) bag.push(24, 24); // 2x2 blue multiplier (4x) unlocked by 1x1
-    if (has2xMultiplier) bag.push(25); // 3x3 indigo multiplier (8x) unlocked by 2x2
+    // Score multiplier pieces - cascading unlock
+    bag.push(23, 23, 23, 23); // 2x multiplier: 4 entries = ~4.7%
+    if (has1xMultiplier) bag.push(24, 24); // 3x multiplier: 2 entries = ~2.4% (when unlocked)
+    if (has2xMultiplier) bag.push(25); // 4x multiplier: 1 entry = ~1.2% (when unlocked)
     
     // Golden cure line (14) only spawns if there are curse pieces to cure
     // Curse magnets STACK - each one adds 3 more cure entries
     if (hasCursePieces) {
-        bag.push(14); // Base spawn
+        bag.push(14, 14); // Base spawn - 2 entries
         if (curseMagnetCount > 0) {
             for (let i = 0; i < curseMagnetCount * 3; i++) {
                 bag.push(14); // Each magnet adds 3 more entries (stacking)
             }
         }
     }
-    
-    // Spreading curse (26) - rare but dangerous
-    if (Math.random() < 0.10) bag.push(26);
-    
-    // Curse wall (27) - very rare obstacle
-    if (Math.random() < 0.06) bag.push(27);
-    
-    // Saw piece (28) - rare but powerful
-    if (Math.random() < 0.12) bag.push(28);
     
     // Rarities: bomb(8) rare, stone(10) very rare, curses(12,13) rare, golden(14) rare (boosted with magnet), heavy(9) occasional, glass(11) occasional, water(16) occasional, snow(18) rare, magnet(19) occasional, snake(20) occasional, rainbow(21) occasional, fire(22) occasional, multipliers(23,24,25) occasional
     const idx = Math.floor(Math.random() * bag.length);
@@ -483,6 +668,13 @@ function resetTetris() {
     tetrisState.hold2Unlocked = false;
     tetrisState.hold3Unlocked = false;
     tetrisState.scoreBuff = { multiplier: 1, untilTime: 0 };
+    tetrisState.coins = 0;
+    tetrisState.queuedPieces = [];
+    tetrisState.hasRevive = false;
+    tetrisState.permanentDoubleScore = false;
+    tetrisState.curseSpawnReduction = 0;
+    tetrisState.specialSpawnReduction = 0;
+    tetrisState.lastMilestone = 0;
     
     // Reset UI badges to locked state
     const nextPieceBadge = document.getElementById('nextPieceLocked');
@@ -582,8 +774,9 @@ function lockPiece() {
         // Play specialized sounds on special placements that do not lock normally
         if (piece.type === 9) playSound('soundHeavy');
         if (piece.type === 11) playSound('soundDrop');
-        if (piece.type === 14) playSound('soundClear');
-        if (piece.type === 18) playSound('soundCurse'); // Snow/ice piece
+        if (piece.type === 14) {
+            playSound('soundCure', 1.3); // Golden cure bar sound with higher pitch
+        }
         return; // special behavior handled placement
     }
     
@@ -601,7 +794,10 @@ function lockPiece() {
     }
     // Play landing sounds for certain piece types
     if (piece.type === 10 || piece.type === 9) playSound('soundHeavy');
-    if (piece.type === 12 || piece.type === 13) playSound('soundCurse');
+    if (piece.type === 12 || piece.type === 13 || piece.type === 26 || piece.type === 27 || piece.type === 37) playSound('soundCurse');
+    if (piece.type === 18) playSound('soundIce');
+    if (piece.type === 22) playSound('soundFire');
+    if (piece.type === 28) playSound('soundSaw');
 }
 
 function applyPreLockBehavior(piece) {
@@ -619,6 +815,7 @@ function applyPreLockBehavior(piece) {
     
     // Glass/Ice (11): Split into 5 singles on contact
     if (type === 11) {
+        playSound('soundGlass');
         splitGlass(piece);
         piece.preventLock = true; // do not lock original 5x1
     }
@@ -658,6 +855,17 @@ function applyPreLockBehavior(piece) {
     // Saw (28): Cuts everything above where it landed
     if (type === 28) {
         sawCutAbove(piece);
+    }
+    
+    // Shop (36): Opens shop menu (only if player has coins)
+    if (type === 36) {
+        if (tetrisState.coins >= 1) {
+            openShop();
+            piece.preventLock = true; // shop piece vanishes after opening
+        } else {
+            // If no coins, shop piece locks normally on the board
+            piece.preventLock = false;
+        }
     }
 }
 function removeConnectedSameColorGroups(piece) {
@@ -838,7 +1046,7 @@ function sawCutAbove(piece) {
         }
     }
     
-    playSound('soundBomb'); // Use bomb sound for cutting effect
+    playSound('soundSaw'); // Saw cutting sound
 }
 
 function hasSnowOnBoard() {
@@ -1060,6 +1268,52 @@ function checkUnlocks() {
         }
         drawHoldPiece3();
     }
+    
+    // Check for milestone board clear (every 50,000 points)
+    const currentMilestone = Math.floor(tetrisState.score / 50000);
+    if (currentMilestone > tetrisState.lastMilestone && currentMilestone > 0) {
+        tetrisState.lastMilestone = currentMilestone;
+        milestoneBoardClear();
+    }
+}
+
+function milestoneBoardClear() {
+    // Clear bottom half of board with spectacular visual effect
+    const clearFromRow = 12; // Clear from row 12 to 23 (bottom half)
+    
+    // Create wave clear animation
+    for (let y = clearFromRow; y < 24; y++) {
+        setTimeout(() => {
+            tetrisState.board[y] = Array(10).fill(0);
+            
+            // Visual flash effect
+            const canvas = document.getElementById('tetrisCanvas');
+            if (canvas) {
+                const effect = document.createElement('div');
+                effect.style.position = 'absolute';
+                effect.style.top = (y * 30) + 'px';
+                effect.style.left = '0';
+                effect.style.width = '300px';
+                effect.style.height = '30px';
+                effect.style.background = 'linear-gradient(90deg, rgba(255,215,0,0.9) 0%, rgba(255,255,255,0.9) 50%, rgba(255,215,0,0.9) 100%)';
+                effect.style.pointerEvents = 'none';
+                effect.style.animation = 'milestoneClearWave 0.5s ease-out';
+                effect.style.boxShadow = '0 0 30px rgba(255,215,0,0.9)';
+                canvas.parentElement.style.position = 'relative';
+                canvas.parentElement.appendChild(effect);
+                
+                setTimeout(() => effect.remove(), 500);
+            }
+            
+            drawTetrisBoard();
+        }, (y - clearFromRow) * 50); // 50ms delay per row for wave effect
+    }
+    
+    // Play sound and show message
+    setTimeout(() => {
+        playSound('soundClear');
+        alert(`🎉 MILESTONE! ${tetrisState.lastMilestone * 50000} Points Reached!\nBoard Cleared! 🎉`);
+    }, (24 - clearFromRow) * 50);
 }
 
 function clearLines() {
@@ -1081,6 +1335,13 @@ function clearLines() {
     if (!hasCurse4x1) {
         for (let y = tetrisState.board.length - 1; y >= 0; y--) {
             if (tetrisState.board[y].every(cell => cell !== 0)) {
+                // Count coins (type 35) in this row
+                let coinsInRow = tetrisState.board[y].filter(cell => cell === 35).length;
+                if (coinsInRow > 0) {
+                    tetrisState.coins += coinsInRow;
+                    playSound('soundCoin'); // Play coin sound when coins are collected
+                }
+                
                 clearedRows.push(y);
                 tetrisState.board.splice(y, 1);
                 tetrisState.board.unshift(Array(10).fill(0));
@@ -1100,20 +1361,21 @@ function clearLines() {
         let pieceMultiplier = 1;
         
         // Count each multiplier type on board - they stack!
-        let count2x = 0, count4x = 0, count8x = 0;
+        let count2x = 0, count3x = 0, count4x = 0;
         for (let row of tetrisState.board) {
             for (let cell of row) {
                 if (cell === 23) count2x++;
-                if (cell === 24) count4x++;
-                if (cell === 25) count8x++;
+                if (cell === 24) count3x++;
+                if (cell === 25) count4x++;
             }
         }
         
-        // Each piece multiplies: 2x for each cyan, 4x for each blue, 8x for each indigo
-        pieceMultiplier *= Math.pow(2, count2x) * Math.pow(4, count4x) * Math.pow(8, count8x);
+        // Each piece multiplies: 2x for each cyan, 3x for each blue, 4x for each indigo
+        pieceMultiplier *= Math.pow(2, count2x) * Math.pow(3, count3x) * Math.pow(4, count4x);
         
         const base = linesCleared * 100 * tetrisState.level;
-        const totalMultiplier = (tetrisState.scoreBuff.multiplier || 1) * pieceMultiplier;
+        const permanentMult = tetrisState.permanentDoubleScore ? 2 : 1;
+        const totalMultiplier = (tetrisState.scoreBuff.multiplier || 1) * pieceMultiplier * permanentMult;
         tetrisState.score += Math.floor(base * totalMultiplier);
 
         // Check for unlocks based on score
@@ -1131,7 +1393,23 @@ function clearLines() {
             updateScoreMultiplierDisplay();
         }
         tetrisState.level = Math.floor(tetrisState.lines / 10) + 1;
-        tetrisState.dropInterval = Math.max(50, 1000 - (tetrisState.level - 1) * 100);
+        
+        // Check if Slow Time pieces (38) are on board
+        let slowTimeCount = 0;
+        for (let row of tetrisState.board) {
+            for (let cell of row) {
+                if (cell === 38) slowTimeCount++;
+            }
+        }
+        
+        // Calculate drop interval - Slow Time pieces keep it slower
+        let baseInterval = Math.max(50, 1000 - (tetrisState.level - 1) * 100);
+        if (slowTimeCount > 0) {
+            // Each Slow Time piece adds 150ms, keeping game slower
+            baseInterval += (slowTimeCount * 150);
+        }
+        tetrisState.dropInterval = baseInterval;
+        
         updateTetrisDisplay();
     }
 }
@@ -1159,17 +1437,17 @@ function updateScoreMultiplierDisplay() {
     if (!el) return;
     
     // Count each multiplier type on board - they stack!
-    let count2x = 0, count4x = 0, count8x = 0;
+    let count2x = 0, count3x = 0, count4x = 0;
     for (let row of tetrisState.board) {
         for (let cell of row) {
             if (cell === 23) count2x++;
-            if (cell === 24) count4x++;
-            if (cell === 25) count8x++;
+            if (cell === 24) count3x++;
+            if (cell === 25) count4x++;
         }
     }
     
-    // Calculate total multiplier: each piece multiplies (2^count2x * 4^count4x * 8^count8x)
-    let pieceMultiplier = Math.pow(2, count2x) * Math.pow(4, count4x) * Math.pow(8, count8x);
+    // Calculate total multiplier: each piece multiplies (2^count2x * 3^count3x * 4^count4x)
+    let pieceMultiplier = Math.pow(2, count2x) * Math.pow(3, count3x) * Math.pow(4, count4x);
     
     // Always show multiplier
     el.textContent = `${pieceMultiplier}x`;
@@ -1422,12 +1700,18 @@ function handleTetrisInput(event) {
         return;
     }
     
+    // Check if Hold Lock curse (37) is on board
+    const hasHoldLock = tetrisState.board.some(row => row.includes(37));
+    if (hasHoldLock && (event.key.toLowerCase() === 'c' || event.key.toLowerCase() === 'v' || event.key.toLowerCase() === 'f')) {
+        return; // Cannot switch hold pieces while Hold Lock is active
+    }
+    
     switch(event.key.toLowerCase()) {
         case 'c':
-            // Hold/swap piece slot 1: not allowed for curses (12,13) and only once per drop
+            // Hold/swap piece slot 1: not allowed for curses (12,13,26,27,37) and only once per drop
             if (tetrisState.hasSwappedThisDrop) break;
             const t = tetrisState.currentPiece.type;
-            if (t === 12 || t === 13) break;
+            if (t === 12 || t === 13 || t === 26 || t === 27 || t === 37) break;
             if (!tetrisState.holdPiece) {
                 tetrisState.holdPiece = createPiece(tetrisState.currentPiece.type);
                 tetrisState.currentPiece = tetrisState.nextPiece;
@@ -1448,7 +1732,7 @@ function handleTetrisInput(event) {
             if (!tetrisState.hold2Unlocked) break;
             if (tetrisState.hasSwappedThisDrop) break;
             const t2 = tetrisState.currentPiece.type;
-            if (t2 === 12 || t2 === 13) break;
+            if (t2 === 12 || t2 === 13 || t2 === 26 || t2 === 27 || t2 === 37) break;
             if (!tetrisState.holdPiece2) {
                 tetrisState.holdPiece2 = createPiece(tetrisState.currentPiece.type);
                 tetrisState.currentPiece = tetrisState.nextPiece;
@@ -1469,7 +1753,7 @@ function handleTetrisInput(event) {
             if (!tetrisState.hold3Unlocked) break;
             if (tetrisState.hasSwappedThisDrop) break;
             const t3 = tetrisState.currentPiece.type;
-            if (t3 === 12 || t3 === 13) break;
+            if (t3 === 12 || t3 === 13 || t3 === 26 || t3 === 27 || t3 === 37) break;
             if (!tetrisState.holdPiece3) {
                 tetrisState.holdPiece3 = createPiece(tetrisState.currentPiece.type);
                 tetrisState.currentPiece = tetrisState.nextPiece;
@@ -1902,12 +2186,21 @@ function updateTetrisDisplay() {
     document.getElementById('tetrisScore').textContent = tetrisState.score;
     document.getElementById('tetrisLevel').textContent = tetrisState.level;
     document.getElementById('tetrisLines').textContent = tetrisState.lines;
+    document.getElementById('tetrisCoins').textContent = tetrisState.coins;
     
     // Update score multiplier display
     updateScoreMultiplierDisplay();
     
     // Update cure spawn rate display
     updateCureSpawnRateDisplay();
+    
+    // Update hold lock indicator
+    const hasHoldLock = tetrisState.board.some(row => row.includes(37));
+    const holdHeader = document.querySelector('.game-info h6');
+    if (holdHeader && holdHeader.textContent.includes('Hold Pieces')) {
+        const lockWarning = hasHoldLock ? '<span class="badge bg-danger ms-2">🔒 LOCKED</span>' : '';
+        holdHeader.innerHTML = `Hold Pieces: <span class="small text-muted">(disabled for curses)</span>${lockWarning}`;
+    }
 }
 
 function updateTimerDisplay() {
@@ -1920,6 +2213,18 @@ function updateTimerDisplay() {
 }
 
 function gameOver() {
+    // Check for revive
+    if (tetrisState.hasRevive) {
+        tetrisState.hasRevive = false;
+        // Clear board halfway down (rows 10-19)
+        for (let y = 10; y < 20; y++) {
+            tetrisState.board[y] = Array(10).fill(0);
+        }
+        alert('Revive used! Board cleared halfway down.');
+        updateTetrisDisplay();
+        return; // Continue playing
+    }
+    
     tetrisState.gameRunning = false;
     alert(`Game Over! Final Score: ${tetrisState.score}`);
     resetTetris();
@@ -1938,6 +2243,138 @@ function toggleMusic() {
         bg.dataset.userPaused = 'true';
         bg.pause();
         btn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+    }
+}
+
+// Shop System
+function openShop() {
+    tetrisState.shopActive = true;
+    tetrisState.paused = true;
+    document.getElementById('shopCoins').textContent = tetrisState.coins;
+    const modal = new bootstrap.Modal(document.getElementById('shopModal'));
+    modal.show();
+}
+
+function closeShop() {
+    if (tetrisState.coins >= 1) {
+        tetrisState.coins -= 1;
+        playSound('soundCoinUse');
+        const modal = bootstrap.Modal.getInstance(document.getElementById('shopModal'));
+        modal.hide();
+        tetrisState.shopActive = false;
+        tetrisState.paused = false;
+        updateTetrisDisplay();
+        tetrisGameLoop();
+    } else {
+        alert('You need 1 coin to close the shop!');
+    }
+}
+
+function buyShopItem(item) {
+    let cost = 0;
+    let canPurchase = false;
+    
+    switch(item) {
+        case 'revive':
+            cost = 8;
+            if (tetrisState.coins >= cost) {
+                tetrisState.coins -= cost;
+                // Revive stored for next game over
+                tetrisState.hasRevive = true;
+                canPurchase = true;
+                alert('Revive purchased! You will get a second chance on game over.');
+            }
+            break;
+        case 'clearBad':
+            cost = 6;
+            if (tetrisState.coins >= cost) {
+                tetrisState.coins -= cost;
+                // Clear curse (12,13,26,27), ice (18), heavy (9)
+                for (let y = 0; y < tetrisState.board.length; y++) {
+                    for (let x = 0; x < tetrisState.board[y].length; x++) {
+                        const cell = tetrisState.board[y][x];
+                        if (cell === 12 || cell === 13 || cell === 26 || cell === 27 || cell === 18 || cell === 9) {
+                            tetrisState.board[y][x] = 0;
+                        }
+                    }
+                }
+                canPurchase = true;
+                alert('Bad blocks cleared!');
+            }
+            break;
+        case 'reduceCurse':
+            cost = 5;
+            if (tetrisState.coins >= cost) {
+                tetrisState.coins -= cost;
+                tetrisState.curseSpawnReduction = 1;
+                canPurchase = true;
+                alert('Curse spawn rate reduced!');
+            }
+            break;
+        case 'reduceSpecial':
+            cost = 4;
+            if (tetrisState.coins >= cost) {
+                tetrisState.coins -= cost;
+                tetrisState.specialSpawnReduction = 1;
+                canPurchase = true;
+                alert('Special piece spawn rate reduced!');
+            }
+            break;
+        case 'snakeQueue':
+            cost = 2;
+            if (tetrisState.coins >= cost) {
+                tetrisState.coins -= cost;
+                tetrisState.queuedPieces.push(20, 20, 20, 20, 20);
+                canPurchase = true;
+                alert('Next 5 pieces will be Snake Destroyers!');
+            }
+            break;
+        case 'boulderQueue':
+            cost = 2;
+            if (tetrisState.coins >= cost) {
+                tetrisState.coins -= cost;
+                tetrisState.queuedPieces.push(10, 10, 10);
+                canPurchase = true;
+                alert('Next 3 pieces will be Boulders!');
+            }
+            break;
+        case 'slowDown':
+            cost = 4;
+            if (tetrisState.coins >= cost) {
+                tetrisState.coins -= cost;
+                // Increase drop interval permanently
+                tetrisState.dropInterval += 200;
+                canPurchase = true;
+                alert('Game slowed down permanently!');
+            }
+            break;
+        case 'doubleScore':
+            cost = 3;
+            if (tetrisState.coins >= cost) {
+                tetrisState.coins -= cost;
+                tetrisState.permanentDoubleScore = true;
+                canPurchase = true;
+                alert('Permanent double score activated!');
+            }
+            break;
+    }
+    
+    if (!canPurchase && tetrisState.coins < cost) {
+        alert(`Not enough coins! You need ${cost} coins.`);
+        return;
+    }
+    
+    if (canPurchase) {
+        // Play coin use sound
+        playSound('soundCoinUse');
+        
+        // Close shop and resume game
+        const modal = bootstrap.Modal.getInstance(document.getElementById('shopModal'));
+        modal.hide();
+        tetrisState.shopActive = false;
+        tetrisState.paused = false;
+        updateTetrisDisplay();
+        tetrisGameLoop();
     }
 }
 </script>
